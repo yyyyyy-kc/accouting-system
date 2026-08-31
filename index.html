@@ -1,2035 +1,1714 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f7e7a8">
-
-<title>💰 我的記帳本</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-
-<style>
-/* =========================================================
-   基本設定
-========================================================= */
-
-:root {
-  --bg: #fffaf0;
-  --surface: #fffdf7;
-  --surface-2: #fff7dc;
-  --border: #eadfbd;
-
-  --text: #40372b;
-  --muted: #8b7d68;
-
-  --primary: #e7b94d;
-  --primary-dark: #9a681d;
-
-  --accent: #b96b32;
-  --accent-dark: #87491f;
-
-  --danger: #c94c42;
-  --success: #4c8a59;
-
-  --shadow:
-    0 8px 28px rgba(108, 78, 27, 0.08);
-
-  --radius: 16px;
-  --font-size: 16px;
-}
-
-body.dark {
-  --bg: #24221d;
-  --surface: #2e2b25;
-  --surface-2: #39352c;
-  --border: #514a3e;
-
-  --text: #f8f0dc;
-  --muted: #b8aa8d;
-
-  --primary: #e7b94d;
-  --primary-dark: #f0c85f;
-
-  --accent: #d88a4b;
-  --accent-dark: #e39b61;
-
-  --danger: #ed7066;
-  --success: #76bd82;
-
-  --shadow:
-    0 8px 30px rgba(0, 0, 0, 0.24);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-size: var(--font-size);
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(248, 224, 139, 0.20),
-      transparent 35%
-    ),
-    var(--bg);
-
-  color: var(--text);
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Noto Sans TC",
-    "Microsoft JhengHei",
-    sans-serif;
-
-  transition:
-    background .25s ease,
-    color .25s ease;
-
-  min-height: 100vh;
-}
-
-/* =========================================================
-   Header
-========================================================= */
-
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-
-  background: color-mix(
-    in srgb,
-    var(--surface) 92%,
-    transparent
-  );
-
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-  max-width: 1240px;
-  margin: auto;
-
-  min-height: 78px;
-  padding: 12px 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 18px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.brand-icon {
-  width: 44px;
-  height: 44px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 13px;
-
-  background: var(--surface-2);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(180, 130, 40, .12);
-
-  font-size: 23px;
-}
-
-.brand-text {
-  min-width: 0;
-}
-
-.brand-title {
-  font-weight: 900;
-  font-size: 1.08rem;
-  letter-spacing: .02em;
-}
-
-.brand-subtitle {
-  color: var(--muted);
-  font-size: .76rem;
-  margin-top: 2px;
-}
-
-.header-tools {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button {
-  border: 0;
-  cursor: pointer;
-}
-
-.tool-btn {
-  min-height: 40px;
-
-  padding: 8px 12px;
-
-  border-radius: 11px;
-
-  background: var(--surface);
-  color: var(--text);
-
-  border: 1px solid var(--border);
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
+
+  <title>💰 我的記帳本</title>
+
+  <!-- =========================================================
+       Chart.js
+       ========================================================= -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* =========================================================
+       基礎設定
+       ========================================================= */
+
+    :root {
+      --bg: #fff9df;
+      --bg-soft: #fffdf2;
+      --card: #fffef8;
+      --card-2: #fff6c9;
+
+      --primary: #f5d76e;
+      --primary-dark: #d49a22;
+
+      --brown: #704214;
+      --brown-dark: #4e2c10;
+      --orange: #c86b1d;
+
+      --text: #4b3824;
+      --text-soft: #806b52;
+      --border: #eadcae;
+
+      --danger: #b83b32;
+      --success: #5b8c45;
+
+      --shadow: 0 8px 28px rgba(99, 69, 25, 0.10);
+
+      --font-size: 16px;
+
+      --radius: 18px;
+    }
+
+    body.dark {
+      --bg: #211c14;
+      --bg-soft: #292218;
+      --card: #30281d;
+      --card-2: #3a2f20;
+
+      --primary: #d6af43;
+      --primary-dark: #f0ca5a;
+
+      --brown: #f4dfaa;
+      --brown-dark: #fff0c4;
+      --orange: #e59645;
+
+      --text: #f5ead0;
+      --text-soft: #cbbd9f;
+      --border: #56462d;
+
+      --danger: #e07167;
+      --success: #8fbd70;
+
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: var(--font-size);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans TC",
+        "Microsoft JhengHei",
+        sans-serif;
+
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(255, 232, 147, 0.35),
+          transparent 32%
+        ),
+        var(--bg);
+
+      transition:
+        background 0.25s ease,
+        color 0.25s ease;
+
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       App Layout
+       ========================================================= */
+
+    .app {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================
+       Header
+       ========================================================= */
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+
+      min-height: 72px;
+      padding: 12px 28px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+
+      background: rgba(255, 250, 224, 0.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(15px);
+
+      transition: background 0.25s ease;
+    }
+
+    body.dark .topbar {
+      background: rgba(33, 28, 20, 0.94);
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .brand {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--brown-dark);
+      white-space: nowrap;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+
+      border-radius: 12px;
+      min-height: 42px;
+      padding: 8px 14px;
+
+      font-weight: 700;
+
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(92, 63, 20, 0.10);
+    }
+
+    .btn-primary {
+      background: var(--brown);
+      color: #fff9df;
+      border-color: var(--brown);
+    }
+
+    .btn-primary:hover {
+      background: var(--brown-dark);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 5px 10px;
+      border-radius: 9px;
+      font-size: 0.85rem;
+    }
+
+    .login-btn {
+      border: none;
+      background: transparent;
+      color: var(--brown);
+      font-weight: 800;
+      padding: 8px 10px;
+      border-radius: 9px;
+    }
+
+    .login-btn:hover {
+      background: var(--card-2);
+    }
+
+    .font-control {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+    }
+
+    .font-control span {
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .font-control input {
+      width: 85px;
+      accent-color: var(--orange);
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    /* =========================================================
+       Main
+       ========================================================= */
+
+    main {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 22px 28px 40px;
+      flex: 1;
+    }
+
+    /* =========================================================
+       Dashboard
+       ========================================================= */
+
+    .dashboard {
+      min-height: 25vh;
+
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+
+      box-shadow: var(--shadow);
+
+      padding: 26px 30px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+
+      right: -45px;
+      top: -45px;
+
+      background: rgba(245, 215, 110, 0.23);
+    }
+
+    .stat-label {
+      color: var(--text-soft);
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      font-weight: 950;
+      color: var(--brown-dark);
+      letter-spacing: -1px;
+    }
+
+    .stat-number.money {
+      color: var(--orange);
+    }
+
+    .filter-bar {
+      grid-column: 1 / -1;
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      overflow-x: auto;
+      padding: 3px 0 8px;
+      scrollbar-width: thin;
+    }
+
+    .filter-btn {
+      flex: 0 0 auto;
+
+      padding: 9px 15px;
+      border-radius: 999px;
+
+      border: 1px solid var(--border);
+      background: var(--card);
+
+      color: var(--text);
+      font-weight: 750;
+    }
+
+    .filter-btn.active {
+      background: var(--brown);
+      color: white;
+      border-color: var(--brown);
+    }
+
+    /* =========================================================
+       Chart
+       ========================================================= */
+
+    .chart-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+
+      margin-bottom: 22px;
+      padding: 20px;
+
+      min-height: 280px;
+    }
+
+    .section-title {
+      font-weight: 900;
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+
+    .chart-wrapper {
+      height: 245px;
+      position: relative;
+    }
+
+    .empty-chart {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-soft);
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       Records
+       ========================================================= */
+
+    .records-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+
+      overflow: hidden;
+    }
+
+    .records-toolbar {
+      padding: 17px 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-box {
+      width: min(420px, 100%);
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+
+      min-height: 42px;
+      padding: 8px 14px 8px 40px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      outline: none;
+      background: var(--bg-soft);
+      color: var(--text);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(245, 215, 110, 0.25);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .record-count {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .record-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .record-table th {
+      background: var(--card-2);
+      color: var(--brown);
+      font-size: 0.88rem;
+      font-weight: 900;
+
+      padding: 13px 14px;
+      text-align: left;
+
+      white-space: nowrap;
+    }
+
+    .record-table td {
+      padding: 13px 14px;
+      border-top: 1px solid var(--border);
+
+      vertical-align: middle;
+    }
 
-  transition:
-    transform .15s ease,
-    background .15s ease,
-    border-color .15s ease;
-}
-
-.tool-btn:hover {
-  background: var(--surface-2);
-  border-color: var(--primary);
-}
-
-.tool-btn:active {
-  transform: scale(.97);
-}
-
-.primary-btn {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  font-weight: 800;
-}
-
-.primary-btn:hover {
-  background: var(--accent-dark);
-  color: white;
-}
-
-.icon-btn {
-  width: 40px;
-  min-width: 40px;
-  padding: 0;
-
-  display: grid;
-  place-items: center;
-}
-
-/* =========================================================
-   Font size
-========================================================= */
-
-.font-control {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-
-  padding: 6px 10px;
-
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-}
-
-.font-control span {
-  font-size: .78rem;
-  color: var(--muted);
-}
-
-.font-control input {
-  width: 75px;
-  accent-color: var(--accent);
-}
-
-/* =========================================================
-   Main
-========================================================= */
-
-main {
-  max-width: 1240px;
-  margin: auto;
-  padding: 20px;
-}
-
-/* =========================================================
-   Dashboard
-========================================================= */
-
-.dashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
-
-  margin-bottom: 16px;
-}
-
-.stat-card {
-  position: relative;
-
-  min-height: 150px;
-
-  padding: 24px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-
-  overflow: hidden;
-}
-
-.stat-card::after {
-  content: "";
-
-  position: absolute;
-
-  width: 120px;
-  height: 120px;
-
-  right: -40px;
-  bottom: -50px;
-
-  border-radius: 50%;
-
-  background: rgba(231, 185, 77, .12);
-}
-
-.stat-label {
-  color: var(--muted);
-  font-weight: 700;
-  font-size: .9rem;
-}
-
-.stat-number {
-  margin-top: 12px;
-
-  font-size: clamp(2rem, 4vw, 3rem);
-
-  font-weight: 950;
-
-  color: var(--accent-dark);
-
-  letter-spacing: -.04em;
-}
-
-.stat-unit {
-  font-size: .82rem;
-  color: var(--muted);
-  margin-left: 5px;
-}
-
-/* =========================================================
-   Filters
-========================================================= */
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  margin-bottom: 16px;
-
-  overflow-x: auto;
-
-  scrollbar-width: none;
-
-  padding-bottom: 2px;
-}
-
-.filter-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-chip {
-  flex: 0 0 auto;
-
-  min-height: 38px;
-
-  padding: 7px 14px;
-
-  border-radius: 999px;
-
-  background: var(--surface);
-
-  color: var(--text);
-
-  border: 1px solid var(--border);
-
-  font-size: .86rem;
-
-  white-space: nowrap;
-}
-
-.filter-chip.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  font-weight: 800;
-}
-
-/* =========================================================
-   Chart
-========================================================= */
-
-.chart-section {
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  padding: 16px;
-
-  margin-bottom: 16px;
-
-  box-shadow: var(--shadow);
-}
-
-.section-title {
-  font-weight: 900;
-  margin-bottom: 10px;
-}
-
-.chart-wrap {
-  height: 250px;
-  position: relative;
-}
-
-.no-chart {
-  height: 100%;
-
-  display: grid;
-  place-items: center;
-
-  color: var(--muted);
-}
-
-/* =========================================================
-   Records
-========================================================= */
-
-.records-panel {
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-
-  overflow: hidden;
-}
-
-.records-top {
-  padding: 15px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.records-title {
-  font-weight: 900;
-  font-size: 1.05rem;
-}
-
-.search-box {
-  width: min(320px, 100%);
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 8px 12px;
-
-  border: 1px solid var(--border);
-
-  background: var(--surface-2);
-
-  border-radius: 11px;
-}
-
-.search-box input {
-  width: 100%;
-
-  border: 0;
-  outline: 0;
-
-  background: transparent;
-
-  color: var(--text);
-}
-
-.search-box input::placeholder {
-  color: var(--muted);
-}
-
-/* =========================================================
-   Table Header
-========================================================= */
-
-.table-header {
-  display: grid;
-
-  grid-template-columns:
-    90px
-    105px
-    minmax(0, 1fr)
-    150px
-    90px;
-
-  align-items: center;
-
-  min-height: 48px;
-
-  padding: 0 16px;
-
-  background: var(--surface-2);
-
-  color: var(--muted);
-
-  font-size: .78rem;
-
-  font-weight: 800;
-}
-
-.sort-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-
-  background: transparent;
-
-  color: inherit;
-
-  padding: 4px;
-
-  font-weight: inherit;
-}
-
-.sort-button:hover {
-  color: var(--accent);
-}
-
-.category-filter-wrap {
-  position: relative;
-}
-
-.funnel-btn {
-  width: 32px;
-  height: 32px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--muted);
-}
-
-.funnel-btn:hover,
-.funnel-btn.active {
-  background: var(--surface);
-  color: var(--accent);
-}
-
-/* =========================================================
-   Category Dropdown
-========================================================= */
-
-.category-menu {
-  position: absolute;
-
-  top: calc(100% + 7px);
-  left: 0;
-
-  z-index: 40;
-
-  width: 190px;
-
-  max-height: 260px;
-
-  overflow-y: auto;
-
-  padding: 7px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: 12px;
-
-  box-shadow: 0 15px 35px rgba(0,0,0,.15);
-
-  display: none;
-}
-
-.category-menu.show {
-  display: block;
-}
-
-.category-option {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 10px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--text);
-
-  text-align: left;
-}
-
-.category-option:hover,
-.category-option.active {
-  background: var(--surface-2);
-}
-
-/* =========================================================
-   Record Rows
-========================================================= */
-
-.record-list {
-  width: 100%;
-}
-
-.record-row {
-  display: grid;
-
-  grid-template-columns:
-    90px
-    105px
-    minmax(0, 1fr)
-    150px
-    90px;
-
-  align-items: center;
-
-  min-height: 66px;
-
-  padding: 0 16px;
-
-  border-bottom: 1px solid var(--border);
-
-  cursor: pointer;
-
-  transition: background .15s ease;
-}
-
-.record-row:hover {
-  background: var(--surface-2);
-}
-
-.record-row:last-child {
-  border-bottom: 0;
-}
-
-.record-id {
-  color: var(--muted);
-  font-size: .85rem;
-}
-
-.amount {
-  color: var(--accent-dark);
-  font-weight: 900;
-
-  text-align: right;
-
-  padding-right: 10px;
-
-  white-space: nowrap;
-}
-
-.content {
-  min-width: 0;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-  padding-right: 15px;
-
-  font-weight: 700;
-}
-
-.date {
-  color: var(--muted);
-  font-size: .8rem;
-}
-
-.row-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
-
-  opacity: 0;
-
-  transition: opacity .15s ease;
-}
-
-.record-row:hover .row-actions {
-  opacity: 1;
-}
-
-.row-action {
-  width: 34px;
-  height: 34px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--muted);
-}
-
-.row-action:hover {
-  background: var(--surface-2);
-  color: var(--accent);
-}
-
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-
-  width: fit-content;
-
-  padding: 4px 8px;
-
-  border-radius: 7px;
-
-  font-size: .72rem;
-
-  font-weight: 800;
-
-  white-space: nowrap;
-}
-
-/* category colors */
-
-.cat-餐飲 {
-  background: #ffe1c7;
-  color: #984b13;
-}
-
-.cat-交通 {
-  background: #dceaff;
-  color: #315b9a;
-}
-
-.cat-購物 {
-  background: #f6d9ec;
-  color: #8c3f72;
-}
-
-.cat-娛樂 {
-  background: #e5ddff;
-  color: #624aa0;
-}
-
-.cat-房租 {
-  background: #d9efe0;
-  color: #37724b;
-}
-
-.cat-醫療 {
-  background: #d8eeee;
-  color: #337276;
-}
-
-.cat-其他 {
-  background: #e7e4df;
-  color: #625d54;
-}
-
-body.dark .cat-餐飲,
-body.dark .cat-交通,
-body.dark .cat-購物,
-body.dark .cat-娛樂,
-body.dark .cat-房租,
-body.dark .cat-醫療,
-body.dark .cat-其他 {
-  filter: brightness(.78);
-}
-
-/* =========================================================
-   Empty
-========================================================= */
-
-.empty {
-  padding: 60px 20px;
-
-  text-align: center;
-
-  color: var(--muted);
-}
-
-.empty-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-
-/* =========================================================
-   Modal
-========================================================= */
-
-.modal-backdrop {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 100;
-
-  display: none;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 18px;
-
-  background: rgba(30, 25, 15, .48);
-
-  backdrop-filter: blur(5px);
-}
-
-.modal-backdrop.show {
-  display: flex;
-}
-
-.modal {
-  width: min(560px, 100%);
-
-  max-height: min(850px, 92vh);
-
-  overflow-y: auto;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: 20px;
-
-  box-shadow: 0 25px 70px rgba(0,0,0,.25);
-
-  animation: modalIn .18s ease;
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.modal-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 16px 18px;
-
-  background: var(--surface);
-
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-weight: 950;
-  font-size: 1.08rem;
-}
-
-.modal-body {
-  padding: 18px;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-
-  gap: 8px;
-
-  padding: 15px 18px;
-
-  border-top: 1px solid var(--border);
-}
-
-/* =========================================================
-   Forms
-========================================================= */
-
-.form-grid {
-  display: grid;
-
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-
-  gap: 6px;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-.form-label {
-  font-size: .82rem;
-
-  color: var(--muted);
-
-  font-weight: 800;
-}
-
-.form-control {
-  width: 100%;
-
-  min-height: 44px;
-
-  padding: 9px 11px;
-
-  border-radius: 10px;
-
-  border: 1px solid var(--border);
-
-  outline: 0;
-
-  background: var(--surface-2);
-
-  color: var(--text);
-}
-
-.form-control:focus {
-  border-color: var(--primary);
-
-  box-shadow:
-    0 0 0 3px rgba(231,185,77,.15);
-}
-
-.location-row {
-  display: flex;
-  gap: 7px;
-}
-
-.location-row .form-control {
-  min-width: 0;
-}
-
-.quick-money {
-  display: flex;
-  gap: 6px;
-
-  margin-top: 6px;
-}
-
-.quick-money button {
-  padding: 6px 9px;
-
-  border-radius: 8px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  color: var(--accent-dark);
-
-  font-weight: 800;
-}
-
-.quick-money button:hover {
-  background: var(--surface-2);
-}
-
-/* =========================================================
-   Detail
-========================================================= */
-
-.detail-card {
-  background: var(--surface-2);
-
-  border: 1px solid var(--border);
-
-  border-radius: 13px;
-
-  padding: 15px;
-}
-
-.detail-amount {
-  font-size: 2.1rem;
-
-  font-weight: 950;
-
-  color: var(--accent-dark);
-
-  margin-bottom: 15px;
-}
-
-.detail-item {
-  display: grid;
-
-  grid-template-columns: 90px 1fr;
-
-  gap: 10px;
-
-  padding: 9px 0;
-
-  border-bottom: 1px dashed var(--border);
-}
-
-.detail-item:last-child {
-  border-bottom: 0;
-}
-
-.detail-label {
-  color: var(--muted);
-
-  font-size: .82rem;
-
-  font-weight: 800;
-}
-
-.detail-value {
-  word-break: break-word;
-}
-
-/* =========================================================
-   Toast
-========================================================= */
-
-.toast-container {
-  position: fixed;
-
-  top: 90px;
-  left: 50%;
-
-  z-index: 200;
-
-  transform: translateX(-50%);
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 7px;
-
-  pointer-events: none;
-}
-
-.toast {
-  min-width: 220px;
-
-  padding: 11px 16px;
-
-  border-radius: 11px;
-
-  background: #3c3329;
-
-  color: white;
-
-  box-shadow: 0 10px 30px rgba(0,0,0,.2);
-
-  text-align: center;
-
-  animation:
-    toastIn .2s ease,
-    toastOut .25s ease 1.75s forwards;
-}
-
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes toastOut {
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-/* =========================================================
-   Login status
-========================================================= */
-
-.user-status {
-  font-size: .75rem;
-
-  color: var(--muted);
-
-  white-space: nowrap;
-}
-
-/* =========================================================
-   Mobile
-========================================================= */
-
-@media (max-width: 700px) {
-
-  body {
-    font-size: 16px;
-  }
-
-  .header-inner {
-    min-height: auto;
-
-    padding:
-      10px
-      13px
-      11px;
-
-    align-items: flex-start;
-  }
-
-  .brand-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .brand-subtitle {
-    display: none;
-  }
-
-  .header-tools {
-    gap: 5px;
-  }
-
-  .font-control {
-    display: none;
-  }
-
-  .tool-btn {
-    min-height: 42px;
-    padding: 8px 10px;
-  }
-
-  .tool-btn.hide-mobile-text span {
-    display: none;
-  }
-
-  main {
-    padding:
-      14px
-      12px
-      calc(30px + env(safe-area-inset-bottom));
-  }
-
-  .dashboard {
-    grid-template-columns: 1fr;
-
-    gap: 10px;
-  }
-
-  .stat-card {
-    min-height: 118px;
-
-    padding: 18px;
-  }
-
-  .stat-number {
-    font-size: 2.15rem;
-  }
-
-  .chart-section {
-    padding: 13px;
-
-    border-radius: 14px;
-  }
-
-  .chart-wrap {
-    height: 215px;
-  }
-
-  .records-panel {
-    border-radius: 14px;
-  }
-
-  .records-top {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    padding: 13px;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  /*
-    手機版不再使用桌面五欄。
-    改成真正的記帳卡片。
-  */
-
-  .table-header {
-    display: none;
-  }
-
-  .record-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .record-row {
-    display: grid;
-
-    grid-template-columns:
-      1fr
-      auto;
-
-    grid-template-areas:
-      "content amount"
-      "meta amount";
-
-    gap: 5px 10px;
-
-    min-height: 78px;
-
-    padding: 13px 14px;
-
-    align-items: center;
-  }
-
-  .record-row:hover {
-    background: transparent;
-  }
-
-  .record-id {
-    display: none;
-  }
-
-  .content {
-    grid-area: content;
-
-    padding: 0;
-
-    font-size: .96rem;
-  }
-
-  .date {
-    grid-area: meta;
-
-    font-size: .73rem;
-  }
-
-  .amount {
-    grid-area: amount;
-
-    padding: 0;
-
-    font-size: 1.02rem;
-
-    align-self: center;
-  }
-
-  .category-badge {
-    margin-right: 6px;
-  }
-
-  /*
-    手機列第二行 metadata
-  */
-
-  .date::before {
-    content: "🕒 ";
-  }
-
-  /*
-    手機上不顯示 hover actions
-  */
-
-  .row-actions {
-    display: none;
-  }
-
-  .record-row {
-    position: relative;
-  }
-
-  .record-row::after {
-    content: "";
-
-    position: absolute;
-
-    left: 14px;
-    right: 14px;
-    bottom: 0;
-
-    border-bottom: 1px solid var(--border);
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-group.full {
-    grid-column: auto;
-  }
-
-  .modal-backdrop {
-    align-items: flex-end;
-
-    padding: 0;
-  }
-
-  .modal {
-    width: 100%;
-
-    max-height: 92vh;
-
-    border-radius:
-      20px
-      20px
-      0
-      0;
-  }
-
-  .modal-header {
-    padding: 14px 16px;
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    padding:
-      12px
-      16px
-      calc(12px + env(safe-area-inset-bottom));
-  }
-
-  .modal-footer button {
-    min-height: 45px;
-
-    flex: 1;
-  }
-
-  .location-row {
-    flex-direction: column;
-  }
-
-  .location-row button {
-    min-height: 44px;
-  }
-
-  .quick-money button {
-    min-height: 40px;
-
-    flex: 1;
-  }
-
-  .category-menu {
     /*
-      確保手機類別選單可以上下滾動
+      重新調整欄位寬度：
+
+      # 序號
+      # 類別
+      # 內容
+      # 時間
+      # 金額
+
+      讓 TH 與 TD 完全使用相同 table layout。
     */
-    max-height: 45vh;
 
-    overflow-y: auto;
+    .col-id {
+      width: 9%;
+    }
 
-    -webkit-overflow-scrolling: touch;
-  }
+    .col-category {
+      width: 15%;
+    }
 
-  .category-option {
-    min-height: 45px;
-  }
+    .col-content {
+      width: 32%;
+    }
 
-  .filter-chip {
-    min-height: 42px;
+    .col-time {
+      width: 23%;
+    }
 
-    padding-left: 15px;
-    padding-right: 15px;
-  }
+    .col-amount {
+      width: 21%;
+      text-align: right !important;
+    }
 
-  .toast-container {
-    top: 72px;
+    th.col-amount,
+    td.col-amount {
+      text-align: right;
+    }
 
-    width: calc(100% - 28px);
-  }
+    .sort-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
 
-  .toast {
-    width: 100%;
-  }
-}
+      border: none;
+      background: transparent;
+      color: inherit;
 
-/* =========================================================
-   Very small phones
-========================================================= */
+      padding: 0;
+      font-weight: 900;
+    }
 
-@media (max-width: 380px) {
+    .sort-button:hover {
+      color: var(--orange);
+    }
 
-  .brand-title {
-    font-size: .95rem;
-  }
+    .filter-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+    }
 
-  .header-tools .tool-btn {
-    width: 40px;
+    .filter-button {
+      border: none;
+      background: transparent;
+      color: inherit;
+      padding: 3px;
+      font-size: 0.9rem;
+    }
 
-    padding: 0;
+    .category-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
 
-    font-size: 0;
-  }
+      z-index: 200;
 
-  .header-tools .tool-btn::first-letter {
-    font-size: 18px;
-  }
+      width: 180px;
+      max-height: 260px;
 
-  .stat-number {
-    font-size: 1.9rem;
-  }
-}
-</style>
+      overflow-y: auto;
+      overscroll-behavior: contain;
+
+      padding: 7px;
+
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      box-shadow: 0 12px 30px rgba(65, 45, 15, 0.18);
+
+      display: none;
+    }
+
+    .category-menu.open {
+      display: block;
+    }
+
+    .category-option {
+      width: 100%;
+
+      border: none;
+      background: transparent;
+
+      padding: 10px;
+      text-align: left;
+
+      color: var(--text);
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    .category-option:hover,
+    .category-option.active {
+      background: var(--card-2);
+    }
+
+    /* =========================================================
+       Category
+       ========================================================= */
+
+    .category-tag {
+      display: inline-flex;
+      align-items: center;
+
+      padding: 4px 9px;
+      border-radius: 999px;
+
+      font-size: 0.78rem;
+      font-weight: 900;
+
+      white-space: nowrap;
+    }
+
+    .cat-餐飲 {
+      background: #ffe0b2;
+      color: #874a00;
+    }
+
+    .cat-交通 {
+      background: #cce5ff;
+      color: #16588c;
+    }
+
+    .cat-購物 {
+      background: #ffd2df;
+      color: #9a3055;
+    }
+
+    .cat-娛樂 {
+      background: #ddd0ff;
+      color: #6042a0;
+    }
+
+    .cat-房租 {
+      background: #d9efc4;
+      color: #3e7027;
+    }
+
+    .cat-醫療 {
+      background: #ffcfcf;
+      color: #a12c2c;
+    }
+
+    .cat-其他 {
+      background: #ddd8cd;
+      color: #625b4f;
+    }
+
+    /* =========================================================
+       Time
+       ========================================================= */
+
+    .time-display {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.2;
+    }
+
+    .time-date {
+      font-weight: 800;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .time-clock {
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .amount {
+      color: var(--orange);
+      font-size: 1.03rem;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .record-row {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .record-row:hover {
+      background: rgba(245, 215, 110, 0.13);
+    }
+
+    .row-actions {
+      display: none;
+      gap: 5px;
+      margin-left: 7px;
+    }
+
+    .record-row:hover .row-actions {
+      display: inline-flex;
+    }
+
+    .icon-button {
+      width: 30px;
+      height: 30px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
+      background: var(--card);
+    }
+
+    .icon-button.delete {
+      color: var(--danger);
+    }
+
+    .empty-records {
+      padding: 55px 20px;
+      text-align: center;
+      color: var(--text-soft);
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       Modal
+       ========================================================= */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+
+      z-index: 500;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(28, 21, 12, 0.48);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      background: var(--card);
+      color: var(--text);
+
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+
+      animation: modalIn 0.18s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 1.12rem;
+      font-weight: 950;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+
+      border: none;
+      border-radius: 50%;
+
+      background: var(--card-2);
+      color: var(--text);
+
+      font-size: 1.2rem;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .detail-main {
+      text-align: center;
+      padding: 10px 0 20px;
+    }
+
+    .detail-amount {
+      font-size: 2.4rem;
+      font-weight: 950;
+      color: var(--orange);
+    }
+
+    .detail-content {
+      margin-top: 6px;
+      font-size: 1.15rem;
+      font-weight: 850;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-item {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .detail-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-label {
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-weight: 800;
+    }
+
+    .modal-footer {
+      padding: 15px 20px;
+
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+
+      border-top: 1px solid var(--border);
+    }
+
+    /* =========================================================
+       Form
+       ========================================================= */
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 850;
+    }
+
+    .form-control {
+      width: 100%;
+
+      min-height: 45px;
+
+      border: 1px solid var(--border);
+      border-radius: 11px;
+
+      padding: 9px 12px;
+
+      outline: none;
+
+      background: var(--bg-soft);
+      color: var(--text);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(245, 215, 110, 0.25);
+    }
+
+    .amount-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .amount-row input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quick-add {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quick-add button {
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--brown);
+
+      border-radius: 9px;
+      padding: 7px 9px;
+
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .location-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .location-row input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* =========================================================
+       Toast
+       ========================================================= */
+
+    .toast-container {
+      position: fixed;
+      top: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      z-index: 1000;
+
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 220px;
+      max-width: 90vw;
+
+      padding: 12px 17px;
+
+      border-radius: 12px;
+
+      background: var(--brown);
+      color: white;
+
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+      text-align: center;
+      font-weight: 800;
+
+      animation:
+        toastIn 0.2s ease,
+        toastOut 0.25s ease 1.75s forwards;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-7px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        opacity: 0;
+        transform: translateY(-7px);
+      }
+    }
+
+    /* =========================================================
+       Data menu
+       ========================================================= */
+
+    .data-menu-wrapper {
+      position: relative;
+    }
+
+    .data-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+
+      width: 190px;
+
+      display: none;
+
+      padding: 7px;
+
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+
+      box-shadow: 0 12px 30px rgba(65, 45, 15, 0.18);
+
+      z-index: 300;
+    }
+
+    .data-menu.open {
+      display: block;
+    }
+
+    .data-menu button {
+      width: 100%;
+
+      padding: 10px;
+
+      border: none;
+      background: transparent;
+
+      color: var(--text);
+      text-align: left;
+
+      border-radius: 8px;
+      font-weight: 750;
+    }
+
+    .data-menu button:hover {
+      background: var(--card-2);
+    }
+
+    .data-menu button.danger-item {
+      color: var(--danger);
+    }
+
+    /* =========================================================
+       Mobile
+       ========================================================= */
+
+    @media (max-width: 900px) {
+      .topbar {
+        padding: 10px 16px;
+      }
+
+      main {
+        padding: 17px 16px 30px;
+      }
+
+      .font-control span {
+        display: none;
+      }
+
+      .dashboard {
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      html {
+        font-size: max(var(--font-size), 17px);
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      .topbar {
+        min-height: 62px;
+        padding: 8px 11px;
+
+        gap: 7px;
+      }
+
+      .brand-area {
+        gap: 5px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .brand {
+        font-size: 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-actions {
+        gap: 5px;
+      }
+
+      .desktop-only {
+        display: none !important;
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+
+      .btn {
+        min-height: 43px;
+        padding: 8px 11px;
+      }
+
+      .header-actions .btn-primary {
+        width: 43px;
+        padding: 0;
+        font-size: 1.25rem;
+      }
+
+      main {
+        padding: 12px 10px 25px;
+      }
+
+      /*
+        手機版統計資料垂直排列
+      */
+
+      .dashboard {
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+
+        margin-bottom: 12px;
+      }
+
+      .stat-card {
+        min-height: 125px;
+        padding: 19px 20px;
+      }
+
+      .stat-number {
+        font-size: 2.15rem;
+      }
+
+      .filter-bar {
+        grid-column: 1;
+        padding-bottom: 3px;
+      }
+
+      .filter-btn {
+        min-height: 43px;
+        padding: 8px 13px;
+      }
+
+      .chart-section {
+        padding: 13px;
+        margin-bottom: 12px;
+        min-height: 250px;
+      }
+
+      .chart-wrapper {
+        height: 220px;
+      }
+
+      .records-toolbar {
+        padding: 11px;
+
+        align-items: center;
+      }
+
+      .search-box {
+        width: 65%;
+      }
+
+      .search-box input {
+        min-height: 43px;
+        padding-left: 37px;
+      }
+
+      .record-count {
+        font-size: 0.78rem;
+      }
+
+      /*
+        清單保持水平表格。
+        使用者可以左右拖動。
+      */
+
+      .table-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .record-table {
+        min-width: 680px;
+      }
+
+      .record-table th,
+      .record-table td {
+        padding: 12px 9px;
+      }
+
+      .col-id {
+        width: 10%;
+      }
+
+      .col-category {
+        width: 17%;
+      }
+
+      .col-content {
+        width: 31%;
+      }
+
+      .col-time {
+        width: 22%;
+      }
+
+      .col-amount {
+        width: 20%;
+      }
+
+      /*
+        手機不使用左滑刪除功能
+      */
+
+      .row-actions {
+        display: none !important;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-item.full {
+        grid-column: auto;
+      }
+
+      .modal-backdrop {
+        padding: 10px;
+        align-items: flex-end;
+      }
+
+      .modal {
+        max-height: 88vh;
+        border-radius: 20px 20px 14px 14px;
+      }
+
+      .modal-footer {
+        flex-wrap: wrap;
+      }
+
+      .modal-footer .btn {
+        flex: 1;
+      }
+
+      .toast-container {
+        top: 70px;
+      }
+
+      .font-control {
+        padding: 2px 5px;
+      }
+
+      .font-control input {
+        width: 65px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- =======================================================
-     Header
-======================================================= -->
+<div class="app">
 
-<header class="app-header">
+  <!-- =========================================================
+       Header
+       ========================================================= -->
 
-  <div class="header-inner">
+  <header class="topbar">
 
-    <div class="brand">
+    <div class="brand-area">
 
-      <div class="brand-icon">
-        💰
+      <div class="brand">
+        💰 我的記帳本
       </div>
 
-      <div class="brand-text">
+      <!--
+        Google Firebase 登入
 
-        <div class="brand-title">
-          我的記帳本
-        </div>
-
-        <div class="brand-subtitle">
-          個人消費管理 · NTD
-        </div>
-
-      </div>
+        登入後會自動顯示「登出」。
+      -->
+      <button
+        id="loginBtn"
+        class="login-btn"
+        type="button"
+      >
+        登入
+      </button>
 
     </div>
 
-    <div class="header-tools">
+    <div class="header-actions">
 
-      <div class="font-control">
-
+      <!-- 字體大小 -->
+      <label class="font-control desktop-only">
         <span>字體</span>
 
         <input
-          id="fontSlider"
+          id="fontSizeRange"
           type="range"
           min="14"
           max="21"
           step="1"
           value="16"
+          title="調整字體大小"
         >
+      </label>
 
-      </div>
-
-      <span
-        id="userStatus"
-        class="user-status"
-      >
-        🔒 未登入
-      </span>
-
-      <button
-        id="loginBtn"
-        class="tool-btn"
-        type="button"
-      >
-        🔑 登入
-      </button>
-
-      <button
-        id="exportBtn"
-        class="tool-btn hide-mobile-text"
-        type="button"
-        title="匯出 CSV"
-      >
-        📤 <span>匯出</span>
-      </button>
-
-      <button
-        id="importBtn"
-        class="tool-btn hide-mobile-text"
-        type="button"
-        title="匯入資料"
-      >
-        📥 <span>匯入</span>
-      </button>
-
-      <input
-        id="fileInput"
-        type="file"
-        accept=".csv,.json"
-        hidden
-      >
-
+      <!-- 深色模式 -->
       <button
         id="themeBtn"
-        class="tool-btn icon-btn"
+        class="btn"
         type="button"
-        title="深色／淺色"
+        title="深色 / 淺色模式"
       >
         🌓
+        <span class="desktop-only">模式</span>
       </button>
 
-      <button
-        id="addBtn"
-        class="tool-btn primary-btn"
-        type="button"
-      >
-        ➕ <span>新增</span>
-      </button>
-
-    </div>
-
-  </div>
-
-</header>
-
-
-<!-- =======================================================
-     Main
-======================================================= -->
-
-<main>
-
-  <!-- Dashboard -->
-
-  <section class="dashboard">
-
-    <article class="stat-card">
-
-      <div class="stat-label">
-        總消費次數
-      </div>
-
-      <div
-        id="totalCount"
-        class="stat-number"
-      >
-        0
-      </div>
-
-      <div class="stat-unit">
-        筆
-      </div>
-
-    </article>
-
-
-    <article class="stat-card">
-
-      <div class="stat-label">
-        總消費金額
-      </div>
-
-      <div
-        id="totalAmount"
-        class="stat-number"
-      >
-        NT$ 0
-      </div>
-
-      <div class="stat-unit">
-        新台幣 NTD
-      </div>
-
-    </article>
-
-  </section>
-
-
-  <!-- Quick Filters -->
-
-  <div class="filter-bar">
-
-    <button
-      class="filter-chip active"
-      data-period="all"
-      type="button"
-    >
-      📊 全部
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="today"
-      type="button"
-    >
-      📅 今日
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="week"
-      type="button"
-    >
-      📅 本週
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="month"
-      type="button"
-    >
-      📅 本月
-    </button>
-
-  </div>
-
-
-  <!-- Chart -->
-
-  <section class="chart-section">
-
-    <div class="section-title">
-      📊 消費類別分析
-    </div>
-
-    <div class="chart-wrap">
-
-      <canvas id="expenseChart"></canvas>
-
-      <div
-        id="noChart"
-        class="no-chart"
-      >
-        無資料可視化
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- Records -->
-
-  <section class="records-panel">
-
-    <div class="records-top">
-
-      <div class="records-title">
-        📋 歷史消費記錄
-      </div>
-
-      <div class="search-box">
-
-        🔍
-
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="搜尋消費內容或地點..."
-          autocomplete="off"
-        >
-
-      </div>
-
-    </div>
-
-
-    <!-- Desktop table header -->
-
-    <div class="table-header">
-
-      <div>
+      <!-- 資料管理 -->
+      <div class="data-menu-wrapper">
 
         <button
-          class="sort-button"
-          data-sort="id"
+          id="dataMenuBtn"
+          class="btn desktop-only"
           type="button"
         >
-          序號 ↕
+          📁 資料管理
         </button>
 
-      </div>
-
-      <div class="category-filter-wrap">
-
-        <span>類別</span>
-
         <button
-          id="categoryFilterBtn"
-          class="funnel-btn"
+          id="mobileDataMenuBtn"
+          class="btn mobile-menu"
           type="button"
-          title="類別篩選"
+          title="資料管理"
         >
-          ⏷
+          📁
         </button>
 
         <div
-          id="categoryMenu"
-          class="category-menu"
+          id="dataMenu"
+          class="data-menu"
         >
 
-          <button
-            class="category-option active"
-            data-category="all"
-            type="button"
-          >
-            ◉ 全部類別
+          <button id="exportBtn">
+            📤 匯出資料
+          </button>
+
+          <button id="importBtn">
+            📥 匯入資料
           </button>
 
           <button
-            class="category-option"
-            data-category="餐飲"
-            type="button"
+            id="clearAllBtn"
+            class="danger-item"
           >
-            <span class="category-badge cat-餐飲">餐飲</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="交通"
-            type="button"
-          >
-            <span class="category-badge cat-交通">交通</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="購物"
-            type="button"
-          >
-            <span class="category-badge cat-購物">購物</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="娛樂"
-            type="button"
-          >
-            <span class="category-badge cat-娛樂">娛樂</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="房租"
-            type="button"
-          >
-            <span class="category-badge cat-房租">房租</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="醫療"
-            type="button"
-          >
-            <span class="category-badge cat-醫療">醫療</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="其他"
-            type="button"
-          >
-            <span class="category-badge cat-其他">其他</span>
+            🗑️ 全部刪除
           </button>
 
         </div>
 
       </div>
 
-      <div>
-        <button
-          class="sort-button"
-          data-sort="content"
-          type="button"
-        >
-          消費內容 ↕
-        </button>
-      </div>
-
-      <div>
-        <button
-          class="sort-button"
-          data-sort="amount"
-          type="button"
-        >
-          消費金額 ↕
-        </button>
-      </div>
-
-      <div>
-        操作
-      </div>
-
-    </div>
-
-
-    <div
-      id="recordList"
-      class="record-list"
-    ></div>
-
-  </section>
-
-</main>
-
-
-<!-- =======================================================
-     Add / Edit Modal
-======================================================= -->
-
-<div
-  id="formModal"
-  class="modal-backdrop"
->
-
-  <div class="modal">
-
-    <div class="modal-header">
-
-      <div
-        id="formTitle"
-        class="modal-title"
-      >
-        ➕ 新增消費記錄
-      </div>
-
+      <!-- 新增 -->
       <button
-        class="tool-btn icon-btn"
-        data-close="formModal"
+        id="addBtn"
+        class="btn btn-primary"
         type="button"
+        title="新增記錄"
       >
-        ✕
+        <span class="desktop-only">➕ 新增記錄</span>
+        <span class="mobile-menu">＋</span>
       </button>
 
     </div>
 
+  </header>
 
-    <form id="recordForm">
+  <!-- =========================================================
+       Main
+       ========================================================= -->
 
-      <div class="modal-body">
+  <main>
 
-        <div class="form-grid">
+    <!-- =======================================================
+         Dashboard
+         ======================================================= -->
 
-          <div class="form-group">
+    <section class="dashboard">
 
-            <label class="form-label">
-              消費金額（NTD）
-            </label>
+      <div class="stat-card">
 
-            <input
-              id="amountInput"
-              class="form-control"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              placeholder="例如 120"
-            >
+        <div class="stat-label">
+          總消費次數
+        </div>
 
-            <div class="quick-money">
-
-              <button
-                type="button"
-                data-add-money="100"
-              >
-                +100
-              </button>
-
-              <button
-                type="button"
-                data-add-money="500"
-              >
-                +500
-              </button>
-
-              <button
-                type="button"
-                data-add-money="1000"
-              >
-                +1000
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label class="form-label">
-              消費類別
-            </label>
-
-            <select
-              id="categoryInput"
-              class="form-control"
-              required
-            >
-
-              <option value="餐飲">餐飲</option>
-              <option value="交通">交通</option>
-              <option value="購物">購物</option>
-              <option value="娛樂">娛樂</option>
-              <option value="房租">房租</option>
-              <option value="醫療">醫療</option>
-              <option value="其他">其他</option>
-
-            </select>
-
-          </div>
-
-
-          <div class="form-group full">
-
-            <label class="form-label">
-              消費內容
-            </label>
-
-            <input
-              id="contentInput"
-              class="form-control"
-              type="text"
-              maxlength="100"
-              required
-              placeholder="例如：午餐、捷運、生活用品"
-            >
-
-          </div>
-
-
-          <div class="form-group full">
-
-            <label class="form-label">
-              消費時間
-            </label>
-
-            <input
-              id="timeInput"
-              class="form-control"
-              type="datetime-local"
-              required
-            >
-
-          </div>
-
-
-          <div class="form-group full">
-
-            <label class="form-label">
-              消費地點
-            </label>
-
-            <div class="location-row">
-
-              <input
-                id="locationInput"
-                class="form-control"
-                type="text"
-                placeholder="例如：台北車站"
-              >
-
-              <button
-                id="mapBtn"
-                class="tool-btn"
-                type="button"
-              >
-                🗺️ 地圖
-              </button>
-
-            </div>
-
-          </div>
-
+        <div
+          id="totalCount"
+          class="stat-number"
+        >
+          0
         </div>
 
       </div>
 
+      <div class="stat-card">
 
-      <div class="modal-footer">
+        <div class="stat-label">
+          總消費金額（NTD）
+        </div>
+
+        <div
+          id="totalAmount"
+          class="stat-number money"
+        >
+          NT$ 0
+        </div>
+
+      </div>
+
+      <!-- 快速篩選 -->
+      <div class="filter-bar">
 
         <button
-          class="tool-btn"
-          data-close="formModal"
-          type="button"
+          class="filter-btn active"
+          data-period="all"
         >
-          取消
+          全部
         </button>
 
         <button
-          class="tool-btn primary-btn"
-          type="submit"
+          class="filter-btn"
+          data-period="today"
         >
-          確定儲存
+          📅 今日
+        </button>
+
+        <button
+          class="filter-btn"
+          data-period="week"
+        >
+          📅 本週
+        </button>
+
+        <button
+          class="filter-btn"
+          data-period="month"
+        >
+          📅 本月
         </button>
 
       </div>
 
-    </form>
+    </section>
 
-  </div>
+    <!-- =======================================================
+         Chart
+         ======================================================= -->
+
+    <section class="chart-section">
+
+      <div class="section-title">
+        📊 消費類別分析
+      </div>
+
+      <div class="chart-wrapper">
+
+        <canvas
+          id="categoryChart"
+        ></canvas>
+
+        <div
+          id="emptyChart"
+          class="empty-chart"
+          style="display:none;"
+        >
+          無資料可視化
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =======================================================
+         Records
+         ======================================================= -->
+
+    <section class="records-section">
+
+      <div class="records-toolbar">
+
+        <div class="search-box">
+
+          <span class="search-icon">
+            🔍
+          </span>
+
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="搜尋消費內容或地點..."
+          >
+
+        </div>
+
+        <div
+          id="recordCount"
+          class="record-count"
+        >
+          0 筆
+        </div>
+
+      </div>
+
+      <div class="table-scroll">
+
+        <table class="record-table">
+
+          <thead>
+
+            <tr>
+
+              <!-- 序號 -->
+              <th class="col-id">
+
+                <button
+                  class="sort-button"
+                  data-sort="id"
+                >
+                  序號
+                  <span>↕</span>
+                </button>
+
+              </th>
+
+              <!-- 類別 -->
+              <th class="col-category">
+
+                類別
+
+                <span class="filter-wrapper">
+
+                  <button
+                    id="categoryFilterBtn"
+                    class="filter-button"
+                    title="類別篩選"
+                  >
+                    ⚱
+                  </button>
+
+                  <div
+                    id="categoryMenu"
+                    class="category-menu"
+                  >
+
+                    <button
+                      class="category-option active"
+                      data-category="all"
+                    >
+                      全部類別
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="餐飲"
+                    >
+                      🍜 餐飲
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="交通"
+                    >
+                      🚇 交通
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="購物"
+                    >
+                      🛍️ 購物
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="娛樂"
+                    >
+                      🎮 娛樂
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="房租"
+                    >
+                      🏠 房租
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="醫療"
+                    >
+                      🏥 醫療
+                    </button>
+
+                    <button
+                      class="category-option"
+                      data-category="其他"
+                    >
+                      📦 其他
+                    </button>
+
+                  </div>
+
+                </span>
+
+              </th>
+
+              <!-- 內容 -->
+              <th class="col-content">
+
+                <button
+                  class="sort-button"
+                  data-sort="content"
+                >
+                  消費內容
+                  <span>↕</span>
+                </button>
+
+              </th>
+
+              <!-- 時間 -->
+              <th class="col-time">
+                消費時間
+              </th>
+
+              <!-- 金額 -->
+              <th class="col-amount">
+
+                <button
+                  class="sort-button"
+                  data-sort="amount"
+                >
+                  消費金額
+                  <span>↕</span>
+                </button>
+
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="recordBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
 
 </div>
 
+<!-- =========================================================
+     Toast
+     ========================================================= -->
 
-<!-- =======================================================
+<div
+  id="toastContainer"
+  class="toast-container"
+></div>
+
+<!-- =========================================================
+     Import File
+     ========================================================= -->
+
+<input
+  id="fileInput"
+  type="file"
+  accept=".csv,.json,application/json,text/csv"
+  style="display:none;"
+>
+
+<!-- =========================================================
      Detail Modal
-======================================================= -->
+     ========================================================= -->
 
 <div
   id="detailModal"
@@ -2041,23 +1720,21 @@ body.dark .cat-其他 {
     <div class="modal-header">
 
       <div class="modal-title">
-        📄 消費詳細資訊
+        消費記錄詳情
       </div>
 
       <button
-        class="tool-btn icon-btn"
+        class="modal-close"
         data-close="detailModal"
-        type="button"
       >
-        ✕
+        ×
       </button>
 
     </div>
 
-
     <div class="modal-body">
 
-      <div class="detail-card">
+      <div class="detail-main">
 
         <div
           id="detailAmount"
@@ -2065,6 +1742,17 @@ body.dark .cat-其他 {
         >
           NT$ 0
         </div>
+
+        <div
+          id="detailContent"
+          class="detail-content"
+        >
+          -
+        </div>
+
+      </div>
+
+      <div class="detail-grid">
 
         <div class="detail-item">
 
@@ -2084,30 +1772,10 @@ body.dark .cat-其他 {
         <div class="detail-item">
 
           <div class="detail-label">
-            消費內容
-          </div>
-
-          <div
-            id="detailContent"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
             消費類別
           </div>
 
-          <div
-            id="detailCategory"
-            class="detail-value"
-          >
-            -
-          </div>
+          <div id="detailCategory"></div>
 
         </div>
 
@@ -2145,30 +1813,25 @@ body.dark .cat-其他 {
 
     </div>
 
-
     <div class="modal-footer">
 
       <button
-        id="duplicateBtn"
-        class="tool-btn"
-        type="button"
+        id="copyRecordBtn"
+        class="btn"
       >
-        📑 複製
+        📋 複製此筆
       </button>
 
       <button
-        id="editBtn"
-        class="tool-btn"
-        type="button"
+        id="editRecordBtn"
+        class="btn"
       >
         ✏️ 編輯
       </button>
 
       <button
-        id="deleteBtn"
-        class="tool-btn"
-        style="color:var(--danger)"
-        type="button"
+        id="deleteRecordBtn"
+        class="btn btn-danger"
       >
         🗑️ 刪除
       </button>
@@ -2179,13 +1842,12 @@ body.dark .cat-其他 {
 
 </div>
 
-
-<!-- =======================================================
-     Login Modal
-======================================================= -->
+<!-- =========================================================
+     Add/Edit Modal
+     ========================================================= -->
 
 <div
-  id="loginModal"
+  id="formModal"
   class="modal-backdrop"
 >
 
@@ -2193,1371 +1855,1551 @@ body.dark .cat-其他 {
 
     <div class="modal-header">
 
-      <div class="modal-title">
-        🔐 帳號登入
+      <div
+        id="formModalTitle"
+        class="modal-title"
+      >
+        新增消費記錄
       </div>
 
       <button
-        class="tool-btn icon-btn"
-        data-close="loginModal"
-        type="button"
+        class="modal-close"
+        data-close="formModal"
       >
-        ✕
+        ×
       </button>
 
     </div>
 
-    <div class="modal-body">
+    <form id="recordForm">
 
-      <p style="color:var(--muted);margin-top:0">
-        登入後，你的記帳資料會依照 Firebase UID
-        儲存在自己的資料區域。
-      </p>
+      <div class="modal-body">
 
-      <button
-        id="googleLoginBtn"
-        class="tool-btn primary-btn"
-        style="width:100%;min-height:48px"
-        type="button"
-      >
-        🔑 使用 Google 登入
-      </button>
+        <!-- 金額 -->
 
-      <p style="font-size:.75rem;color:var(--muted);line-height:1.6">
-        如果你尚未在 Firebase Console 啟用 Google
-        Authentication，請先到 Firebase →
-        Authentication → Sign-in method → Google 啟用。
-      </p>
+        <div class="form-group">
 
-    </div>
+          <label class="form-label">
+            消費金額（NTD）
+          </label>
+
+          <div class="amount-row">
+
+            <input
+              id="amountInput"
+              class="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              placeholder="例如 120"
+            >
+
+            <div class="quick-add">
+
+              <button
+                type="button"
+                data-add="100"
+              >
+                +100
+              </button>
+
+              <button
+                type="button"
+                data-add="500"
+              >
+                +500
+              </button>
+
+              <button
+                type="button"
+                data-add="1000"
+              >
+                +1000
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- 內容 -->
+
+        <div class="form-group">
+
+          <label class="form-label">
+            消費內容
+          </label>
+
+          <input
+            id="contentInput"
+            class="form-control"
+            type="text"
+            maxlength="100"
+            required
+            placeholder="例如：午餐"
+          >
+
+        </div>
+
+        <!-- 時間 -->
+
+        <div class="form-group">
+
+          <label class="form-label">
+            消費時間
+          </label>
+
+          <input
+            id="timeInput"
+            class="form-control"
+            type="datetime-local"
+            required
+          >
+
+        </div>
+
+        <!-- 地點 -->
+
+        <div class="form-group">
+
+          <label class="form-label">
+            消費地點
+          </label>
+
+          <div class="location-row">
+
+            <input
+              id="locationInput"
+              class="form-control"
+              type="text"
+              maxlength="200"
+              placeholder="例如：台北車站"
+            >
+
+            <button
+              id="mapBtn"
+              type="button"
+              class="btn"
+            >
+              🗺️ 地圖
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- 類別 -->
+
+        <div class="form-group">
+
+          <label class="form-label">
+            消費類別
+          </label>
+
+          <select
+            id="categoryInput"
+            class="form-control"
+          >
+
+            <option value="餐飲">🍜 餐飲</option>
+            <option value="交通">🚇 交通</option>
+            <option value="購物">🛍️ 購物</option>
+            <option value="娛樂">🎮 娛樂</option>
+            <option value="房租">🏠 房租</option>
+            <option value="醫療">🏥 醫療</option>
+            <option value="其他">📦 其他</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn"
+          data-close="formModal"
+        >
+          取消
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          確定儲存
+        </button>
+
+      </div>
+
+    </form>
 
   </div>
 
 </div>
 
-
-<!-- =======================================================
-     Toast
-======================================================= -->
-
-<div
-  id="toastContainer"
-  class="toast-container"
-></div>
-
+<!-- =========================================================
+     Firebase
+     ========================================================= -->
 
 <script type="module">
 
-/* =========================================================
-   Firebase
-========================================================= */
+  /* =========================================================
+     Firebase SDK
+     ========================================================= */
 
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import {
-  getFirestore,
-  collection,
-  doc,
-  addDoc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import {
+    getFirestore,
+    collection,
+    doc,
+    setDoc,
+    deleteDoc,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-/*
-===========================================================
-你的 Firebase 設定
-===========================================================
+  /* =========================================================
+     Firebase 設定
+     
+     這裡使用你提供的 Firebase Configuration。
+     
+     注意：
+     Firebase Web API Key 本身不是 Firebase 資料庫密碼。
+     真正控制資料安全的是 Firestore Rules + Authentication。
+     ========================================================= */
 
-這裡使用你之前提供的 Firebase Project。
+  const firebaseConfig = {
+    apiKey: "AIzaSyAY2G2UObkOr-jnSI7ZfO4jsQb2ZSScOSoI",
+    authDomain: "accounting-system-b42ba.firebaseapp.com",
+    projectId: "accounting-system-b42ba",
+    storageBucket: "accounting-system-b42ba.firebasestorage.app",
+    messagingSenderId: "112901288885",
+    appId: "1:112901288885:web:350f90297018165d941ffc",
+    measurementId: "G-XSP0NTY9ED"
+  };
 
-如果未來重新建立 Firebase Project，
-只需要把這個 firebaseConfig 換掉即可。
 
-===========================================================
-*/
+  /* =========================================================
+     初始化 Firebase
+     ========================================================= */
 
-const firebaseConfig = {
+  const firebaseApp = initializeApp(firebaseConfig);
 
-  apiKey:
-    "AIzaSyAYG2UObOr-jnSI7ZfO4jsQb2ZSScOSoI",
+  const auth = getAuth(firebaseApp);
 
-  authDomain:
-    "accounting-system-b42ba.firebaseapp.com",
+  const db = getFirestore(firebaseApp);
 
-  projectId:
-    "accounting-system-b42ba",
+  const googleProvider = new GoogleAuthProvider();
 
-  storageBucket:
-    "accounting-system-b42ba.firebasestorage.app",
 
-  messagingSenderId:
-    "112901288885",
+  /* =========================================================
+     你的 Firestore Rules 對應
 
-  appId:
-    "1:112901288885:web:350f90297018165d941ffc",
+     match /users/{userId}/{document=**} {
 
-  measurementId:
-    "G-XSP0NTY9ED"
-};
+       allow read, write:
+         if request.auth != null
+         && request.auth.uid == userId;
 
+     }
 
-const firebaseApp =
-  initializeApp(firebaseConfig);
+     因此資料必須放在：
 
-const auth =
-  getAuth(firebaseApp);
+     users
+       └── UID
+            └── accountingRecords
+                 └── recordId
 
-const db =
-  getFirestore(firebaseApp);
+     這樣登入者只能看到自己的資料。
+     ========================================================= */
 
-const googleProvider =
-  new GoogleAuthProvider();
 
+  /* =========================================================
+     常數
+     ========================================================= */
 
-/* =========================================================
-   Firestore Rules 對應方式
+  const STORAGE_KEY = "accountingRecords";
 
-   你的 Rules：
+  const CATEGORIES = [
+    "餐飲",
+    "交通",
+    "購物",
+    "娛樂",
+    "房租",
+    "醫療",
+    "其他"
+  ];
 
-   match /users/{userId}/{document=**} {
-     allow read, write:
-       if request.auth != null
-       && request.auth.uid == userId;
-   }
 
-   所以資料會放：
+  /* =========================================================
+     State
+     ========================================================= */
 
-   users
-      └── UID
-           └── records
-                └── recordId
+  let records = [];
 
-========================================================= */
+  let currentUser = null;
 
+  let selectedRecordId = null;
 
-let currentUser = null;
-let unsubscribeRecords = null;
+  let editingRecordId = null;
 
+  let activePeriod = "all";
 
-/* =========================================================
-   App State
-========================================================= */
+  let activeCategory = "all";
 
-let records = [];
+  let searchKeyword = "";
 
-let currentPeriod = "all";
+  let sortField = "id";
 
-let currentCategory = "all";
+  let sortDirection = "desc";
 
-let currentSearch = "";
+  let categoryChart = null;
 
-let sortField = "id";
 
-let sortDirection = "desc";
+  /* =========================================================
+     DOM
+     ========================================================= */
 
-let editingId = null;
+  const $ = (id) => document.getElementById(id);
 
-let selectedRecordId = null;
 
-let expenseChart = null;
+  /* =========================================================
+     基本工具
+     ========================================================= */
 
+  function showToast(message) {
 
-/* =========================================================
-   Constants
-========================================================= */
+    const toast = document.createElement("div");
 
-const STORAGE_KEY =
-  "accountingRecords";
+    toast.className = "toast";
 
-const CATEGORIES = [
-  "餐飲",
-  "交通",
-  "購物",
-  "娛樂",
-  "房租",
-  "醫療",
-  "其他"
-];
+    toast.textContent = message;
 
+    $("toastContainer").appendChild(toast);
 
-/* =========================================================
-   DOM
-========================================================= */
+    setTimeout(() => {
 
-const $ = selector =>
-  document.querySelector(selector);
+      toast.remove();
 
-const $$ = selector =>
-  [...document.querySelectorAll(selector)];
-
-
-/* =========================================================
-   Utility
-========================================================= */
-
-function showToast(message) {
-
-  const container =
-    $("#toastContainer");
-
-  const toast =
-    document.createElement("div");
-
-  toast.className = "toast";
-
-  toast.textContent = message;
-
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 2100);
-}
-
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-function formatMoney(value) {
-
-  return Number(value || 0)
-    .toLocaleString("zh-TW", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    });
-}
-
-
-function formatDate(value) {
-
-  if (!value) return "-";
-
-  const date =
-    new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
+    }, 2000);
   }
 
-  return date.toLocaleString(
-    "zh-TW",
-    {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    }
-  );
-}
 
+  function escapeHtml(value) {
 
-function localDateTimeValue(date = new Date()) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
-  const pad =
-    n => String(n).padStart(2, "0");
-
-  return [
-    date.getFullYear(),
-    "-",
-    pad(date.getMonth() + 1),
-    "-",
-    pad(date.getDate()),
-    "T",
-    pad(date.getHours()),
-    ":",
-    pad(date.getMinutes())
-  ].join("");
-}
-
-
-function getNextId() {
-
-  if (!records.length) {
-    return 1;
   }
 
-  return Math.max(
-    ...records.map(
-      r => Number(r.id) || 0
+
+  function getNowLocalInputValue() {
+
+    const now = new Date();
+
+    const offset =
+      now.getTimezoneOffset() * 60000;
+
+    return new Date(
+      now.getTime() - offset
     )
-  ) + 1;
-}
+      .toISOString()
+      .slice(0, 16);
+
+  }
 
 
-/* =========================================================
-   LocalStorage
-========================================================= */
+  function parseDate(value) {
 
-function saveLocal() {
+    if (!value) {
+      return null;
+    }
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(records)
-  );
-}
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    return date;
+
+  }
 
 
-function loadLocal() {
+  function formatDateTime(value) {
 
-  try {
+    const date = parseDate(value);
 
-    const raw =
-      localStorage.getItem(
-        STORAGE_KEY
+    if (!date) {
+      return {
+        date: "-",
+        time: "-"
+      };
+    }
+
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    const hour = String(
+      date.getHours()
+    ).padStart(2, "0");
+
+    const minute = String(
+      date.getMinutes()
+    ).padStart(2, "0");
+
+    return {
+      date: `${year}/${month}/${day}`,
+      time: `${hour}:${minute}`
+    };
+
+  }
+
+
+  function formatMoney(value) {
+
+    const number =
+      Number(value) || 0;
+
+    return number.toLocaleString(
+      "zh-TW",
+      {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }
+    );
+
+  }
+
+
+  function generateId() {
+
+    if (!records.length) {
+      return 1;
+    }
+
+    return Math.max(
+      ...records.map(
+        r => Number(r.id) || 0
+      )
+    ) + 1;
+
+  }
+
+
+  /* =========================================================
+     LocalStorage
+     ========================================================= */
+
+  function loadLocalRecords() {
+
+    try {
+
+      const saved =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+      if (!saved) {
+        return [];
+      }
+
+      const parsed =
+        JSON.parse(saved);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.map(normalizeRecord);
+
+    } catch (error) {
+
+      console.error(
+        "LocalStorage 讀取失敗",
+        error
       );
 
-    if (!raw) {
-      records = [];
+      return [];
+
+    }
+
+  }
+
+
+  function saveLocalRecords() {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(records)
+    );
+
+  }
+
+
+  function normalizeRecord(record) {
+
+    return {
+      id: Number(record.id) || 0,
+
+      amount:
+        Number(record.amount) || 0,
+
+      content:
+        String(record.content || ""),
+
+      time:
+        record.time || "",
+
+      location:
+        String(record.location || ""),
+
+      category:
+        CATEGORIES.includes(record.category)
+          ? record.category
+          : "其他"
+    };
+
+  }
+
+
+  /* =========================================================
+     Firebase 讀取
+     ========================================================= */
+
+  async function loadFirebaseRecords() {
+
+    if (!currentUser) {
       return;
     }
 
-    const parsed =
-      JSON.parse(raw);
+    try {
 
-    records =
-      Array.isArray(parsed)
-        ? parsed
-        : [];
+      const recordsRef =
+        collection(
+          db,
+          "users",
+          currentUser.uid,
+          "accountingRecords"
+        );
 
-  } catch (error) {
+      const snapshot =
+        await getDocs(recordsRef);
 
-    console.error(error);
+      const firebaseRecords = [];
 
-    records = [];
-  }
-}
+      snapshot.forEach(
+        docSnapshot => {
 
-
-/* =========================================================
-   Firebase collection
-========================================================= */
-
-function userRecordsCollection() {
-
-  if (!currentUser) {
-    return null;
-  }
-
-  return collection(
-    db,
-    "users",
-    currentUser.uid,
-    "records"
-  );
-}
-
-
-/* =========================================================
-   Firebase realtime sync
-========================================================= */
-
-function startFirebaseSync() {
-
-  if (!currentUser) return;
-
-  if (unsubscribeRecords) {
-    unsubscribeRecords();
-  }
-
-  const ref =
-    userRecordsCollection();
-
-  unsubscribeRecords =
-    onSnapshot(
-      ref,
-      snapshot => {
-
-        records =
-          snapshot.docs.map(
-            item => ({
-              ...item.data(),
-              firebaseId: item.id
-            })
+          firebaseRecords.push(
+            normalizeRecord(
+              docSnapshot.data()
+            )
           );
 
-        records.sort(
-          (a, b) =>
-            Number(a.id) -
-            Number(b.id)
-        );
-
-        saveLocal();
-
-        render();
-
-      },
-
-      error => {
-
-        console.error(
-          "Firestore sync error:",
-          error
-        );
-
-        showToast(
-          "Firebase 同步失敗，已使用本機資料"
-        );
-
-        loadLocal();
-
-        render();
-      }
-    );
-}
-
-
-/* =========================================================
-   Firebase Add
-========================================================= */
-
-async function firebaseAdd(record) {
-
-  if (!currentUser) {
-    return false;
-  }
-
-  try {
-
-    const ref =
-      await addDoc(
-        userRecordsCollection(),
-        record
+        }
       );
 
-    return ref.id;
+      /*
+        Firebase 有資料：
+        以 Firebase 為目前登入帳號的主要資料來源。
 
-  } catch (error) {
+        同時寫入 LocalStorage，
+        方便離線 / 未登入狀態使用。
+      */
 
-    console.error(error);
+      records = firebaseRecords;
 
-    showToast(
-      "Firebase 儲存失敗，已保留本機資料"
-    );
+      saveLocalRecords();
 
-    return false;
+      renderAll();
+
+    } catch (error) {
+
+      console.error(
+        "Firebase 讀取失敗：",
+        error
+      );
+
+      showToast(
+        "Firebase 讀取失敗，暫時使用本機資料"
+      );
+
+    }
+
   }
-}
 
 
-/* =========================================================
-   Firebase Update
-========================================================= */
+  /* =========================================================
+     Firebase 儲存單筆
+     ========================================================= */
 
-async function firebaseUpdate(record) {
+  async function saveRecordToFirebase(record) {
 
-  if (!currentUser) {
-    return false;
-  }
+    if (!currentUser) {
+      return;
+    }
 
-  try {
-
-    await setDoc(
+    const recordRef =
       doc(
         db,
         "users",
         currentUser.uid,
-        "records",
-        record.firebaseId
-      ),
+        "accountingRecords",
+        String(record.id)
+      );
+
+    await setDoc(
+      recordRef,
       record
     );
 
-    return true;
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "Firebase 更新失敗"
-    );
-
-    return false;
-  }
-}
-
-
-/* =========================================================
-   Firebase Delete
-========================================================= */
-
-async function firebaseDelete(record) {
-
-  if (!currentUser) {
-    return false;
   }
 
-  try {
+
+  /* =========================================================
+     Firebase 刪除單筆
+     ========================================================= */
+
+  async function deleteRecordFromFirebase(id) {
+
+    if (!currentUser) {
+      return;
+    }
 
     await deleteDoc(
       doc(
         db,
         "users",
         currentUser.uid,
-        "records",
-        record.firebaseId
+        "accountingRecords",
+        String(id)
       )
     );
 
-    return true;
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "Firebase 刪除失敗"
-    );
-
-    return false;
-  }
-}
-
-
-/* =========================================================
-   Data filtering
-========================================================= */
-
-function isToday(date) {
-
-  const now =
-    new Date();
-
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-}
-
-
-function isThisWeek(date) {
-
-  const now =
-    new Date();
-
-  const start =
-    new Date(now);
-
-  const day =
-    start.getDay();
-
-  const diff =
-    day === 0 ? 6 : day - 1;
-
-  start.setDate(
-    start.getDate() - diff
-  );
-
-  start.setHours(
-    0, 0, 0, 0
-  );
-
-  return date >= start;
-}
-
-
-function isThisMonth(date) {
-
-  const now =
-    new Date();
-
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth()
-  );
-}
-
-
-function getFilteredRecords() {
-
-  let result =
-    [...records];
-
-  if (currentPeriod !== "all") {
-
-    result =
-      result.filter(record => {
-
-        const date =
-          new Date(record.time);
-
-        if (
-          Number.isNaN(
-            date.getTime()
-          )
-        ) {
-          return false;
-        }
-
-        if (
-          currentPeriod === "today"
-        ) {
-          return isToday(date);
-        }
-
-        if (
-          currentPeriod === "week"
-        ) {
-          return isThisWeek(date);
-        }
-
-        if (
-          currentPeriod === "month"
-        ) {
-          return isThisMonth(date);
-        }
-
-        return true;
-      });
   }
 
 
-  if (currentCategory !== "all") {
+  /* =========================================================
+     Google Login
+     ========================================================= */
 
-    result =
-      result.filter(
-        record =>
-          record.category ===
-          currentCategory
+  async function loginWithGoogle() {
+
+    try {
+
+      await signInWithPopup(
+        auth,
+        googleProvider
       );
-  }
 
+    } catch (error) {
 
-  if (currentSearch.trim()) {
+      console.error(
+        "Google 登入失敗：",
+        error
+      );
 
-    const keyword =
-      currentSearch
-        .trim()
-        .toLowerCase();
+      if (
+        error.code ===
+        "auth/popup-blocked"
+      ) {
 
-    result =
-      result.filter(record => {
-
-        const content =
-          String(
-            record.content || ""
-          ).toLowerCase();
-
-        const location =
-          String(
-            record.location || ""
-          ).toLowerCase();
-
-        return (
-          content.includes(keyword) ||
-          location.includes(keyword)
+        showToast(
+          "Google 登入視窗被瀏覽器阻擋"
         );
-      });
+
+      } else if (
+        error.code ===
+        "auth/popup-closed-by-user"
+      ) {
+
+        showToast(
+          "登入視窗已關閉"
+        );
+
+      } else {
+
+        showToast(
+          "Google 登入失敗，請檢查 Firebase 設定"
+        );
+
+      }
+
+    }
+
   }
 
 
-  result.sort((a, b) => {
+  async function logoutGoogle() {
 
-    let av;
-    let bv;
+    try {
 
-    if (sortField === "amount") {
+      await signOut(auth);
 
-      av =
-        Number(a.amount) || 0;
+      showToast("已登出");
 
-      bv =
-        Number(b.amount) || 0;
+    } catch (error) {
 
-    } else if (
-      sortField === "content"
-    ) {
+      console.error(error);
 
-      av =
-        String(a.content || "");
+      showToast("登出失敗");
 
-      bv =
-        String(b.content || "");
-
-    } else {
-
-      av =
-        Number(a.id) || 0;
-
-      bv =
-        Number(b.id) || 0;
     }
 
-    if (
-      typeof av === "string"
-    ) {
+  }
 
-      return (
-        av.localeCompare(
-          bv,
-          "zh-Hant"
-        ) *
-        sortDirection
-      );
+
+  /* =========================================================
+     Firebase Auth 狀態
+     ========================================================= */
+
+  onAuthStateChanged(
+    auth,
+    async user => {
+
+      currentUser = user;
+
+      if (user) {
+
+        $("loginBtn").textContent =
+          "登出";
+
+        $("loginBtn").title =
+          `${user.displayName || ""} 已登入`;
+
+        await loadFirebaseRecords();
+
+      } else {
+
+        $("loginBtn").textContent =
+          "登入";
+
+        $("loginBtn").title =
+          "使用 Google 登入";
+
+        records =
+          loadLocalRecords();
+
+        renderAll();
+
+      }
+
     }
+  );
+
+
+  /* =========================================================
+     日期篩選
+     ========================================================= */
+
+  function isSameDay(a, b) {
 
     return (
-      (av - bv) *
-      sortDirection
-    );
-  });
-
-  return result;
-}
-
-
-/* =========================================================
-   Render
-========================================================= */
-
-function render() {
-
-  const filtered =
-    getFilteredRecords();
-
-  renderStats(filtered);
-
-  renderRecords(filtered);
-
-  renderChart(filtered);
-}
-
-
-function renderStats(data) {
-
-  $("#totalCount")
-    .textContent =
-    data.length.toLocaleString(
-      "zh-TW"
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
     );
 
-  const total =
-    data.reduce(
-      (sum, record) =>
-        sum +
-        (Number(record.amount) || 0),
-      0
-    );
-
-  $("#totalAmount")
-    .textContent =
-    "NT$ " +
-    formatMoney(total);
-}
-
-
-/* =========================================================
-   Render records
-========================================================= */
-
-function renderRecords(data) {
-
-  const list =
-    $("#recordList");
-
-  if (!data.length) {
-
-    list.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">🧾</div>
-        <div>目前沒有符合條件的消費記錄</div>
-      </div>
-    `;
-
-    return;
   }
 
 
-  list.innerHTML =
-    data.map(record => {
+  function isThisWeek(date) {
 
-      const category =
-        record.category ||
-        "其他";
+    const now = new Date();
 
-      return `
+    const day =
+      now.getDay();
 
-        <div
-          class="record-row"
-          data-id="${escapeHTML(record.id)}"
-        >
+    const diff =
+      day === 0
+        ? 6
+        : day - 1;
 
-          <div class="record-id">
-            #${escapeHTML(record.id)}
-          </div>
+    const monday =
+      new Date(now);
 
-          <div>
-            <span
-              class="category-badge cat-${escapeHTML(category)}"
-            >
-              ${escapeHTML(category)}
-            </span>
-          </div>
+    monday.setHours(
+      0, 0, 0, 0
+    );
 
-          <div class="content">
-            ${escapeHTML(record.content)}
-          </div>
+    monday.setDate(
+      now.getDate() - diff
+    );
 
-          <div class="amount">
-            NT$ ${formatMoney(record.amount)}
-          </div>
+    const nextMonday =
+      new Date(monday);
 
-          <div class="row-actions">
+    nextMonday.setDate(
+      monday.getDate() + 7
+    );
 
-            <button
-              class="row-action edit-row"
-              data-id="${escapeHTML(record.id)}"
-              title="編輯"
-              type="button"
-            >
-              ✏️
-            </button>
+    return (
+      date >= monday &&
+      date < nextMonday
+    );
 
-            <button
-              class="row-action delete-row"
-              data-id="${escapeHTML(record.id)}"
-              title="刪除"
-              type="button"
-            >
-              🗑️
-            </button>
-
-          </div>
-
-          <div
-            class="date"
-            style="display:none"
-          >
-            ${escapeHTML(formatDate(record.time))}
-          </div>
-
-        </div>
-      `;
-    }).join("");
+  }
 
 
-  /*
-    注意：
+  function isThisMonth(date) {
 
-    手機版不使用 swipe。
+    const now = new Date();
 
-    手機卡片會直接顯示時間。
-    桌面版則透過 JS 顯示日期欄。
-  */
+    return (
+      date.getFullYear() ===
+        now.getFullYear() &&
+      date.getMonth() ===
+        now.getMonth()
+    );
 
-  $$(".record-row").forEach(row => {
+  }
 
-    const id =
-      Number(row.dataset.id);
 
-    const record =
-      records.find(
-        r =>
-          Number(r.id) === id
-      );
+  function recordPassesPeriod(record) {
 
-    if (!record) return;
-
-    const date =
-      row.querySelector(".date");
-
-    if (date) {
-
-      date.style.display =
-        "block";
+    if (activePeriod === "all") {
+      return true;
     }
 
+    const date =
+      parseDate(record.time);
 
-    row.addEventListener(
-      "click",
-      event => {
+    if (!date) {
+      return false;
+    }
+
+    if (activePeriod === "today") {
+      return isSameDay(
+        date,
+        new Date()
+      );
+    }
+
+    if (activePeriod === "week") {
+      return isThisWeek(date);
+    }
+
+    if (activePeriod === "month") {
+      return isThisMonth(date);
+    }
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     Filtering
+     ========================================================= */
+
+  function getFilteredRecords() {
+
+    let result =
+      records.filter(
+        record =>
+          recordPassesPeriod(record)
+      );
+
+    if (activeCategory !== "all") {
+
+      result =
+        result.filter(
+          record =>
+            record.category ===
+            activeCategory
+        );
+
+    }
+
+    if (searchKeyword.trim()) {
+
+      const keyword =
+        searchKeyword
+          .trim()
+          .toLowerCase();
+
+      result =
+        result.filter(record => {
+
+          return (
+            String(record.content)
+              .toLowerCase()
+              .includes(keyword) ||
+
+            String(record.location)
+              .toLowerCase()
+              .includes(keyword)
+          );
+
+        });
+
+    }
+
+    result.sort(
+      (a, b) => {
+
+        let valueA;
+        let valueB;
+
+        if (sortField === "id") {
+
+          valueA =
+            Number(a.id);
+
+          valueB =
+            Number(b.id);
+
+        } else if (
+          sortField === "amount"
+        ) {
+
+          valueA =
+            Number(a.amount);
+
+          valueB =
+            Number(b.amount);
+
+        } else if (
+          sortField === "content"
+        ) {
+
+          valueA =
+            String(a.content)
+              .localeCompare(
+                String(b.content),
+                "zh-Hant"
+              );
+
+          valueB = 0;
+
+        }
 
         if (
-          event.target.closest(
-            ".row-action"
-          )
+          sortField === "content"
         ) {
-          return;
+
+          return sortDirection === "asc"
+            ? valueA
+            : -valueA;
+
         }
 
-        openDetail(record);
+        return sortDirection === "asc"
+          ? valueA - valueB
+          : valueB - valueA;
+
       }
     );
-  });
 
+    return result;
 
-  $$(".edit-row").forEach(btn => {
-
-    btn.addEventListener(
-      "click",
-      event => {
-
-        event.stopPropagation();
-
-        const id =
-          Number(
-            btn.dataset.id
-          );
-
-        const record =
-          records.find(
-            r =>
-              Number(r.id) === id
-          );
-
-        if (record) {
-          openEdit(record);
-        }
-      }
-    );
-  });
-
-
-  $$(".delete-row").forEach(btn => {
-
-    btn.addEventListener(
-      "click",
-      async event => {
-
-        event.stopPropagation();
-
-        const id =
-          Number(
-            btn.dataset.id
-          );
-
-        const record =
-          records.find(
-            r =>
-              Number(r.id) === id
-          );
-
-        if (record) {
-          await deleteRecord(record);
-        }
-      }
-    );
-  });
-}
-
-
-/* =========================================================
-   Chart
-========================================================= */
-
-function renderChart(data) {
-
-  const canvas =
-    $("#expenseChart");
-
-  const empty =
-    $("#noChart");
-
-  const totals = {};
-
-  data.forEach(record => {
-
-    const category =
-      record.category ||
-      "其他";
-
-    totals[category] =
-      (totals[category] || 0) +
-      (Number(record.amount) || 0);
-  });
-
-
-  const labels =
-    Object.keys(totals);
-
-  const values =
-    Object.values(totals);
-
-
-  if (
-    expenseChart
-  ) {
-
-    expenseChart.destroy();
-
-    expenseChart =
-      null;
   }
 
 
-  if (!labels.length) {
+  /* =========================================================
+     Dashboard
+     ========================================================= */
+
+  function renderDashboard() {
+
+    const filtered =
+      getFilteredRecords();
+
+    const count =
+      filtered.length;
+
+    const total =
+      filtered.reduce(
+        (sum, record) =>
+          sum + Number(record.amount || 0),
+        0
+      );
+
+    $("totalCount").textContent =
+      count.toLocaleString("zh-TW");
+
+    $("totalAmount").textContent =
+      `NT$ ${formatMoney(total)}`;
+
+    $("recordCount").textContent =
+      `${count} 筆`;
+
+  }
+
+
+  /* =========================================================
+     Render Records
+     ========================================================= */
+
+  function renderRecords() {
+
+    const tbody =
+      $("recordBody");
+
+    const filtered =
+      getFilteredRecords();
+
+    if (!filtered.length) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            <div class="empty-records">
+              📭 目前沒有符合條件的消費記錄
+            </div>
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+    tbody.innerHTML =
+      filtered
+        .map(record => {
+
+          const time =
+            formatDateTime(
+              record.time
+            );
+
+          const safeCategory =
+            escapeHtml(
+              record.category
+            );
+
+          return `
+            <tr
+              class="record-row"
+              data-id="${record.id}"
+            >
+
+              <td class="col-id">
+                #${record.id}
+              </td>
+
+              <td class="col-category">
+                <span
+                  class="category-tag cat-${safeCategory}"
+                >
+                  ${safeCategory}
+                </span>
+              </td>
+
+              <td class="col-content">
+
+                <span>
+                  ${escapeHtml(record.content)}
+                </span>
+
+                <span class="row-actions">
+
+                  <button
+                    class="icon-button"
+                    data-action="edit"
+                    data-id="${record.id}"
+                    title="編輯"
+                  >
+                    ✏️
+                  </button>
+
+                  <button
+                    class="icon-button delete"
+                    data-action="delete"
+                    data-id="${record.id}"
+                    title="刪除"
+                  >
+                    🗑️
+                  </button>
+
+                </span>
+
+              </td>
+
+              <td class="col-time">
+
+                <div class="time-display">
+
+                  <span class="time-date">
+                    ${time.date}
+                  </span>
+
+                  <span class="time-clock">
+                    ${time.time}
+                  </span>
+
+                </div>
+
+              </td>
+
+              <td class="col-amount">
+
+                <span class="amount">
+                  NT$ ${formatMoney(record.amount)}
+                </span>
+
+              </td>
+
+            </tr>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  /* =========================================================
+     Chart
+     ========================================================= */
+
+  function renderChart() {
+
+    const filtered =
+      getFilteredRecords();
+
+    const canvas =
+      $("categoryChart");
+
+    const empty =
+      $("emptyChart");
+
+    if (
+      categoryChart
+    ) {
+
+      categoryChart.destroy();
+
+      categoryChart = null;
+
+    }
+
+    if (!filtered.length) {
+
+      canvas.style.display =
+        "none";
+
+      empty.style.display =
+        "flex";
+
+      return;
+
+    }
 
     canvas.style.display =
-      "none";
+      "block";
 
     empty.style.display =
-      "grid";
+      "none";
 
-    return;
-  }
+    const categoryTotals =
+      {};
 
+    CATEGORIES.forEach(
+      category => {
+        categoryTotals[category] = 0;
+      }
+    );
 
-  canvas.style.display =
-    "block";
+    filtered.forEach(
+      record => {
 
-  empty.style.display =
-    "none";
+        const category =
+          CATEGORIES.includes(
+            record.category
+          )
+            ? record.category
+            : "其他";
 
+        categoryTotals[category] +=
+          Number(record.amount) || 0;
 
-  const colors = [
-    "#d98b45",
-    "#6e9fd5",
-    "#c875a8",
-    "#9077c9",
-    "#68a77c",
-    "#63aeb0",
-    "#999184"
-  ];
+      }
+    );
 
+    const labels =
+      CATEGORIES.filter(
+        category =>
+          categoryTotals[category] > 0
+      );
 
-  expenseChart =
-    new Chart(
-      canvas,
-      {
-        type: "pie",
+    const values =
+      labels.map(
+        category =>
+          categoryTotals[category]
+      );
 
-        data: {
-          labels,
+    categoryChart =
+      new Chart(
+        canvas,
+        {
+          type: "pie",
 
-          datasets: [
-            {
-              data: values,
+          data: {
+            labels,
 
-              backgroundColor:
-                colors.slice(
-                  0,
-                  labels.length
-                ),
+            datasets: [
+              {
+                data: values,
 
-              borderWidth: 2,
+                borderWidth: 2,
 
-              borderColor:
-                getComputedStyle(
-                  document.body
-                )
-                .getPropertyValue(
-                  "--surface"
-                )
-            }
-          ]
-        },
-
-        options: {
-
-          responsive: true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-
-            legend: {
-              position:
-                "right",
-
-              labels: {
-                color:
+                borderColor:
                   getComputedStyle(
                     document.body
+                  ).getPropertyValue(
+                    "--card"
                   )
-                  .getPropertyValue(
-                    "--text"
-                  ),
-
-                boxWidth: 13,
-
-                padding: 12
               }
-            },
+            ]
+          },
 
-            tooltip: {
+          options: {
+            responsive: true,
 
-              callbacks: {
+            maintainAspectRatio: false,
 
-                label(context) {
+            plugins: {
+              legend: {
+                position: "right",
 
-                  const total =
-                    values.reduce(
-                      (a, b) =>
-                        a + b,
-                      0
-                    );
+                labels: {
+                  color:
+                    getComputedStyle(
+                      document.body
+                    ).getPropertyValue(
+                      "--text"
+                    )
+                }
+              },
 
-                  const value =
-                    context.raw;
+              tooltip: {
+                callbacks: {
+                  label: context => {
 
-                  const percent =
-                    total
-                      ? (
-                        value /
-                        total *
-                        100
-                      ).toFixed(1)
-                      : 0;
+                    const total =
+                      values.reduce(
+                        (a, b) => a + b,
+                        0
+                      );
 
-                  return (
-                    " " +
-                    context.label +
-                    "：" +
-                    formatMoney(value) +
-                    " NTD (" +
-                    percent +
-                    "%)"
-                  );
+                    const value =
+                      Number(
+                        context.raw
+                      );
+
+                    const percent =
+                      total
+                        ? (
+                            value /
+                            total *
+                            100
+                          ).toFixed(1)
+                        : 0;
+
+                    return `${context.label}: NT$ ${formatMoney(value)} (${percent}%)`;
+
+                  }
                 }
               }
             }
           }
         }
-      }
-    );
-}
+      );
+
+  }
 
 
-/* =========================================================
-   Modal
-========================================================= */
+  /* =========================================================
+     Render All
+     ========================================================= */
 
-function openModal(id) {
+  function renderAll() {
 
-  $("#" + id)
-    .classList.add("show");
-}
+    renderDashboard();
 
+    renderRecords();
 
-function closeModal(id) {
+    renderChart();
 
-  $("#" + id)
-    .classList.remove("show");
-}
+  }
 
 
-function closeAllModals() {
+  /* =========================================================
+     Modal
+     ========================================================= */
 
-  $$(".modal-backdrop")
-    .forEach(modal =>
-      modal.classList.remove(
-        "show"
-      )
-    );
-}
+  function openModal(id) {
 
-
-/* =========================================================
-   Add modal
-========================================================= */
-
-function openAdd() {
-
-  editingId = null;
-
-  $("#formTitle")
-    .textContent =
-    "➕ 新增消費記錄";
-
-  $("#recordForm")
-    .reset();
-
-  $("#categoryInput")
-    .value =
-    "餐飲";
-
-  $("#timeInput")
-    .value =
-    localDateTimeValue();
-
-  openModal("formModal");
-
-  setTimeout(() => {
-    $("#amountInput").focus();
-  }, 100);
-}
-
-
-/* =========================================================
-   Edit
-========================================================= */
-
-function openEdit(record) {
-
-  editingId =
-    Number(record.id);
-
-  $("#formTitle")
-    .textContent =
-    "✏️ 編輯消費記錄";
-
-  $("#amountInput")
-    .value =
-    record.amount;
-
-  $("#contentInput")
-    .value =
-    record.content || "";
-
-  $("#categoryInput")
-    .value =
-    record.category || "其他";
-
-  $("#timeInput")
-    .value =
-    localDateTimeValue(
-      new Date(record.time)
+    $(id).classList.add(
+      "open"
     );
 
-  $("#locationInput")
-    .value =
-    record.location || "";
+    document.body.style.overflow =
+      "hidden";
 
-  closeModal("detailModal");
-
-  openModal("formModal");
-}
+  }
 
 
-/* =========================================================
-   Detail
-========================================================= */
+  function closeModal(id) {
 
-function openDetail(record) {
+    $(id).classList.remove(
+      "open"
+    );
 
-  selectedRecordId =
-    Number(record.id);
+    /*
+      如果還有其他 modal 開啟，
+      不恢復 body scroll。
+    */
 
-  $("#detailAmount")
-    .textContent =
-    "NT$ " +
-    formatMoney(record.amount);
+    const anotherOpen =
+      document.querySelector(
+        ".modal-backdrop.open"
+      );
 
-  $("#detailId")
-    .textContent =
-    "#" + record.id;
+    if (!anotherOpen) {
 
-  $("#detailContent")
-    .textContent =
-    record.content || "-";
+      document.body.style.overflow =
+        "";
 
-  $("#detailCategory")
-    .innerHTML =
-    `<span class="category-badge cat-${escapeHTML(
-      record.category || "其他"
-    )}">
-      ${escapeHTML(record.category || "其他")}
-    </span>`;
+    }
 
-  $("#detailTime")
-    .textContent =
-    formatDate(record.time);
-
-  $("#detailLocation")
-    .textContent =
-    record.location || "未填寫";
-
-  openModal("detailModal");
-}
+  }
 
 
-/* =========================================================
-   Save record
-========================================================= */
+  /* =========================================================
+     Detail
+     ========================================================= */
 
-$("#recordForm")
-  .addEventListener(
-    "submit",
-    async event => {
+  function openDetail(id) {
 
-      event.preventDefault();
+    const record =
+      records.find(
+        r =>
+          Number(r.id) ===
+          Number(id)
+      );
 
+    if (!record) {
+      return;
+    }
 
-      const amount =
-        Number(
-          $("#amountInput").value
-        );
+    selectedRecordId =
+      Number(record.id);
 
-      const content =
-        $("#contentInput")
-          .value
-          .trim();
+    const time =
+      formatDateTime(
+        record.time
+      );
 
-      const time =
-        $("#timeInput").value;
+    $("detailId").textContent =
+      `#${record.id}`;
 
-      const location =
-        $("#locationInput")
-          .value
-          .trim();
+    $("detailAmount").textContent =
+      `NT$ ${formatMoney(record.amount)}`;
 
-      const category =
-        $("#categoryInput").value;
+    $("detailContent").textContent =
+      record.content || "-";
 
+    $("detailTime").textContent =
+      `${time.date} ${time.time}`;
 
-      if (
-        !Number.isFinite(amount) ||
-        amount < 0
-      ) {
+    $("detailLocation").textContent =
+      record.location || "未填寫";
 
-        showToast(
-          "請輸入正確的金額"
-        );
+    $("detailCategory").innerHTML = `
+      <span
+        class="category-tag cat-${escapeHtml(record.category)}"
+      >
+        ${escapeHtml(record.category)}
+      </span>
+    `;
 
-        return;
-      }
+    openModal(
+      "detailModal"
+    );
 
-
-      if (!content) {
-
-        showToast(
-          "請輸入消費內容"
-        );
-
-        return;
-      }
+  }
 
 
-      if (!time) {
+  /* =========================================================
+     Add / Edit Form
+     ========================================================= */
 
-        showToast(
-          "請選擇消費時間"
-        );
+  function openAddForm() {
 
-        return;
-      }
+    editingRecordId =
+      null;
+
+    $("formModalTitle").textContent =
+      "新增消費記錄";
+
+    $("amountInput").value =
+      "";
+
+    $("contentInput").value =
+      "";
+
+    $("timeInput").value =
+      getNowLocalInputValue();
+
+    $("locationInput").value =
+      "";
+
+    $("categoryInput").value =
+      "餐飲";
+
+    openModal(
+      "formModal"
+    );
+
+    setTimeout(
+      () => $("amountInput").focus(),
+      100
+    );
+
+  }
 
 
-      if (editingId === null) {
+  function openEditForm(id) {
+
+    const record =
+      records.find(
+        r =>
+          Number(r.id) ===
+          Number(id)
+      );
+
+    if (!record) {
+      return;
+    }
+
+    editingRecordId =
+      Number(record.id);
+
+    $("formModalTitle").textContent =
+      "編輯消費記錄";
+
+    $("amountInput").value =
+      record.amount;
+
+    $("contentInput").value =
+      record.content;
+
+    $("timeInput").value =
+      record.time;
+
+    $("locationInput").value =
+      record.location;
+
+    $("categoryInput").value =
+      record.category;
+
+    closeModal(
+      "detailModal"
+    );
+
+    openModal(
+      "formModal"
+    );
+
+  }
+
+
+  /* =========================================================
+     Save Form
+     ========================================================= */
+
+  $("recordForm")
+    .addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        const amount =
+          Number(
+            $("amountInput").value
+          );
+
+        const content =
+          $("contentInput").value.trim();
+
+        const time =
+          $("timeInput").value;
+
+        const location =
+          $("locationInput").value.trim();
+
+        const category =
+          $("categoryInput").value;
+
+        if (
+          !Number.isFinite(amount) ||
+          amount < 0
+        ) {
+
+          showToast(
+            "請輸入有效的消費金額"
+          );
+
+          return;
+
+        }
+
+        if (!content) {
+
+          showToast(
+            "請輸入消費內容"
+          );
+
+          return;
+
+        }
+
+        if (!time) {
+
+          showToast(
+            "請選擇消費時間"
+          );
+
+          return;
+
+        }
 
         const record = {
-
           id:
-            getNextId(),
+            editingRecordId ??
+            generateId(),
 
           amount:
             Number(
@@ -3566,1280 +3408,1530 @@ $("#recordForm")
 
           content,
 
-          time:
-            new Date(time)
-              .toISOString(),
+          time,
 
           location,
 
-          category,
-
-          createdAt:
-            new Date().toISOString()
+          category
         };
 
+        try {
 
-        records.push(record);
+          if (
+            editingRecordId !== null
+          ) {
 
-        saveLocal();
+            const index =
+              records.findIndex(
+                r =>
+                  Number(r.id) ===
+                  Number(editingRecordId)
+              );
 
+            if (index !== -1) {
 
-        if (currentUser) {
+              records[index] =
+                record;
 
-          await firebaseAdd(
-            record
+            }
+
+            saveLocalRecords();
+
+            await saveRecordToFirebase(
+              record
+            );
+
+            showToast(
+              "記錄已更新"
+            );
+
+          } else {
+
+            records.push(
+              record
+            );
+
+            saveLocalRecords();
+
+            await saveRecordToFirebase(
+              record
+            );
+
+            showToast(
+              "新增記錄成功"
+            );
+
+          }
+
+          closeModal(
+            "formModal"
           );
+
+          renderAll();
+
+        } catch (error) {
+
+          console.error(error);
+
+          /*
+            即使 Firebase 暫時失敗，
+            LocalStorage 已經先保存，
+            因此不讓使用者的資料消失。
+          */
+
+          saveLocalRecords();
+
+          renderAll();
+
+          showToast(
+            "本機已保存，但 Firebase 同步失敗"
+          );
+
         }
 
+      }
+    );
 
-        showToast(
-          "✅ 新增成功"
+
+  /* =========================================================
+     Delete
+     ========================================================= */
+
+  async function deleteRecord(id) {
+
+    const record =
+      records.find(
+        r =>
+          Number(r.id) ===
+          Number(id)
+      );
+
+    if (!record) {
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        `確認刪除？\n\n#${record.id} ${record.content}\nNT$ ${formatMoney(record.amount)}`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+
+      records =
+        records.filter(
+          r =>
+            Number(r.id) !==
+            Number(id)
         );
 
-      } else {
+      saveLocalRecords();
 
-        const index =
-          records.findIndex(
+      await deleteRecordFromFirebase(
+        id
+      );
+
+      closeModal(
+        "detailModal"
+      );
+
+      renderAll();
+
+      showToast(
+        "刪除成功"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      /*
+        如果 Firebase 刪除失敗，
+        重新從本機狀態保存。
+      */
+
+      saveLocalRecords();
+
+      renderAll();
+
+      showToast(
+        "本機已刪除，但 Firebase 同步失敗"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     Copy
+     ========================================================= */
+
+  $("copyRecordBtn")
+    .addEventListener(
+      "click",
+      async () => {
+
+        const original =
+          records.find(
             r =>
               Number(r.id) ===
-              editingId
+              Number(
+                selectedRecordId
+              )
           );
 
-        if (index === -1) {
+        if (!original) {
           return;
         }
 
-
-        const old =
-          records[index];
-
-
-        const updated = {
-
-          ...old,
+        const copied = {
+          id:
+            generateId(),
 
           amount:
             Number(
-              amount.toFixed(2)
+              Number(
+                original.amount
+              ).toFixed(2)
             ),
 
-          content,
+          content:
+            original.content,
 
           time:
-            new Date(time)
-              .toISOString(),
+            getNowLocalInputValue(),
 
-          location,
+          location:
+            original.location,
 
-          category,
-
-          updatedAt:
-            new Date().toISOString()
+          category:
+            original.category
         };
 
+        try {
 
-        records[index] =
-          updated;
+          records.push(
+            copied
+          );
 
-        saveLocal();
+          saveLocalRecords();
 
+          await saveRecordToFirebase(
+            copied
+          );
+
+          closeModal(
+            "detailModal"
+          );
+
+          renderAll();
+
+          showToast(
+            "已複製為新的消費記錄"
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          saveLocalRecords();
+
+          renderAll();
+
+          showToast(
+            "本機已複製，但 Firebase 同步失敗"
+          );
+
+        }
+
+      }
+    );
+
+
+  /* =========================================================
+     Detail buttons
+     ========================================================= */
+
+  $("editRecordBtn")
+    .addEventListener(
+      "click",
+      () => {
+
+        if (
+          selectedRecordId === null
+        ) {
+          return;
+        }
+
+        openEditForm(
+          selectedRecordId
+        );
+
+      }
+    );
+
+
+  $("deleteRecordBtn")
+    .addEventListener(
+      "click",
+      () => {
+
+        if (
+          selectedRecordId === null
+        ) {
+          return;
+        }
+
+        deleteRecord(
+          selectedRecordId
+        );
+
+      }
+    );
+
+
+  /* =========================================================
+     Add button
+     ========================================================= */
+
+  $("addBtn")
+    .addEventListener(
+      "click",
+      openAddForm
+    );
+
+
+  /* =========================================================
+     Login button
+
+     已登入 -> 登出
+     未登入 -> Google 登入
+     ========================================================= */
+
+  $("loginBtn")
+    .addEventListener(
+      "click",
+      () => {
 
         if (currentUser) {
 
-          await firebaseUpdate(
-            updated
-          );
-        }
-
-
-        showToast(
-          "✅ 修改成功"
-        );
-      }
-
-
-      closeModal("formModal");
-
-      render();
-    }
-  );
-
-
-/* =========================================================
-   Delete
-========================================================= */
-
-async function deleteRecord(record) {
-
-  const confirmed =
-    confirm(
-      "確認刪除？\n\n" +
-      "「" +
-      record.content +
-      "」\n" +
-      "NT$ " +
-      formatMoney(record.amount)
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-
-  records =
-    records.filter(
-      r =>
-        Number(r.id) !==
-        Number(record.id)
-    );
-
-  saveLocal();
-
-
-  if (
-    currentUser &&
-    record.firebaseId
-  ) {
-
-    await firebaseDelete(
-      record
-    );
-  }
-
-
-  closeModal("detailModal");
-
-  render();
-
-  showToast(
-    "🗑️ 已刪除記錄"
-  );
-}
-
-
-/* =========================================================
-   Duplicate
-========================================================= */
-
-$("#duplicateBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (!record) {
-        return;
-      }
-
-
-      const copy = {
-
-        id:
-          getNextId(),
-
-        amount:
-          Number(record.amount),
-
-        content:
-          record.content,
-
-        time:
-          new Date()
-            .toISOString(),
-
-        location:
-          record.location || "",
-
-        category:
-          record.category || "其他",
-
-        createdAt:
-          new Date().toISOString()
-      };
-
-
-      records.push(copy);
-
-      saveLocal();
-
-
-      if (currentUser) {
-
-        await firebaseAdd(
-          copy
-        );
-      }
-
-
-      closeModal("detailModal");
-
-      render();
-
-      showToast(
-        "📑 已複製記錄"
-      );
-    }
-  );
-
-
-/* =========================================================
-   Detail Edit
-========================================================= */
-
-$("#editBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (record) {
-        openEdit(record);
-      }
-    }
-  );
-
-
-/* =========================================================
-   Detail Delete
-========================================================= */
-
-$("#deleteBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (record) {
-        await deleteRecord(
-          record
-        );
-      }
-    }
-  );
-
-
-/* =========================================================
-   Quick money
-========================================================= */
-
-$$("[data-add-money]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const add =
-          Number(
-            button.dataset.addMoney
-          );
-
-        const input =
-          $("#amountInput");
-
-        const current =
-          Number(input.value) || 0;
-
-        input.value =
-          (
-            current + add
-          ).toFixed(2)
-          .replace(
-            /\.00$/,
-            ""
-          );
-
-        input.focus();
-      }
-    );
-  });
-
-
-/* =========================================================
-   Google Maps
-========================================================= */
-
-$("#mapBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const location =
-        $("#locationInput")
-          .value
-          .trim();
-
-      const query =
-        location ||
-        "台北市";
-
-      const url =
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(query);
-
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-  );
-
-
-/* =========================================================
-   Add button
-========================================================= */
-
-$("#addBtn")
-  .addEventListener(
-    "click",
-    openAdd
-  );
-
-
-/* =========================================================
-   Modal close
-========================================================= */
-
-$$("[data-close]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        closeModal(
-          button.dataset.close
-        );
-      }
-    );
-  });
-
-
-$$(".modal-backdrop")
-  .forEach(backdrop => {
-
-    backdrop.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          backdrop
-        ) {
-
-          backdrop.classList.remove(
-            "show"
-          );
-        }
-      }
-    );
-  });
-
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key === "Escape"
-    ) {
-
-      closeAllModals();
-    }
-  }
-);
-
-
-/* =========================================================
-   Search
-========================================================= */
-
-$("#searchInput")
-  .addEventListener(
-    "input",
-    event => {
-
-      currentSearch =
-        event.target.value;
-
-      render();
-    }
-  );
-
-
-/* =========================================================
-   Period filters
-========================================================= */
-
-$$("[data-period]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        currentPeriod =
-          button.dataset.period;
-
-        $$("[data-period]")
-          .forEach(btn =>
-            btn.classList.toggle(
-              "active",
-              btn === button
-            )
-          );
-
-        render();
-      }
-    );
-  });
-
-
-/* =========================================================
-   Category filter dropdown
-========================================================= */
-
-const categoryFilterBtn =
-  $("#categoryFilterBtn");
-
-const categoryMenu =
-  $("#categoryMenu");
-
-
-categoryFilterBtn
-  .addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-      categoryMenu
-        .classList.toggle(
-          "show"
-        );
-
-      categoryFilterBtn
-        .classList.toggle(
-          "active"
-        );
-    }
-  );
-
-
-categoryMenu
-  .addEventListener(
-    "click",
-    event => {
-
-      const option =
-        event.target.closest(
-          ".category-option"
-        );
-
-      if (!option) return;
-
-      currentCategory =
-        option.dataset.category;
-
-      $$(".category-option")
-        .forEach(item =>
-          item.classList.toggle(
-            "active",
-            item === option
-          )
-        );
-
-      categoryMenu
-        .classList.remove(
-          "show"
-        );
-
-      categoryFilterBtn
-        .classList.toggle(
-          "active",
-          currentCategory !== "all"
-        );
-
-      render();
-    }
-  );
-
-
-document.addEventListener(
-  "click",
-  event => {
-
-    if (
-      !event.target.closest(
-        ".category-filter-wrap"
-      )
-    ) {
-
-      categoryMenu
-        .classList.remove(
-          "show"
-        );
-    }
-  }
-);
-
-
-/* =========================================================
-   Sorting
-========================================================= */
-
-$$("[data-sort]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const field =
-          button.dataset.sort;
-
-        if (
-          sortField === field
-        ) {
-
-          sortDirection *= -1;
+          logoutGoogle();
 
         } else {
 
-          sortField = field;
+          loginWithGoogle();
 
-          sortDirection = 1;
         }
 
-        $$("[data-sort]")
-          .forEach(btn => {
-
-            const current =
-              btn.dataset.sort ===
-              sortField;
-
-            btn.textContent =
-              btn.textContent
-                .replace(
-                  /[↕↑↓]/,
-                  current
-                    ? (
-                      sortDirection === 1
-                        ? "↑"
-                        : "↓"
-                    )
-                    : "↕"
-                );
-          });
-
-        render();
       }
     );
-  });
 
 
-/* =========================================================
-   Theme
-========================================================= */
+  /* =========================================================
+     Close buttons
+     ========================================================= */
 
-$("#themeBtn")
-  .addEventListener(
-    "click",
-    () => {
+  document
+    .querySelectorAll(
+      "[data-close]"
+    )
+    .forEach(
+      button => {
 
-      document.body
-        .classList.toggle(
-          "dark"
-        );
+        button.addEventListener(
+          "click",
+          () => {
 
-      localStorage.setItem(
-        "accountingTheme",
-        document.body.classList.contains(
-          "dark"
-        )
-          ? "dark"
-          : "light"
-      );
-
-      renderChart();
-    }
-  );
-
-
-const savedTheme =
-  localStorage.getItem(
-    "accountingTheme"
-  );
-
-if (savedTheme === "dark") {
-  document.body.classList.add(
-    "dark"
-  );
-}
-
-
-/* =========================================================
-   Font size
-========================================================= */
-
-$("#fontSlider")
-  .addEventListener(
-    "input",
-    event => {
-
-      const size =
-        event.target.value;
-
-      document.documentElement
-        .style
-        .setProperty(
-          "--font-size",
-          size + "px"
-        );
-
-      localStorage.setItem(
-        "accountingFontSize",
-        size
-      );
-    }
-  );
-
-
-const savedFontSize =
-  localStorage.getItem(
-    "accountingFontSize"
-  );
-
-if (savedFontSize) {
-
-  $("#fontSlider")
-    .value =
-    savedFontSize;
-
-  document.documentElement
-    .style
-    .setProperty(
-      "--font-size",
-      savedFontSize + "px"
-    );
-}
-
-
-/* =========================================================
-   Export CSV
-========================================================= */
-
-$("#exportBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if (!records.length) {
-
-        showToast(
-          "目前沒有資料可以匯出"
-        );
-
-        return;
-      }
-
-
-      /*
-        Excel CSV 標題按照你的要求：
-
-        消費序號
-        消費內容
-        消費金額
-        消費時間
-
-        同時額外保留：
-        消費地點
-        消費類別
-
-        方便資料還原。
-      */
-
-      const headers = [
-        "消費序號",
-        "消費內容",
-        "消費金額",
-        "消費時間",
-        "消費地點",
-        "消費類別"
-      ];
-
-
-      const rows =
-        records.map(record => [
-
-          record.id,
-
-          record.content,
-
-          record.amount,
-
-          formatDate(
-            record.time
-          ),
-
-          record.location || "",
-
-          record.category || "其他"
-        ]);
-
-
-      const csv = [
-        headers,
-        ...rows
-      ]
-        .map(row =>
-          row
-            .map(value =>
-              `"${String(
-                value ?? ""
-              ).replaceAll(
-                '"',
-                '""'
-              )}"`
-            )
-            .join(",")
-        )
-        .join("\r\n");
-
-
-      /*
-        UTF-8 BOM
-
-        這個很重要：
-
-        Excel 開啟中文 CSV 時
-        比較不會出現亂碼。
-      */
-
-      const blob =
-        new Blob(
-          [
-            "\uFEFF" + csv
-          ],
-          {
-            type:
-              "text/csv;charset=utf-8"
-          }
-        );
-
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-      const a =
-        document.createElement(
-          "a"
-        );
-
-      a.href = url;
-
-      a.download =
-        "我的記帳本_" +
-        new Date()
-          .toISOString()
-          .slice(0, 10) +
-        ".csv";
-
-      a.click();
-
-      URL.revokeObjectURL(
-        url
-      );
-
-      showToast(
-        "📤 CSV 匯出成功"
-      );
-    }
-  );
-
-
-/* =========================================================
-   Import
-========================================================= */
-
-$("#importBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      $("#fileInput").click();
-    }
-  );
-
-
-$("#fileInput")
-  .addEventListener(
-    "change",
-    async event => {
-
-      const file =
-        event.target.files[0];
-
-      if (!file) return;
-
-
-      try {
-
-        const text =
-          await file.text();
-
-
-        let imported = [];
-
-
-        if (
-          file.name
-            .toLowerCase()
-            .endsWith(".json")
-        ) {
-
-          imported =
-            JSON.parse(text);
-
-          if (
-            !Array.isArray(
-              imported
-            )
-          ) {
-            throw new Error(
-              "JSON 必須是陣列"
+            closeModal(
+              button.dataset.close
             );
+
           }
+        );
 
-        } else {
-
-          imported =
-            parseCSV(text);
-        }
+      }
+    );
 
 
-        if (!imported.length) {
+  /* 點擊背景關閉 */
 
-          throw new Error(
-            "檔案沒有資料"
-          );
-        }
+  document
+    .querySelectorAll(
+      ".modal-backdrop"
+    )
+    .forEach(
+      backdrop => {
+
+        backdrop.addEventListener(
+          "click",
+          event => {
+
+            if (
+              event.target ===
+              backdrop
+            ) {
+
+              closeModal(
+                backdrop.id
+              );
+
+            }
+
+          }
+        );
+
+      }
+    );
 
 
-        const normalized =
-          imported.map(
-            (item, index) => {
+  /* ESC 關閉 */
 
-              return {
+  document.addEventListener(
+    "keydown",
+    event => {
 
-                id:
-                  Number(
-                    item.id ??
-                    item["消費序號"] ??
-                    getNextId() +
-                    index
-                  ),
+      if (
+        event.key === "Escape"
+      ) {
 
-                amount:
-                  Number(
-                    item.amount ??
-                    item["消費金額"] ??
-                    0
-                  ),
-
-                content:
-                  item.content ??
-                  item["消費內容"] ??
-                  "",
-
-                time:
-                  normalizeImportedTime(
-                    item.time ??
-                    item["消費時間"]
-                  ),
-
-                location:
-                  item.location ??
-                  item["消費地點"] ??
-                  "",
-
-                category:
-                  item.category ??
-                  item["消費類別"] ??
-                  "其他"
-              };
+        document
+          .querySelectorAll(
+            ".modal-backdrop.open"
+          )
+          .forEach(
+            modal => {
+              closeModal(
+                modal.id
+              );
             }
           );
 
-
-        const confirmed =
-          confirm(
-            "即將匯入 " +
-            normalized.length +
-            " 筆資料。\n\n" +
-            "按「確定」後會加入現有資料。"
-          );
-
-        if (!confirmed) {
-          return;
-        }
-
-
-        for (
-          const record
-          of normalized
-        ) {
-
-          const exists =
-            records.some(
-              r =>
-                Number(r.id) ===
-                Number(record.id)
-            );
-
-          if (exists) {
-
-            record.id =
-              getNextId();
-          }
-
-
-          records.push(
-            record
-          );
-
-
-          if (currentUser) {
-
-            await firebaseAdd(
-              record
-            );
-          }
-        }
-
-
-        saveLocal();
-
-        render();
-
-        showToast(
-          "📥 匯入成功"
-        );
-
-      } catch (error) {
-
-        console.error(error);
-
-        showToast(
-          "匯入失敗，請檢查 CSV / JSON 格式"
-        );
       }
 
-
-      event.target.value = "";
     }
   );
 
 
-/* =========================================================
-   CSV Parser
-========================================================= */
+  /* =========================================================
+     Search
+     ========================================================= */
 
-function parseCSV(text) {
+  $("searchInput")
+    .addEventListener(
+      "input",
+      event => {
 
-  const lines =
-    text
-      .replace(
-        /^\uFEFF/,
-        ""
-      )
-      .split(/\r?\n/)
-      .filter(
-        line =>
-          line.trim()
-      );
+        searchKeyword =
+          event.target.value;
 
+        renderAll();
 
-  if (lines.length < 2) {
-    return [];
-  }
-
-
-  const headers =
-    splitCSVLine(
-      lines[0]
+      }
     );
 
 
-  return lines
-    .slice(1)
-    .map(line => {
+  /* =========================================================
+     Period filter
+     ========================================================= */
 
-      const values =
-        splitCSVLine(line);
-
-      const obj = {};
-
-      headers.forEach(
-        (header, index) => {
-
-          obj[header] =
-            values[index] ??
-            "";
-        }
-      );
-
-      return obj;
-    });
-}
-
-
-function splitCSVLine(line) {
-
-  const result = [];
-
-  let current = "";
-
-  let quoted = false;
-
-
-  for (
-    let i = 0;
-    i < line.length;
-    i++
-  ) {
-
-    const char =
-      line[i];
-
-    if (char === '"') {
-
-      if (
-        quoted &&
-        line[i + 1] === '"'
-      ) {
-
-        current += '"';
-
-        i++;
-
-      } else {
-
-        quoted =
-          !quoted;
-      }
-
-    } else if (
-      char === "," &&
-      !quoted
-    ) {
-
-      result.push(
-        current
-      );
-
-      current = "";
-
-    } else {
-
-      current += char;
-    }
-  }
-
-
-  result.push(
-    current
-  );
-
-  return result;
-}
-
-
-function normalizeImportedTime(value) {
-
-  if (!value) {
-    return new Date()
-      .toISOString();
-  }
-
-
-  const date =
-    new Date(value);
-
-
-  if (
-    !Number.isNaN(
-      date.getTime()
+  document
+    .querySelectorAll(
+      "[data-period]"
     )
-  ) {
+    .forEach(
+      button => {
 
-    return date.toISOString();
-  }
+        button.addEventListener(
+          "click",
+          () => {
+
+            activePeriod =
+              button.dataset.period;
+
+            document
+              .querySelectorAll(
+                "[data-period]"
+              )
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    "active"
+                  )
+              );
+
+            button.classList.add(
+              "active"
+            );
+
+            renderAll();
+
+          }
+        );
+
+      }
+    );
 
 
-  return new Date()
-    .toISOString();
-}
+  /* =========================================================
+     Category Filter
+     ========================================================= */
 
+  $("categoryFilterBtn")
+    .addEventListener(
+      "click",
+      event => {
 
-/* =========================================================
-   Login
-========================================================= */
+        event.stopPropagation();
 
-$("#loginBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if (currentUser) {
-
-        const confirmed =
-          confirm(
-            "確定要登出嗎？"
+        $("categoryMenu")
+          .classList.toggle(
+            "open"
           );
 
-        if (confirmed) {
-          signOut(auth);
-        }
-
-      } else {
-
-        openModal(
-          "loginModal"
-        );
       }
+    );
+
+
+  document
+    .querySelectorAll(
+      ".category-option"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            activeCategory =
+              button.dataset.category;
+
+            document
+              .querySelectorAll(
+                ".category-option"
+              )
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    "active"
+                  )
+              );
+
+            button.classList.add(
+              "active"
+            );
+
+            $("categoryMenu")
+              .classList.remove(
+                "open"
+              );
+
+            renderAll();
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =========================================================
+     Click outside category menu
+     ========================================================= */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      if (
+        !event.target.closest(
+          ".filter-wrapper"
+        )
+      ) {
+
+        $("categoryMenu")
+          .classList.remove(
+            "open"
+          );
+
+      }
+
+      if (
+        !event.target.closest(
+          ".data-menu-wrapper"
+        )
+      ) {
+
+        $("dataMenu")
+          .classList.remove(
+            "open"
+          );
+
+      }
+
     }
   );
 
 
-$("#googleLoginBtn")
-  .addEventListener(
-    "click",
-    async () => {
+  /* =========================================================
+     Sorting
+     ========================================================= */
 
-      try {
+  document
+    .querySelectorAll(
+      "[data-sort]"
+    )
+    .forEach(
+      button => {
 
-        await signInWithPopup(
-          auth,
-          googleProvider
+        button.addEventListener(
+          "click",
+          () => {
+
+            const field =
+              button.dataset.sort;
+
+            if (
+              sortField === field
+            ) {
+
+              sortDirection =
+                sortDirection ===
+                "asc"
+                  ? "desc"
+                  : "asc";
+
+            } else {
+
+              sortField =
+                field;
+
+              sortDirection =
+                "asc";
+
+            }
+
+            renderAll();
+
+          }
         );
 
-        closeModal(
-          "loginModal"
-        );
+      }
+    );
 
-        showToast(
-          "🔓 Google 登入成功"
-        );
 
-      } catch (error) {
+  /* =========================================================
+     Row click / edit / delete
+     ========================================================= */
 
-        console.error(error);
+  $("recordBody")
+    .addEventListener(
+      "click",
+      event => {
 
-        if (
-          error.code ===
-          "auth/popup-closed-by-user"
-        ) {
+        const actionButton =
+          event.target.closest(
+            "[data-action]"
+          );
 
+        if (actionButton) {
+
+          event.stopPropagation();
+
+          const id =
+            Number(
+              actionButton.dataset.id
+            );
+
+          if (
+            actionButton.dataset.action ===
+            "edit"
+          ) {
+
+            openEditForm(id);
+
+          }
+
+          if (
+            actionButton.dataset.action ===
+            "delete"
+          ) {
+
+            deleteRecord(id);
+
+          }
+
+          return;
+
+        }
+
+        const row =
+          event.target.closest(
+            ".record-row"
+          );
+
+        if (!row) {
           return;
         }
 
-        showToast(
-          "登入失敗：" +
-          error.message
-        );
-      }
-    }
-  );
-
-
-/* =========================================================
-   Auth State
-========================================================= */
-
-onAuthStateChanged(
-  auth,
-  user => {
-
-    currentUser =
-      user || null;
-
-
-    if (currentUser) {
-
-      $("#userStatus")
-        .textContent =
-        "👤 " +
-        (
-          currentUser.displayName ||
-          currentUser.email ||
-          "已登入"
+        openDetail(
+          Number(
+            row.dataset.id
+          )
         );
 
-      $("#loginBtn")
-        .textContent =
-        "🚪 登出";
-
-      startFirebaseSync();
-
-    } else {
-
-      $("#userStatus")
-        .textContent =
-        "🔒 未登入";
-
-      $("#loginBtn")
-        .textContent =
-        "🔑 登入";
-
-      if (unsubscribeRecords) {
-
-        unsubscribeRecords();
-
-        unsubscribeRecords =
-          null;
       }
+    );
 
-      /*
-        未登入時使用 LocalStorage
-      */
 
-      loadLocal();
+  /* =========================================================
+     Quick amount buttons
+     ========================================================= */
 
-      render();
+  document
+    .querySelectorAll(
+      "[data-add]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const add =
+              Number(
+                button.dataset.add
+              );
+
+            const current =
+              Number(
+                $("amountInput").value
+              ) || 0;
+
+            $("amountInput").value =
+              (
+                current + add
+              ).toFixed(2)
+              .replace(
+                /\.00$/,
+                ""
+              );
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =========================================================
+     Google Maps
+     ========================================================= */
+
+  $("mapBtn")
+    .addEventListener(
+      "click",
+      () => {
+
+        const location =
+          $("locationInput")
+            .value
+            .trim();
+
+        const query =
+          location ||
+          "Google Maps";
+
+        const url =
+          "https://www.google.com/maps/search/" +
+          encodeURIComponent(
+            query
+          );
+
+        window.open(
+          url,
+          "_blank",
+          "noopener,noreferrer"
+        );
+
+      }
+    );
+
+
+  /* =========================================================
+     Theme
+     ========================================================= */
+
+  function loadTheme() {
+
+    const theme =
+      localStorage.getItem(
+        "accountingTheme"
+      );
+
+    if (
+      theme === "dark"
+    ) {
+
+      document.body.classList.add(
+        "dark"
+      );
+
     }
+
   }
-);
 
 
-/* =========================================================
-   Initial
-========================================================= */
+  $("themeBtn")
+    .addEventListener(
+      "click",
+      () => {
 
-loadLocal();
+        document.body.classList.toggle(
+          "dark"
+        );
 
-render();
+        const isDark =
+          document.body.classList.contains(
+            "dark"
+          );
+
+        localStorage.setItem(
+          "accountingTheme",
+          isDark
+            ? "dark"
+            : "light"
+        );
+
+        renderChart();
+
+      }
+    );
+
+
+  /* =========================================================
+     Font size
+     ========================================================= */
+
+  const savedFontSize =
+    localStorage.getItem(
+      "accountingFontSize"
+    );
+
+  if (savedFontSize) {
+
+    document.documentElement
+      .style
+      .setProperty(
+        "--font-size",
+        `${savedFontSize}px`
+      );
+
+    $("fontSizeRange").value =
+      savedFontSize;
+
+  }
+
+
+  $("fontSizeRange")
+    .addEventListener(
+      "input",
+      event => {
+
+        const size =
+          event.target.value;
+
+        document.documentElement
+          .style
+          .setProperty(
+            "--font-size",
+            `${size}px`
+          );
+
+        localStorage.setItem(
+          "accountingFontSize",
+          size
+        );
+
+      }
+    );
+
+
+  /* =========================================================
+     Data Management Menu
+     ========================================================= */
+
+  function toggleDataMenu() {
+
+    $("dataMenu")
+      .classList.toggle(
+        "open"
+      );
+
+  }
+
+
+  $("dataMenuBtn")
+    .addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        toggleDataMenu();
+
+      }
+    );
+
+
+  $("mobileDataMenuBtn")
+    .addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        toggleDataMenu();
+
+      }
+    );
+
+
+  /* =========================================================
+     CSV Export
+
+     Excel 標題欄固定為：
+
+     消費序號
+     消費內容
+     消費金額
+     消費時間
+
+     同時附上地點與類別。
+     ========================================================= */
+
+  function exportCSV() {
+
+    const headers = [
+      "消費序號",
+      "消費內容",
+      "消費金額",
+      "消費時間",
+      "消費地點",
+      "消費類別"
+    ];
+
+    const rows =
+      records.map(
+        record => [
+          record.id,
+          record.content,
+          record.amount,
+          record.time,
+          record.location,
+          record.category
+        ]
+      );
+
+    const csvRows = [
+      headers,
+      ...rows
+    ];
+
+    const csv =
+      "\uFEFF" +
+      csvRows
+        .map(
+          row =>
+            row
+              .map(
+                value =>
+                  `"${String(
+                    value ?? ""
+                  ).replaceAll(
+                    '"',
+                    '""'
+                  )}"`
+              )
+              .join(",")
+        )
+        .join("\r\n");
+
+    const blob =
+      new Blob(
+        [csv],
+        {
+          type:
+            "text/csv;charset=utf-8;"
+        }
+      );
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+    const a =
+      document.createElement(
+        "a"
+      );
+
+    const date =
+      new Date()
+        .toISOString()
+        .slice(0, 10);
+
+    a.href = url;
+
+    a.download =
+      `accountingRecords_${date}.csv`;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+    showToast(
+      "CSV 匯出成功"
+    );
+
+  }
+
+
+  $("exportBtn")
+    .addEventListener(
+      "click",
+      () => {
+
+        exportCSV();
+
+        $("dataMenu")
+          .classList.remove(
+            "open"
+          );
+
+      }
+    );
+
+
+  /* =========================================================
+     Import
+     ========================================================= */
+
+  $("importBtn")
+    .addEventListener(
+      "click",
+      () => {
+
+        $("fileInput").click();
+
+        $("dataMenu")
+          .classList.remove(
+            "open"
+          );
+
+      }
+    );
+
+
+  $("fileInput")
+    .addEventListener(
+      "change",
+      async event => {
+
+        const file =
+          event.target.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        try {
+
+          const text =
+            await file.text();
+
+          let imported = [];
+
+          if (
+            file.name
+              .toLowerCase()
+              .endsWith(".json")
+          ) {
+
+            const parsed =
+              JSON.parse(text);
+
+            imported =
+              Array.isArray(parsed)
+                ? parsed
+                : parsed.records || [];
+
+          } else {
+
+            imported =
+              parseCSV(text);
+
+          }
+
+          imported =
+            imported
+              .map(normalizeRecord)
+              .filter(
+                record =>
+                  record.content
+              );
+
+          if (!imported.length) {
+
+            showToast(
+              "找不到有效資料"
+            );
+
+            return;
+
+          }
+
+          const confirmed =
+            confirm(
+              `即將匯入 ${imported.length} 筆資料。\n\n匯入後會與目前資料合併，是否繼續？`
+            );
+
+          if (!confirmed) {
+            return;
+          }
+
+          const existingIds =
+            new Set(
+              records.map(
+                r =>
+                  Number(r.id)
+              )
+            );
+
+          imported.forEach(
+            record => {
+
+              if (
+                existingIds.has(
+                  Number(record.id)
+                )
+              ) {
+
+                record.id =
+                  generateId();
+
+              }
+
+              records.push(
+                record
+              );
+
+            }
+          );
+
+          saveLocalRecords();
+
+          /*
+            登入 Firebase 時，
+            將匯入資料同步上傳。
+          */
+
+          if (currentUser) {
+
+            for (
+              const record of imported
+            ) {
+
+              await saveRecordToFirebase(
+                record
+              );
+
+            }
+
+          }
+
+          renderAll();
+
+          showToast(
+            `成功匯入 ${imported.length} 筆資料`
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          showToast(
+            "匯入失敗，請確認檔案格式"
+          );
+
+        }
+
+        event.target.value = "";
+
+      }
+    );
+
+
+  /* =========================================================
+     CSV Parser
+     ========================================================= */
+
+  function parseCSV(text) {
+
+    const lines = [];
+    let row = [];
+    let cell = "";
+    let insideQuotes = false;
+
+    for (
+      let i = 0;
+      i < text.length;
+      i++
+    ) {
+
+      const char =
+        text[i];
+
+      const next =
+        text[i + 1];
+
+      if (
+        char === '"' &&
+        insideQuotes &&
+        next === '"'
+      ) {
+
+        cell += '"';
+
+        i++;
+
+        continue;
+
+      }
+
+      if (
+        char === '"'
+      ) {
+
+        insideQuotes =
+          !insideQuotes;
+
+        continue;
+
+      }
+
+      if (
+        char === "," &&
+        !insideQuotes
+      ) {
+
+        row.push(cell);
+
+        cell = "";
+
+        continue;
+
+      }
+
+      if (
+        (
+          char === "\n" ||
+          char === "\r"
+        ) &&
+        !insideQuotes
+      ) {
+
+        if (
+          char === "\r" &&
+          next === "\n"
+        ) {
+
+          i++;
+
+        }
+
+        row.push(cell);
+
+        cell = "";
+
+        if (
+          row.some(
+            value =>
+              value.trim() !== ""
+          )
+        ) {
+
+          lines.push(row);
+
+        }
+
+        row = [];
+
+        continue;
+
+      }
+
+      cell += char;
+
+    }
+
+    row.push(cell);
+
+    if (
+      row.some(
+        value =>
+          value.trim() !== ""
+      )
+    ) {
+
+      lines.push(row);
+
+    }
+
+    if (lines.length < 2) {
+      return [];
+    }
+
+    /*
+      支援兩種標題：
+
+      消費序號 / 消費內容 / 消費金額 / 消費時間
+
+      以及本系統完整 CSV
+    */
+
+    const headers =
+      lines[0].map(
+        h =>
+          h.trim()
+            .replace(
+              /^\uFEFF/,
+              ""
+            )
+      );
+
+    const indexOf =
+      (...names) => {
+
+        for (
+          const name of names
+        ) {
+
+          const index =
+            headers.indexOf(
+              name
+            );
+
+          if (index !== -1) {
+            return index;
+          }
+
+        }
+
+        return -1;
+
+      };
+
+    const idIndex =
+      indexOf(
+        "消費序號",
+        "id"
+      );
+
+    const contentIndex =
+      indexOf(
+        "消費內容",
+        "content"
+      );
+
+    const amountIndex =
+      indexOf(
+        "消費金額",
+        "amount"
+      );
+
+    const timeIndex =
+      indexOf(
+        "消費時間",
+        "time"
+      );
+
+    const locationIndex =
+      indexOf(
+        "消費地點",
+        "location"
+      );
+
+    const categoryIndex =
+      indexOf(
+        "消費類別",
+        "category"
+      );
+
+    return lines
+      .slice(1)
+      .map(
+        values => ({
+          id:
+            idIndex >= 0
+              ? Number(
+                  values[idIndex]
+                )
+              : 0,
+
+          content:
+            contentIndex >= 0
+              ? values[contentIndex]
+              : "",
+
+          amount:
+            amountIndex >= 0
+              ? Number(
+                  values[amountIndex]
+                )
+              : 0,
+
+          time:
+            timeIndex >= 0
+              ? values[timeIndex]
+              : "",
+
+          location:
+            locationIndex >= 0
+              ? values[locationIndex]
+              : "",
+
+          category:
+            categoryIndex >= 0
+              ? values[categoryIndex]
+              : "其他"
+        })
+      );
+
+  }
+
+
+  /* =========================================================
+     Clear All
+
+     雙重確認。
+     ========================================================= */
+
+  $("clearAllBtn")
+    .addEventListener(
+      "click",
+      async () => {
+
+        const first =
+          confirm(
+            "⚠️ 確定要刪除全部消費記錄嗎？\n\n這個操作無法復原。"
+          );
+
+        if (!first) {
+          return;
+        }
+
+        const second =
+          confirm(
+            "最後確認：真的要「全部刪除」嗎？"
+          );
+
+        if (!second) {
+          return;
+        }
+
+        try {
+
+          /*
+            Firebase：
+            由於你的 Rules 允許目前登入者
+            讀寫自己的 users/{uid}/*，
+            這裡逐筆刪除。
+          */
+
+          if (currentUser) {
+
+            const recordsRef =
+              collection(
+                db,
+                "users",
+                currentUser.uid,
+                "accountingRecords"
+              );
+
+            const snapshot =
+              await getDocs(
+                recordsRef
+              );
+
+            for (
+              const item of snapshot.docs
+            ) {
+
+              await deleteDoc(
+                item.ref
+              );
+
+            }
+
+          }
+
+          records = [];
+
+          localStorage.removeItem(
+            STORAGE_KEY
+          );
+
+          renderAll();
+
+          $("dataMenu")
+            .classList.remove(
+              "open"
+            );
+
+          showToast(
+            "所有記錄已清除"
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          /*
+            Firebase 清除失敗時，
+            不偷偷假裝已同步成功。
+          */
+
+          showToast(
+            "Firebase 清除失敗，請檢查登入狀態"
+          );
+
+        }
+
+      }
+    );
+
+
+  /* =========================================================
+     Initial
+     ========================================================= */
+
+  loadTheme();
+
+  records =
+    loadLocalRecords();
+
+  renderAll();
+
 
 </script>
 
