@@ -112,6 +112,7 @@
       margin-top: 2px;
     }
 
+    /* 搜尋框 (桌面) */
     .header-search {
       display: flex;
       align-items: center;
@@ -135,7 +136,7 @@
       box-shadow: 0 0 0 3px rgba(231,185,77,0.2);
     }
     .header-search #searchToggle {
-      display: none;
+      display: none; /* 桌面隱藏，手機顯示（但手機第二行常駐，也不需要了） */
     }
 
     .header-tools {
@@ -721,16 +722,21 @@
     }
 
     /* =========================================================
-       手機響應式
+       手機響應式 (兩行頂欄)
     ========================================================= */
     @media (max-width: 700px) {
       body { font-size: 16px; }
       .header-inner {
         min-height: auto;
-        padding: 10px 13px 11px;
+        padding: 8px 12px 10px;
+        flex-wrap: wrap;
         align-items: center;
-        flex-wrap: nowrap;
-        gap: 8px;
+        gap: 6px;
+      }
+
+      /* 第一行：品牌 + 工具按鈕 */
+      .brand {
+        flex: 0 0 auto;
       }
       .brand-icon {
         width: 40px;
@@ -740,34 +746,37 @@
       .brand-subtitle { display: none; }
       .brand-title { font-size: 1rem; }
 
+      .header-tools {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        gap: 4px;
+      }
+
+      /* 第二行：搜尋框 - 佔滿整行 */
       .header-search {
-        flex: 1;
-        margin: 0 4px;
+        flex: 0 0 100%;
+        order: 3;
+        margin: 4px 0 2px;
         min-width: 0;
       }
       .header-search input {
-        display: none;
-        position: absolute;
-        top: calc(100% + 6px);
-        left: 0;
-        right: 0;
+        display: block;
         width: 100%;
-        z-index: 60;
-        background: var(--surface);
-        border-color: var(--primary);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      }
-      .header-search input.show { display: block; }
-      .header-search #searchToggle {
-        display: inline-flex;
-        background: var(--surface);
-        border: 1px solid var(--border);
+        padding: 10px 14px;
+        font-size: 1rem;
         border-radius: 30px;
-        padding: 6px 12px;
-        min-height: 38px;
-        width: auto;
+        background: var(--surface-2);
+        border-color: var(--border);
+      }
+      .header-search input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(231,185,77,0.15);
+      }
+      .header-search #searchToggle {
+        display: none; /* 搜尋框常駐，無需切換 */
       }
 
+      /* 工具按鈕精簡 */
       .header-tools .tool-btn.hide-mobile-text span { display: none; }
       .font-control { display: none; }
       .hide-mobile { display: none !important; }
@@ -914,7 +923,7 @@
 
 <body>
 <!-- =======================================================
-     標題欄 (手機優化版)
+     標題欄 (手機兩行版)
 ======================================================= -->
 <header class="app-header">
   <div class="header-inner">
@@ -926,10 +935,11 @@
       </div>
     </div>
 
-    <!-- 搜尋框（手機加寬） -->
+    <!-- 搜尋框（手機第二行） -->
     <div class="header-search">
-      <input id="searchInput" type="search" placeholder="搜尋..." autocomplete="off">
-      <button id="searchToggle" class="tool-btn" type="button" aria-label="搜尋">🔍</button>
+      <input id="searchInput" type="search" placeholder="搜尋消費內容或地點..." autocomplete="off">
+      <!-- 手機不再需要切換按鈕，但保留以備不時之需，可隱藏 -->
+      <button id="searchToggle" class="tool-btn" type="button" aria-label="搜尋" style="display:none;">🔍</button>
     </div>
 
     <div class="header-tools">
@@ -1546,26 +1556,16 @@
   $$(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("click", e => { if (e.target === backdrop) backdrop.classList.remove("show"); }));
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllModals(); });
 
-  // 搜尋
+  // 搜尋 (桌面與手機第二行共用一個 input)
   $("#searchInput").addEventListener("input", e => {
     currentSearch = e.target.value;
     render();
   });
 
-  // 手機搜尋展開
+  // 手機搜尋展開按鈕 (但現在常駐，保留無害)
   const searchToggle = $("#searchToggle");
   const searchInput = $("#searchInput");
-  if (searchToggle) {
-    searchToggle.addEventListener("click", () => {
-      searchInput.classList.toggle("show");
-      if (searchInput.classList.contains("show")) searchInput.focus();
-    });
-    document.addEventListener("click", e => {
-      if (!e.target.closest(".header-search") && searchInput.classList.contains("show")) {
-        searchInput.classList.remove("show");
-      }
-    });
-  }
+  // 若手機有 toggle 按鈕但我們已隱藏，可忽略
 
   // 日期篩選
   $$("[data-period]").forEach(btn => {
@@ -1781,7 +1781,6 @@
     if (currentUser) {
       $("#userStatus").textContent = "👤 " + (currentUser.displayName || currentUser.email || "已登入");
       $("#loginBtn").textContent = "🚪 登出";
-      // 更新手機選單中的按鈕文字
       document.getElementById("mobileLoginBtn").textContent = "🚪 登出";
       startFirebaseSync();
     } else {
