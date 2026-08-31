@@ -1,1927 +1,1140 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f7e7a8">
-
-<title>💰 我的記帳本</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-
-<style>
-/* =========================================================
-   基本設定
-========================================================= */
-
-:root {
-  --bg: #fffaf0;
-  --surface: #fffdf7;
-  --surface-2: #fff7dc;
-  --border: #eadfbd;
-
-  --text: #40372b;
-  --muted: #8b7d68;
-
-  --primary: #e7b94d;
-  --primary-dark: #9a681d;
-
-  --accent: #b96b32;
-  --accent-dark: #87491f;
-
-  --danger: #c94c42;
-  --success: #4c8a59;
-
-  --shadow:
-    0 8px 28px rgba(108, 78, 27, 0.08);
-
-  --radius: 16px;
-  --font-size: 16px;
-}
-
-body.dark {
-  --bg: #24221d;
-  --surface: #2e2b25;
-  --surface-2: #39352c;
-  --border: #514a3e;
-
-  --text: #f8f0dc;
-  --muted: #b8aa8d;
-
-  --primary: #e7b94d;
-  --primary-dark: #f0c85f;
-
-  --accent: #d88a4b;
-  --accent-dark: #e39b61;
-
-  --danger: #ed7066;
-  --success: #76bd82;
-
-  --shadow:
-    0 8px 30px rgba(0, 0, 0, 0.24);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-size: var(--font-size);
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(248, 224, 139, 0.20),
-      transparent 35%
-    ),
-    var(--bg);
-
-  color: var(--text);
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Noto Sans TC",
-    "Microsoft JhengHei",
-    sans-serif;
-
-  transition:
-    background .25s ease,
-    color .25s ease;
-
-  min-height: 100vh;
-}
-
-/* =========================================================
-   Header
-========================================================= */
-
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-
-  background: color-mix(
-    in srgb,
-    var(--surface) 92%,
-    transparent
-  );
-
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-  max-width: 1240px;
-  margin: auto;
-
-  min-height: 78px;
-  padding: 12px 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 18px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.brand-icon {
-  width: 44px;
-  height: 44px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 13px;
-
-  background: var(--surface-2);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(180, 130, 40, .12);
-
-  font-size: 23px;
-}
-
-.brand-text {
-  min-width: 0;
-}
-
-.brand-title {
-  font-weight: 900;
-  font-size: 1.08rem;
-  letter-spacing: .02em;
-}
-
-.brand-subtitle {
-  color: var(--muted);
-  font-size: .76rem;
-  margin-top: 2px;
-}
-
-.header-tools {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button {
-  border: 0;
-  cursor: pointer;
-}
-
-.tool-btn {
-  min-height: 40px;
-
-  padding: 8px 12px;
-
-  border-radius: 11px;
-
-  background: var(--surface);
-  color: var(--text);
-
-  border: 1px solid var(--border);
-
-  transition:
-    transform .15s ease,
-    background .15s ease,
-    border-color .15s ease;
-}
-
-.tool-btn:hover {
-  background: var(--surface-2);
-  border-color: var(--primary);
-}
-
-.tool-btn:active {
-  transform: scale(.97);
-}
-
-.primary-btn {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  font-weight: 800;
-}
-
-.primary-btn:hover {
-  background: var(--accent-dark);
-  color: white;
-}
-
-.icon-btn {
-  width: 40px;
-  min-width: 40px;
-  padding: 0;
-
-  display: grid;
-  place-items: center;
-}
-
-/* =========================================================
-   Font size
-========================================================= */
-
-.font-control {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-
-  padding: 6px 10px;
-
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-}
-
-.font-control span {
-  font-size: .78rem;
-  color: var(--muted);
-}
-
-.font-control input {
-  width: 75px;
-  accent-color: var(--accent);
-}
-
-/* =========================================================
-   Main
-========================================================= */
-
-main {
-  max-width: 1240px;
-  margin: auto;
-  padding: 20px;
-}
-
-/* =========================================================
-   Dashboard
-========================================================= */
-
-.dashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
-
-  margin-bottom: 16px;
-}
-
-.stat-card {
-  position: relative;
-
-  min-height: 150px;
-
-  padding: 24px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-
-  overflow: hidden;
-}
-
-.stat-card::after {
-  content: "";
-
-  position: absolute;
-
-  width: 120px;
-  height: 120px;
-
-  right: -40px;
-  bottom: -50px;
-
-  border-radius: 50%;
-
-  background: rgba(231, 185, 77, .12);
-}
-
-.stat-label {
-  color: var(--muted);
-  font-weight: 700;
-  font-size: .9rem;
-}
-
-.stat-number {
-  margin-top: 12px;
-
-  font-size: clamp(2rem, 4vw, 3rem);
-
-  font-weight: 950;
-
-  color: var(--accent-dark);
-
-  letter-spacing: -.04em;
-}
-
-.stat-unit {
-  font-size: .82rem;
-  color: var(--muted);
-  margin-left: 5px;
-}
-
-/* =========================================================
-   Filters
-========================================================= */
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  margin-bottom: 16px;
-
-  overflow-x: auto;
-
-  scrollbar-width: none;
-
-  padding-bottom: 2px;
-}
-
-.filter-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-chip {
-  flex: 0 0 auto;
-
-  min-height: 38px;
-
-  padding: 7px 14px;
-
-  border-radius: 999px;
-
-  background: var(--surface);
-
-  color: var(--text);
-
-  border: 1px solid var(--border);
-
-  font-size: .86rem;
-
-  white-space: nowrap;
-}
-
-.filter-chip.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  font-weight: 800;
-}
-
-/* =========================================================
-   Chart
-========================================================= */
-
-.chart-section {
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  padding: 16px;
-
-  margin-bottom: 16px;
-
-  box-shadow: var(--shadow);
-}
-
-.section-title {
-  font-weight: 900;
-  margin-bottom: 10px;
-}
-
-.chart-wrap {
-  height: 250px;
-  position: relative;
-}
-
-.no-chart {
-  height: 100%;
-
-  display: grid;
-  place-items: center;
-
-  color: var(--muted);
-}
-
-/* =========================================================
-   Records
-========================================================= */
-
-.records-panel {
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-
-  overflow: hidden;
-}
-
-.records-top {
-  padding: 15px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.records-title {
-  font-weight: 900;
-  font-size: 1.05rem;
-}
-
-.search-box {
-  width: min(320px, 100%);
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 8px 12px;
-
-  border: 1px solid var(--border);
-
-  background: var(--surface-2);
-
-  border-radius: 11px;
-}
-
-.search-box input {
-  width: 100%;
-
-  border: 0;
-  outline: 0;
-
-  background: transparent;
-
-  color: var(--text);
-}
-
-.search-box input::placeholder {
-  color: var(--muted);
-}
-
-/* =========================================================
-   Table Header
-========================================================= */
-
-.table-header {
-  display: grid;
-
-  grid-template-columns:
-    90px
-    105px
-    minmax(0, 1fr)
-    150px
-    90px;
-
-  align-items: center;
-
-  min-height: 48px;
-
-  padding: 0 16px;
-
-  background: var(--surface-2);
-
-  color: var(--muted);
-
-  font-size: .78rem;
-
-  font-weight: 800;
-}
-
-.sort-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-
-  background: transparent;
-
-  color: inherit;
-
-  padding: 4px;
-
-  font-weight: inherit;
-}
-
-.sort-button:hover {
-  color: var(--accent);
-}
-
-.category-filter-wrap {
-  position: relative;
-}
-
-.funnel-btn {
-  width: 32px;
-  height: 32px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--muted);
-}
-
-.funnel-btn:hover,
-.funnel-btn.active {
-  background: var(--surface);
-  color: var(--accent);
-}
-
-/* =========================================================
-   Category Dropdown
-========================================================= */
-
-.category-menu {
-  position: absolute;
-
-  top: calc(100% + 7px);
-  left: 0;
-
-  z-index: 40;
-
-  width: 190px;
-
-  max-height: 260px;
-
-  overflow-y: auto;
-
-  padding: 7px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: 12px;
-
-  box-shadow: 0 15px 35px rgba(0,0,0,.15);
-
-  display: none;
-}
-
-.category-menu.show {
-  display: block;
-}
-
-.category-option {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 10px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--text);
-
-  text-align: left;
-}
-
-.category-option:hover,
-.category-option.active {
-  background: var(--surface-2);
-}
-
-/* =========================================================
-   Record Rows
-========================================================= */
-
-.record-list {
-  width: 100%;
-}
-
-.record-row {
-  display: grid;
-
-  grid-template-columns:
-    90px
-    105px
-    minmax(0, 1fr)
-    150px
-    90px;
-
-  align-items: center;
-
-  min-height: 66px;
-
-  padding: 0 16px;
-
-  border-bottom: 1px solid var(--border);
-
-  cursor: pointer;
-
-  transition: background .15s ease;
-}
-
-.record-row:hover {
-  background: var(--surface-2);
-}
-
-.record-row:last-child {
-  border-bottom: 0;
-}
-
-.record-id {
-  color: var(--muted);
-  font-size: .85rem;
-}
-
-.amount {
-  color: var(--accent-dark);
-  font-weight: 900;
-
-  text-align: right;
-
-  padding-right: 10px;
-
-  white-space: nowrap;
-}
-
-.content {
-  min-width: 0;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-  padding-right: 15px;
-
-  font-weight: 700;
-}
-
-.date {
-  color: var(--muted);
-  font-size: .8rem;
-}
-
-.row-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
-
-  opacity: 0;
-
-  transition: opacity .15s ease;
-}
-
-.record-row:hover .row-actions {
-  opacity: 1;
-}
-
-.row-action {
-  width: 34px;
-  height: 34px;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--muted);
-}
-
-.row-action:hover {
-  background: var(--surface-2);
-  color: var(--accent);
-}
-
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-
-  width: fit-content;
-
-  padding: 4px 8px;
-
-  border-radius: 7px;
-
-  font-size: .72rem;
-
-  font-weight: 800;
-
-  white-space: nowrap;
-}
-
-/* category colors */
-
-.cat-餐飲 {
-  background: #ffe1c7;
-  color: #984b13;
-}
-
-.cat-交通 {
-  background: #dceaff;
-  color: #315b9a;
-}
-
-.cat-購物 {
-  background: #f6d9ec;
-  color: #8c3f72;
-}
-
-.cat-娛樂 {
-  background: #e5ddff;
-  color: #624aa0;
-}
-
-.cat-房租 {
-  background: #d9efe0;
-  color: #37724b;
-}
-
-.cat-醫療 {
-  background: #d8eeee;
-  color: #337276;
-}
-
-.cat-其他 {
-  background: #e7e4df;
-  color: #625d54;
-}
-
-body.dark .cat-餐飲,
-body.dark .cat-交通,
-body.dark .cat-購物,
-body.dark .cat-娛樂,
-body.dark .cat-房租,
-body.dark .cat-醫療,
-body.dark .cat-其他 {
-  filter: brightness(.78);
-}
-
-/* =========================================================
-   Empty
-========================================================= */
-
-.empty {
-  padding: 60px 20px;
-
-  text-align: center;
-
-  color: var(--muted);
-}
-
-.empty-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-
-/* =========================================================
-   Modal
-========================================================= */
-
-.modal-backdrop {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 100;
-
-  display: none;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 18px;
-
-  background: rgba(30, 25, 15, .48);
-
-  backdrop-filter: blur(5px);
-}
-
-.modal-backdrop.show {
-  display: flex;
-}
-
-.modal {
-  width: min(560px, 100%);
-
-  max-height: min(850px, 92vh);
-
-  overflow-y: auto;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: 20px;
-
-  box-shadow: 0 25px 70px rgba(0,0,0,.25);
-
-  animation: modalIn .18s ease;
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.modal-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 16px 18px;
-
-  background: var(--surface);
-
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-weight: 950;
-  font-size: 1.08rem;
-}
-
-.modal-body {
-  padding: 18px;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-
-  gap: 8px;
-
-  padding: 15px 18px;
-
-  border-top: 1px solid var(--border);
-}
-
-/* =========================================================
-   Forms
-========================================================= */
-
-.form-grid {
-  display: grid;
-
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-
-  gap: 6px;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-.form-label {
-  font-size: .82rem;
-
-  color: var(--muted);
-
-  font-weight: 800;
-}
-
-.form-control {
-  width: 100%;
-
-  min-height: 44px;
-
-  padding: 9px 11px;
-
-  border-radius: 10px;
-
-  border: 1px solid var(--border);
-
-  outline: 0;
-
-  background: var(--surface-2);
-
-  color: var(--text);
-}
-
-.form-control:focus {
-  border-color: var(--primary);
-
-  box-shadow:
-    0 0 0 3px rgba(231,185,77,.15);
-}
-
-.location-row {
-  display: flex;
-  gap: 7px;
-}
-
-.location-row .form-control {
-  min-width: 0;
-}
-
-.quick-money {
-  display: flex;
-  gap: 6px;
-
-  margin-top: 6px;
-}
-
-.quick-money button {
-  padding: 6px 9px;
-
-  border-radius: 8px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  color: var(--accent-dark);
-
-  font-weight: 800;
-}
-
-.quick-money button:hover {
-  background: var(--surface-2);
-}
-
-/* =========================================================
-   Detail
-========================================================= */
-
-.detail-card {
-  background: var(--surface-2);
-
-  border: 1px solid var(--border);
-
-  border-radius: 13px;
-
-  padding: 15px;
-}
-
-.detail-amount {
-  font-size: 2.1rem;
-
-  font-weight: 950;
-
-  color: var(--accent-dark);
-
-  margin-bottom: 15px;
-}
-
-.detail-item {
-  display: grid;
-
-  grid-template-columns: 90px 1fr;
-
-  gap: 10px;
-
-  padding: 9px 0;
-
-  border-bottom: 1px dashed var(--border);
-}
-
-.detail-item:last-child {
-  border-bottom: 0;
-}
-
-.detail-label {
-  color: var(--muted);
-
-  font-size: .82rem;
-
-  font-weight: 800;
-}
-
-.detail-value {
-  word-break: break-word;
-}
-
-/* =========================================================
-   Toast
-========================================================= */
-
-.toast-container {
-  position: fixed;
-
-  top: 90px;
-  left: 50%;
-
-  z-index: 200;
-
-  transform: translateX(-50%);
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 7px;
-
-  pointer-events: none;
-}
-
-.toast {
-  min-width: 220px;
-
-  padding: 11px 16px;
-
-  border-radius: 11px;
-
-  background: #3c3329;
-
-  color: white;
-
-  box-shadow: 0 10px 30px rgba(0,0,0,.2);
-
-  text-align: center;
-
-  animation:
-    toastIn .2s ease,
-    toastOut .25s ease 1.75s forwards;
-}
-
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes toastOut {
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-/* =========================================================
-   Login status
-========================================================= */
-
-.user-status {
-  font-size: .75rem;
-
-  color: var(--muted);
-
-  white-space: nowrap;
-}
-
-/* =========================================================
-   Mobile
-========================================================= */
-
-@media (max-width: 700px) {
-
-  body {
-    font-size: 16px;
-  }
-
-  .header-inner {
-    min-height: auto;
-
-    padding:
-      10px
-      13px
-      11px;
-
-    align-items: flex-start;
-  }
-
-  .brand-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .brand-subtitle {
-    display: none;
-  }
-
-  .header-tools {
-    gap: 5px;
-  }
-
-  .font-control {
-    display: none;
-  }
-
-  .tool-btn {
-    min-height: 42px;
-    padding: 8px 10px;
-  }
-
-  .tool-btn.hide-mobile-text span {
-    display: none;
-  }
-
-  main {
-    padding:
-      14px
-      12px
-      calc(30px + env(safe-area-inset-bottom));
-  }
-
-  .dashboard {
-    grid-template-columns: 1fr;
-
-    gap: 10px;
-  }
-
-  .stat-card {
-    min-height: 118px;
-
-    padding: 18px;
-  }
-
-  .stat-number {
-    font-size: 2.15rem;
-  }
-
-  .chart-section {
-    padding: 13px;
-
-    border-radius: 14px;
-  }
-
-  .chart-wrap {
-    height: 215px;
-  }
-
-  .records-panel {
-    border-radius: 14px;
-  }
-
-  .records-top {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    padding: 13px;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  /*
-    手機版不再使用桌面五欄。
-    改成真正的記帳卡片。
-  */
-
-  .table-header {
-    display: none;
-  }
-
-  .record-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .record-row {
-    display: grid;
-
-    grid-template-columns:
-      1fr
-      auto;
-
-    grid-template-areas:
-      "content amount"
-      "meta amount";
-
-    gap: 5px 10px;
-
-    min-height: 78px;
-
-    padding: 13px 14px;
-
-    align-items: center;
-  }
-
-  .record-row:hover {
-    background: transparent;
-  }
-
-  .record-id {
-    display: none;
-  }
-
-  .content {
-    grid-area: content;
-
-    padding: 0;
-
-    font-size: .96rem;
-  }
-
-  .date {
-    grid-area: meta;
-
-    font-size: .73rem;
-  }
-
-  .amount {
-    grid-area: amount;
-
-    padding: 0;
-
-    font-size: 1.02rem;
-
-    align-self: center;
-  }
-
-  .category-badge {
-    margin-right: 6px;
-  }
-
-  /*
-    手機列第二行 metadata
-  */
-
-  .date::before {
-    content: "🕒 ";
-  }
-
-  /*
-    手機上不顯示 hover actions
-  */
-
-  .row-actions {
-    display: none;
-  }
-
-  .record-row {
-    position: relative;
-  }
-
-  .record-row::after {
-    content: "";
-
-    position: absolute;
-
-    left: 14px;
-    right: 14px;
-    bottom: 0;
-
-    border-bottom: 1px solid var(--border);
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-group.full {
-    grid-column: auto;
-  }
-
-  .modal-backdrop {
-    align-items: flex-end;
-
-    padding: 0;
-  }
-
-  .modal {
-    width: 100%;
-
-    max-height: 92vh;
-
-    border-radius:
-      20px
-      20px
-      0
-      0;
-  }
-
-  .modal-header {
-    padding: 14px 16px;
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    padding:
-      12px
-      16px
-      calc(12px + env(safe-area-inset-bottom));
-  }
-
-  .modal-footer button {
-    min-height: 45px;
-
-    flex: 1;
-  }
-
-  .location-row {
-    flex-direction: column;
-  }
-
-  .location-row button {
-    min-height: 44px;
-  }
-
-  .quick-money button {
-    min-height: 40px;
-
-    flex: 1;
-  }
-
-  .category-menu {
-    /*
-      確保手機類別選單可以上下滾動
-    */
-    max-height: 45vh;
-
-    overflow-y: auto;
-
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .category-option {
-    min-height: 45px;
-  }
-
-  .filter-chip {
-    min-height: 42px;
-
-    padding-left: 15px;
-    padding-right: 15px;
-  }
-
-  .toast-container {
-    top: 72px;
-
-    width: calc(100% - 28px);
-  }
-
-  .toast {
-    width: 100%;
-  }
-}
-
-/* =========================================================
-   Very small phones
-========================================================= */
-
-@media (max-width: 380px) {
-
-  .brand-title {
-    font-size: .95rem;
-  }
-
-  .header-tools .tool-btn {
-    width: 40px;
-
-    padding: 0;
-
-    font-size: 0;
-  }
-
-  .header-tools .tool-btn::first-letter {
-    font-size: 18px;
-  }
-
-  .stat-number {
-    font-size: 1.9rem;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7e7a8">
+  <title>💰 我的記帳本</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    /* =========================================================
+       基本設定 (保留原有變數，新增部分樣式)
+    ========================================================= */
+    :root {
+      --bg: #fffaf0;
+      --surface: #fffdf7;
+      --surface-2: #fff7dc;
+      --border: #eadfbd;
+      --text: #40372b;
+      --muted: #8b7d68;
+      --primary: #e7b94d;
+      --primary-dark: #9a681d;
+      --accent: #b96b32;
+      --accent-dark: #87491f;
+      --danger: #c94c42;
+      --success: #4c8a59;
+      --shadow: 0 8px 28px rgba(108, 78, 27, 0.08);
+      --radius: 16px;
+      --font-size: 16px;
+    }
+
+    body.dark {
+      --bg: #24221d;
+      --surface: #2e2b25;
+      --surface-2: #39352c;
+      --border: #514a3e;
+      --text: #f8f0dc;
+      --muted: #b8aa8d;
+      --primary: #e7b94d;
+      --primary-dark: #f0c85f;
+      --accent: #d88a4b;
+      --accent-dark: #e39b61;
+      --danger: #ed7066;
+      --success: #76bd82;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.24);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      font-size: var(--font-size);
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, rgba(248, 224, 139, 0.20), transparent 35%), var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      transition: background .25s ease, color .25s ease;
+      min-height: 100vh;
+    }
+
+    /* =========================================================
+       標題欄 (美化)
+    ========================================================= */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #fdf6e3 0%, #f7e7a8 100%);
+      border-bottom: 2px solid #e6d5a8;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      transition: background .25s ease;
+    }
+    body.dark .app-header {
+      background: linear-gradient(135deg, #2e2b25 0%, #3a352b 100%);
+      border-bottom-color: #514a3e;
+    }
+
+    .header-inner {
+      max-width: 1240px;
+      margin: auto;
+      min-height: 78px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .brand-icon {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #fff3d6, #f7e0b0);
+      box-shadow: 0 2px 8px rgba(150, 100, 30, 0.15);
+      font-size: 28px;
+    }
+    .brand-title {
+      font-weight: 900;
+      font-size: 1.2rem;
+      letter-spacing: .02em;
+      text-shadow: 0 1px 2px rgba(255,215,0,0.2);
+    }
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: .76rem;
+      margin-top: 2px;
+    }
+
+    /* 搜尋框 (桌面) */
+    .header-search {
+      display: flex;
+      align-items: center;
+      flex: 0 1 260px;
+      min-width: 120px;
+      margin: 0 12px;
+      position: relative;
+    }
+    .header-search input {
+      width: 100%;
+      padding: 8px 14px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: all 0.2s;
+      outline: 0;
+      color: var(--text);
+    }
+    .header-search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(231,185,77,0.2);
+    }
+    .header-search #searchToggle {
+      display: none;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    button, input, select {
+      font: inherit;
+    }
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+    .tool-btn {
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+    .tool-btn:hover {
+      background: var(--surface-2);
+      border-color: var(--primary);
+    }
+    .tool-btn:active {
+      transform: scale(.97);
+    }
+    .primary-btn {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 800;
+    }
+    .primary-btn:hover {
+      background: var(--accent-dark);
+      color: white;
+    }
+    .icon-btn {
+      width: 40px;
+      min-width: 40px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .font-control {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+    }
+    .font-control span {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .font-control input {
+      width: 75px;
+      accent-color: var(--accent);
+    }
+    .user-status {
+      font-size: .75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       Main
+    ========================================================= */
+    main {
+      max-width: 1240px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* Dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      position: relative;
+      min-height: 150px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      right: -40px;
+      bottom: -50px;
+      border-radius: 50%;
+      background: rgba(231, 185, 77, .12);
+    }
+    .stat-label {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .stat-number {
+      margin-top: 12px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 950;
+      color: var(--accent-dark);
+      letter-spacing: -.04em;
+    }
+    .stat-unit {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-left: 5px;
+    }
+
+    /* =========================================================
+       統一的篩選工具欄 (電腦 + 手機)
+    ========================================================= */
+    .filter-toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      margin: 16px 0;
+      box-shadow: var(--shadow);
+    }
+    .filter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filter-chips::-webkit-scrollbar {
+      display: none;
+    }
+    .filter-chip {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 800;
+    }
+    #moreFilterBtn {
+      display: none;
+    }
+    .filter-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      padding-top: 12px;
+      margin-top: 10px;
+      border-top: 1px dashed var(--border);
+    }
+    .filter-panel.hidden {
+      display: none;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-group label {
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .category-filter-wrap {
+      position: relative;
+    }
+    .funnel-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .funnel-btn:hover,
+    .funnel-btn.active {
+      background: var(--surface-2);
+      color: var(--accent);
+    }
+    .category-menu {
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      z-index: 40;
+      width: 190px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 7px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.15);
+      display: none;
+    }
+    .category-menu.show {
+      display: block;
+    }
+    .category-option {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+    .category-option:hover,
+    .category-option.active {
+      background: var(--surface-2);
+    }
+    .sort-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .sort-buttons .sort-button {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .sort-buttons .sort-button:hover {
+      border-color: var(--primary);
+    }
+
+    /* 圖表區塊 */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .chart-wrap {
+      height: 250px;
+      position: relative;
+    }
+    .no-chart {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+    }
+
+    /* 記錄清單 */
+    .records-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .records-top {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .records-title {
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+    .record-count {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 90px 105px minmax(0, 1fr) 150px 90px;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 16px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    .table-header .sort-button {
+      background: transparent;
+      border: 0;
+      color: inherit;
+      padding: 4px;
+      font-weight: inherit;
+    }
+    .table-header .sort-button:hover {
+      color: var(--accent);
+    }
+
+    .record-list {
+      width: 100%;
+    }
+
+    .record-row {
+      display: grid;
+      grid-template-columns: 90px 105px minmax(0, 1fr) 150px 90px;
+      align-items: center;
+      min-height: 66px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .record-row:hover {
+      background: var(--surface-2);
+    }
+    .record-row:last-child {
+      border-bottom: 0;
+    }
+    .record-id {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .amount {
+      color: var(--accent-dark);
+      font-weight: 900;
+      text-align: right;
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+    .content {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 15px;
+      font-weight: 700;
+    }
+    .date {
+      color: var(--muted);
+      font-size: .8rem;
+    }
+    .row-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+    .record-row:hover .row-actions {
+      opacity: 1;
+    }
+    .row-action {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+    }
+    .row-action:hover {
+      background: var(--surface-2);
+      color: var(--accent);
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: .72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .cat-餐飲 { background: #ffe1c7; color: #984b13; }
+    .cat-交通 { background: #dceaff; color: #315b9a; }
+    .cat-購物 { background: #f6d9ec; color: #8c3f72; }
+    .cat-娛樂 { background: #e5ddff; color: #624aa0; }
+    .cat-房租 { background: #d9efe0; color: #37724b; }
+    .cat-醫療 { background: #d8eeee; color: #337276; }
+    .cat-其他 { background: #e7e4df; color: #625d54; }
+
+    body.dark .cat-餐飲,
+    body.dark .cat-交通,
+    body.dark .cat-購物,
+    body.dark .cat-娛樂,
+    body.dark .cat-房租,
+    body.dark .cat-醫療,
+    body.dark .cat-其他 {
+      filter: brightness(.78);
+    }
+
+    .empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    /* 模態框 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(30, 25, 15, .48);
+      backdrop-filter: blur(5px);
+    }
+    .modal-backdrop.show {
+      display: flex;
+    }
+    .modal {
+      width: min(560px, 100%);
+      max-height: min(850px, 92vh);
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.25);
+      animation: modalIn .18s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title {
+      font-weight: 950;
+      font-size: 1.08rem;
+    }
+    .modal-body {
+      padding: 18px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 15px 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: .82rem;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .form-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      outline: 0;
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(231,185,77,.15);
+    }
+    .location-row {
+      display: flex;
+      gap: 7px;
+    }
+    .location-row .form-control {
+      min-width: 0;
+    }
+    .quick-money {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .quick-money button {
+      padding: 6px 9px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+    .quick-money button:hover {
+      background: var(--surface-2);
+    }
+
+    .detail-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 15px;
+    }
+    .detail-amount {
+      font-size: 2.1rem;
+      font-weight: 950;
+      color: var(--accent-dark);
+      margin-bottom: 15px;
+    }
+    .detail-item {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .detail-item:last-child {
+      border-bottom: 0;
+    }
+    .detail-label {
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 800;
+    }
+    .detail-value {
+      word-break: break-word;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      z-index: 200;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      pointer-events: none;
+    }
+    .toast {
+      min-width: 220px;
+      padding: 11px 16px;
+      border-radius: 11px;
+      background: #3c3329;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      text-align: center;
+      animation: toastIn .2s ease, toastOut .25s ease 1.75s forwards;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
+    /* =========================================================
+       手機響應式
+    ========================================================= */
+    @media (max-width: 700px) {
+      body { font-size: 16px; }
+      .header-inner {
+        min-height: auto;
+        padding: 10px 13px 11px;
+        align-items: flex-start;
+      }
+      .brand-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 23px;
+      }
+      .brand-subtitle {
+        display: none;
+      }
+      .header-search {
+        flex: 0 0 auto;
+        margin: 0;
+      }
+      .header-search input {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+        z-index: 60;
+        background: var(--surface);
+        border-color: var(--primary);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      }
+      .header-search input.show {
+        display: block;
+      }
+      .header-search #searchToggle {
+        display: inline-flex;
+      }
+
+      .header-tools .tool-btn.hide-mobile-text span {
+        display: none;
+      }
+      .font-control {
+        display: none;
+      }
+
+      main {
+        padding: 14px 12px calc(30px + env(safe-area-inset-bottom));
+      }
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .stat-card {
+        min-height: 118px;
+        padding: 18px;
+      }
+      .stat-number {
+        font-size: 2.15rem;
+      }
+
+      /* 篩選工具欄手機 */
+      #moreFilterBtn {
+        display: inline-flex;
+      }
+      .filter-panel {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .filter-group {
+        flex-wrap: wrap;
+      }
+      .filter-group label {
+        width: 100%;
+      }
+      .category-filter-wrap {
+        width: 100%;
+      }
+      .category-menu {
+        position: static;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        margin-top: 6px;
+        border-radius: 10px;
+      }
+      .sort-buttons {
+        flex-wrap: wrap;
+      }
+
+      .chart-section {
+        padding: 13px;
+        border-radius: 14px;
+      }
+      .chart-wrap {
+        height: 215px;
+      }
+      .records-panel {
+        border-radius: 14px;
+      }
+      .records-top {
+        padding: 13px;
+      }
+
+      /* 手機版隱藏表格標頭，改為卡片式 */
+      .table-header {
+        display: none;
+      }
+      .record-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .record-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "content amount"
+          "meta amount";
+        gap: 5px 10px;
+        min-height: 78px;
+        padding: 13px 14px;
+        align-items: center;
+      }
+      .record-row:hover {
+        background: transparent;
+      }
+      .record-id {
+        display: none;
+      }
+      .content {
+        grid-area: content;
+        padding: 0;
+        font-size: .96rem;
+      }
+      .date {
+        grid-area: meta;
+        font-size: .73rem;
+      }
+      .date::before {
+        content: "🕒 ";
+      }
+      .amount {
+        grid-area: amount;
+        padding: 0;
+        font-size: 1.02rem;
+        align-self: center;
+      }
+      .category-badge {
+        margin-right: 6px;
+      }
+      .row-actions {
+        display: none;
+      }
+      .record-row::after {
+        content: "";
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .record-row {
+        position: relative;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group.full {
+        grid-column: auto;
+      }
+      .modal-backdrop {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .modal {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+      }
+      .modal-header {
+        padding: 14px 16px;
+      }
+      .modal-body {
+        padding: 16px;
+      }
+      .modal-footer {
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      }
+      .modal-footer button {
+        min-height: 45px;
+        flex: 1;
+      }
+      .location-row {
+        flex-direction: column;
+      }
+      .location-row button {
+        min-height: 44px;
+      }
+      .quick-money button {
+        min-height: 40px;
+        flex: 1;
+      }
+      .filter-chip {
+        min-height: 42px;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      .toast-container {
+        top: 72px;
+        width: calc(100% - 28px);
+      }
+      .toast {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand-title {
+        font-size: .95rem;
+      }
+      .header-tools .tool-btn {
+        width: 40px;
+        padding: 0;
+        font-size: 0;
+      }
+      .header-tools .tool-btn::first-letter {
+        font-size: 18px;
+      }
+      .stat-number {
+        font-size: 1.9rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-
 <!-- =======================================================
-     Header
+     標題欄 (美化版)
 ======================================================= -->
-
 <header class="app-header">
-
   <div class="header-inner">
-
     <div class="brand">
-
-      <div class="brand-icon">
-        💰
-      </div>
-
+      <div class="brand-icon">💰</div>
       <div class="brand-text">
-
-        <div class="brand-title">
-          我的記帳本
-        </div>
-
-        <div class="brand-subtitle">
-          個人消費管理 · NTD
-        </div>
-
+        <div class="brand-title">我的記帳本</div>
+        <div class="brand-subtitle">個人消費管理 · NTD</div>
       </div>
+    </div>
 
+    <!-- 搜尋框（電腦顯示輸入框，手機顯示切換按鈕） -->
+    <div class="header-search">
+      <input id="searchInput" type="search" placeholder="搜尋消費內容或地點..." autocomplete="off">
+      <button id="searchToggle" class="tool-btn icon-btn" type="button" aria-label="搜尋">🔍</button>
     </div>
 
     <div class="header-tools">
-
       <div class="font-control">
-
         <span>字體</span>
-
-        <input
-          id="fontSlider"
-          type="range"
-          min="14"
-          max="21"
-          step="1"
-          value="16"
-        >
-
+        <input id="fontSlider" type="range" min="14" max="21" step="1" value="16">
       </div>
-
-      <span
-        id="userStatus"
-        class="user-status"
-      >
-        🔒 未登入
-      </span>
-
-      <button
-        id="loginBtn"
-        class="tool-btn"
-        type="button"
-      >
-        🔑 登入
-      </button>
-
-      <button
-        id="exportBtn"
-        class="tool-btn hide-mobile-text"
-        type="button"
-        title="匯出 CSV"
-      >
-        📤 <span>匯出</span>
-      </button>
-
-      <button
-        id="importBtn"
-        class="tool-btn hide-mobile-text"
-        type="button"
-        title="匯入資料"
-      >
-        📥 <span>匯入</span>
-      </button>
-
-      <input
-        id="fileInput"
-        type="file"
-        accept=".csv,.json"
-        hidden
-      >
-
-      <button
-        id="themeBtn"
-        class="tool-btn icon-btn"
-        type="button"
-        title="深色／淺色"
-      >
-        🌓
-      </button>
-
-      <button
-        id="addBtn"
-        class="tool-btn primary-btn"
-        type="button"
-      >
-        ➕ <span>新增</span>
-      </button>
-
+      <span id="userStatus" class="user-status">🔒 未登入</span>
+      <button id="loginBtn" class="tool-btn" type="button">🔑 登入</button>
+      <button id="exportBtn" class="tool-btn hide-mobile-text" type="button" title="匯出 CSV">📤 <span>匯出</span></button>
+      <button id="importBtn" class="tool-btn hide-mobile-text" type="button" title="匯入資料">📥 <span>匯入</span></button>
+      <input id="fileInput" type="file" accept=".csv,.json" hidden>
+      <button id="themeBtn" class="tool-btn icon-btn" type="button" title="深色／淺色">🌓</button>
+      <button id="addBtn" class="tool-btn primary-btn" type="button">➕ <span>新增</span></button>
     </div>
-
   </div>
-
 </header>
-
 
 <!-- =======================================================
      Main
 ======================================================= -->
-
 <main>
-
   <!-- Dashboard -->
-
   <section class="dashboard">
-
     <article class="stat-card">
-
-      <div class="stat-label">
-        總消費次數
-      </div>
-
-      <div
-        id="totalCount"
-        class="stat-number"
-      >
-        0
-      </div>
-
-      <div class="stat-unit">
-        筆
-      </div>
-
+      <div class="stat-label">總消費次數</div>
+      <div id="totalCount" class="stat-number">0</div>
+      <div class="stat-unit">筆</div>
     </article>
-
-
     <article class="stat-card">
-
-      <div class="stat-label">
-        總消費金額
-      </div>
-
-      <div
-        id="totalAmount"
-        class="stat-number"
-      >
-        NT$ 0
-      </div>
-
-      <div class="stat-unit">
-        新台幣 NTD
-      </div>
-
+      <div class="stat-label">總消費金額</div>
+      <div id="totalAmount" class="stat-number">NT$ 0</div>
+      <div class="stat-unit">新台幣 NTD</div>
     </article>
-
   </section>
 
+  <!-- 統一的篩選工具欄 -->
+  <div class="filter-toolbar">
+    <div class="filter-row">
+      <div class="filter-chips">
+        <button class="filter-chip active" data-period="all">📊 全部</button>
+        <button class="filter-chip" data-period="today">📅 今日</button>
+        <button class="filter-chip" data-period="week">📅 本週</button>
+        <button class="filter-chip" data-period="month">📅 本月</button>
+      </div>
+      <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
+    </div>
 
-  <!-- Quick Filters -->
-
-  <div class="filter-bar">
-
-    <button
-      class="filter-chip active"
-      data-period="all"
-      type="button"
-    >
-      📊 全部
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="today"
-      type="button"
-    >
-      📅 今日
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="week"
-      type="button"
-    >
-      📅 本週
-    </button>
-
-    <button
-      class="filter-chip"
-      data-period="month"
-      type="button"
-    >
-      📅 本月
-    </button>
-
+    <!-- 進階篩選面板 (手機可展開) -->
+    <div id="filterPanel" class="filter-panel hidden">
+      <div class="filter-group">
+        <label>類別</label>
+        <div class="category-filter-wrap">
+          <button id="categoryFilterBtn" class="funnel-btn" type="button">⏷ 類別</button>
+          <div id="categoryMenu" class="category-menu">
+            <button class="category-option active" data-category="all">◉ 全部類別</button>
+            <button class="category-option" data-category="餐飲"><span class="category-badge cat-餐飲">餐飲</span></button>
+            <button class="category-option" data-category="交通"><span class="category-badge cat-交通">交通</span></button>
+            <button class="category-option" data-category="購物"><span class="category-badge cat-購物">購物</span></button>
+            <button class="category-option" data-category="娛樂"><span class="category-badge cat-娛樂">娛樂</span></button>
+            <button class="category-option" data-category="房租"><span class="category-badge cat-房租">房租</span></button>
+            <button class="category-option" data-category="醫療"><span class="category-badge cat-醫療">醫療</span></button>
+            <button class="category-option" data-category="其他"><span class="category-badge cat-其他">其他</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>排序</label>
+        <div class="sort-buttons">
+          <button class="sort-button" data-sort="id">序號 ↕</button>
+          <button class="sort-button" data-sort="content">內容 ↕</button>
+          <button class="sort-button" data-sort="amount">金額 ↕</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-
-  <!-- Chart -->
-
+  <!-- 圖表 -->
   <section class="chart-section">
-
-    <div class="section-title">
-      📊 消費類別分析
-    </div>
-
+    <div class="section-title">📊 消費類別分析</div>
     <div class="chart-wrap">
-
       <canvas id="expenseChart"></canvas>
-
-      <div
-        id="noChart"
-        class="no-chart"
-      >
-        無資料可視化
-      </div>
-
+      <div id="noChart" class="no-chart">無資料可視化</div>
     </div>
-
   </section>
 
-
-  <!-- Records -->
-
+  <!-- 記錄清單 -->
   <section class="records-panel">
-
     <div class="records-top">
-
-      <div class="records-title">
-        📋 歷史消費記錄
-      </div>
-
-      <div class="search-box">
-
-        🔍
-
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="搜尋消費內容或地點..."
-          autocomplete="off"
-        >
-
-      </div>
-
+      <div class="records-title">📋 歷史消費記錄</div>
+      <span id="recordCount" class="record-count"></span>
     </div>
 
-
-    <!-- Desktop table header -->
-
+    <!-- 電腦版表格標頭 -->
     <div class="table-header">
-
-      <div>
-
-        <button
-          class="sort-button"
-          data-sort="id"
-          type="button"
-        >
-          序號 ↕
-        </button>
-
-      </div>
-
-      <div class="category-filter-wrap">
-
-        <span>類別</span>
-
-        <button
-          id="categoryFilterBtn"
-          class="funnel-btn"
-          type="button"
-          title="類別篩選"
-        >
-          ⏷
-        </button>
-
-        <div
-          id="categoryMenu"
-          class="category-menu"
-        >
-
-          <button
-            class="category-option active"
-            data-category="all"
-            type="button"
-          >
-            ◉ 全部類別
-          </button>
-
-          <button
-            class="category-option"
-            data-category="餐飲"
-            type="button"
-          >
-            <span class="category-badge cat-餐飲">餐飲</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="交通"
-            type="button"
-          >
-            <span class="category-badge cat-交通">交通</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="購物"
-            type="button"
-          >
-            <span class="category-badge cat-購物">購物</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="娛樂"
-            type="button"
-          >
-            <span class="category-badge cat-娛樂">娛樂</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="房租"
-            type="button"
-          >
-            <span class="category-badge cat-房租">房租</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="醫療"
-            type="button"
-          >
-            <span class="category-badge cat-醫療">醫療</span>
-          </button>
-
-          <button
-            class="category-option"
-            data-category="其他"
-            type="button"
-          >
-            <span class="category-badge cat-其他">其他</span>
-          </button>
-
-        </div>
-
-      </div>
-
-      <div>
-        <button
-          class="sort-button"
-          data-sort="content"
-          type="button"
-        >
-          消費內容 ↕
-        </button>
-      </div>
-
-      <div>
-        <button
-          class="sort-button"
-          data-sort="amount"
-          type="button"
-        >
-          消費金額 ↕
-        </button>
-      </div>
-
-      <div>
-        操作
-      </div>
-
+      <div><button class="sort-button" data-sort="id">序號 ↕</button></div>
+      <div>類別</div>
+      <div><button class="sort-button" data-sort="content">消費內容 ↕</button></div>
+      <div><button class="sort-button" data-sort="amount">消費金額 ↕</button></div>
+      <div>操作</div>
     </div>
 
-
-    <div
-      id="recordList"
-      class="record-list"
-    ></div>
-
+    <div id="recordList" class="record-list"></div>
   </section>
-
 </main>
 
-
 <!-- =======================================================
-     Add / Edit Modal
+     新增/編輯 彈窗
 ======================================================= -->
-
-<div
-  id="formModal"
-  class="modal-backdrop"
->
-
+<div id="formModal" class="modal-backdrop">
   <div class="modal">
-
     <div class="modal-header">
-
-      <div
-        id="formTitle"
-        class="modal-title"
-      >
-        ➕ 新增消費記錄
-      </div>
-
-      <button
-        class="tool-btn icon-btn"
-        data-close="formModal"
-        type="button"
-      >
-        ✕
-      </button>
-
+      <div id="formTitle" class="modal-title">➕ 新增消費記錄</div>
+      <button class="tool-btn icon-btn" data-close="formModal" type="button">✕</button>
     </div>
-
-
     <form id="recordForm">
-
       <div class="modal-body">
-
         <div class="form-grid">
-
           <div class="form-group">
-
-            <label class="form-label">
-              消費金額（NTD）
-            </label>
-
-            <input
-              id="amountInput"
-              class="form-control"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              placeholder="例如 120"
-            >
-
+            <label class="form-label">消費金額（NTD）</label>
+            <input id="amountInput" class="form-control" type="number" min="0" step="0.01" required placeholder="例如 120">
             <div class="quick-money">
-
-              <button
-                type="button"
-                data-add-money="100"
-              >
-                +100
-              </button>
-
-              <button
-                type="button"
-                data-add-money="500"
-              >
-                +500
-              </button>
-
-              <button
-                type="button"
-                data-add-money="1000"
-              >
-                +1000
-              </button>
-
+              <button type="button" data-add-money="100">+100</button>
+              <button type="button" data-add-money="500">+500</button>
+              <button type="button" data-add-money="1000">+1000</button>
             </div>
-
           </div>
-
-
           <div class="form-group">
-
-            <label class="form-label">
-              消費類別
-            </label>
-
-            <select
-              id="categoryInput"
-              class="form-control"
-              required
-            >
-
+            <label class="form-label">消費類別</label>
+            <select id="categoryInput" class="form-control" required>
               <option value="餐飲">餐飲</option>
               <option value="交通">交通</option>
               <option value="購物">購物</option>
@@ -1929,2919 +1142,701 @@ body.dark .cat-其他 {
               <option value="房租">房租</option>
               <option value="醫療">醫療</option>
               <option value="其他">其他</option>
-
             </select>
-
           </div>
-
-
           <div class="form-group full">
-
-            <label class="form-label">
-              消費內容
-            </label>
-
-            <input
-              id="contentInput"
-              class="form-control"
-              type="text"
-              maxlength="100"
-              required
-              placeholder="例如：午餐、捷運、生活用品"
-            >
-
+            <label class="form-label">消費內容</label>
+            <input id="contentInput" class="form-control" type="text" maxlength="100" required placeholder="例如：午餐、捷運、生活用品">
           </div>
-
-
           <div class="form-group full">
-
-            <label class="form-label">
-              消費時間
-            </label>
-
-            <input
-              id="timeInput"
-              class="form-control"
-              type="datetime-local"
-              required
-            >
-
+            <label class="form-label">消費時間</label>
+            <input id="timeInput" class="form-control" type="datetime-local" required>
           </div>
-
-
           <div class="form-group full">
-
-            <label class="form-label">
-              消費地點
-            </label>
-
+            <label class="form-label">消費地點</label>
             <div class="location-row">
-
-              <input
-                id="locationInput"
-                class="form-control"
-                type="text"
-                placeholder="例如：台北車站"
-              >
-
-              <button
-                id="mapBtn"
-                class="tool-btn"
-                type="button"
-              >
-                🗺️ 地圖
-              </button>
-
+              <input id="locationInput" class="form-control" type="text" placeholder="例如：台北車站">
+              <button id="mapBtn" class="tool-btn" type="button">🗺️ 地圖</button>
             </div>
-
           </div>
-
         </div>
-
       </div>
-
-
       <div class="modal-footer">
-
-        <button
-          class="tool-btn"
-          data-close="formModal"
-          type="button"
-        >
-          取消
-        </button>
-
-        <button
-          class="tool-btn primary-btn"
-          type="submit"
-        >
-          確定儲存
-        </button>
-
+        <button class="tool-btn" data-close="formModal" type="button">取消</button>
+        <button class="tool-btn primary-btn" type="submit">確定儲存</button>
       </div>
-
     </form>
-
   </div>
-
 </div>
 
-
 <!-- =======================================================
-     Detail Modal
+     詳細資訊 彈窗
 ======================================================= -->
-
-<div
-  id="detailModal"
-  class="modal-backdrop"
->
-
+<div id="detailModal" class="modal-backdrop">
   <div class="modal">
-
     <div class="modal-header">
-
-      <div class="modal-title">
-        📄 消費詳細資訊
-      </div>
-
-      <button
-        class="tool-btn icon-btn"
-        data-close="detailModal"
-        type="button"
-      >
-        ✕
-      </button>
-
+      <div class="modal-title">📄 消費詳細資訊</div>
+      <button class="tool-btn icon-btn" data-close="detailModal" type="button">✕</button>
     </div>
-
-
     <div class="modal-body">
-
       <div class="detail-card">
-
-        <div
-          id="detailAmount"
-          class="detail-amount"
-        >
-          NT$ 0
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費序號
-          </div>
-
-          <div
-            id="detailId"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費內容
-          </div>
-
-          <div
-            id="detailContent"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費類別
-          </div>
-
-          <div
-            id="detailCategory"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費時間
-          </div>
-
-          <div
-            id="detailTime"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費地點
-          </div>
-
-          <div
-            id="detailLocation"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
+        <div id="detailAmount" class="detail-amount">NT$ 0</div>
+        <div class="detail-item"><div class="detail-label">消費序號</div><div id="detailId" class="detail-value">-</div></div>
+        <div class="detail-item"><div class="detail-label">消費內容</div><div id="detailContent" class="detail-value">-</div></div>
+        <div class="detail-item"><div class="detail-label">消費類別</div><div id="detailCategory" class="detail-value">-</div></div>
+        <div class="detail-item"><div class="detail-label">消費時間</div><div id="detailTime" class="detail-value">-</div></div>
+        <div class="detail-item"><div class="detail-label">消費地點</div><div id="detailLocation" class="detail-value">-</div></div>
       </div>
-
     </div>
-
-
     <div class="modal-footer">
-
-      <button
-        id="duplicateBtn"
-        class="tool-btn"
-        type="button"
-      >
-        📑 複製
-      </button>
-
-      <button
-        id="editBtn"
-        class="tool-btn"
-        type="button"
-      >
-        ✏️ 編輯
-      </button>
-
-      <button
-        id="deleteBtn"
-        class="tool-btn"
-        style="color:var(--danger)"
-        type="button"
-      >
-        🗑️ 刪除
-      </button>
-
+      <button id="duplicateBtn" class="tool-btn" type="button">📑 複製</button>
+      <button id="editBtn" class="tool-btn" type="button">✏️ 編輯</button>
+      <button id="deleteBtn" class="tool-btn" style="color:var(--danger)" type="button">🗑️ 刪除</button>
     </div>
-
   </div>
-
 </div>
-
 
 <!-- =======================================================
-     Login Modal
+     登入 彈窗
 ======================================================= -->
-
-<div
-  id="loginModal"
-  class="modal-backdrop"
->
-
+<div id="loginModal" class="modal-backdrop">
   <div class="modal">
-
     <div class="modal-header">
-
-      <div class="modal-title">
-        🔐 帳號登入
-      </div>
-
-      <button
-        class="tool-btn icon-btn"
-        data-close="loginModal"
-        type="button"
-      >
-        ✕
-      </button>
-
+      <div class="modal-title">🔐 帳號登入</div>
+      <button class="tool-btn icon-btn" data-close="loginModal" type="button">✕</button>
     </div>
-
     <div class="modal-body">
-
-      <p style="color:var(--muted);margin-top:0">
-        登入後，你的記帳資料會依照 Firebase UID
-        儲存在自己的資料區域。
-      </p>
-
-      <button
-        id="googleLoginBtn"
-        class="tool-btn primary-btn"
-        style="width:100%;min-height:48px"
-        type="button"
-      >
-        🔑 使用 Google 登入
-      </button>
-
-      <p style="font-size:.75rem;color:var(--muted);line-height:1.6">
-        如果你尚未在 Firebase Console 啟用 Google
-        Authentication，請先到 Firebase →
-        Authentication → Sign-in method → Google 啟用。
-      </p>
-
+      <p style="color:var(--muted);margin-top:0">登入後，你的記帳資料會依照 Firebase UID 儲存在自己的資料區域。</p>
+      <button id="googleLoginBtn" class="tool-btn primary-btn" style="width:100%;min-height:48px" type="button">🔑 使用 Google 登入</button>
+      <p style="font-size:.75rem;color:var(--muted);line-height:1.6">如果你尚未在 Firebase Console 啟用 Google Authentication，請先到 Firebase → Authentication → Sign-in method → Google 啟用。</p>
     </div>
-
   </div>
-
 </div>
-
 
 <!-- =======================================================
      Toast
 ======================================================= -->
+<div id="toastContainer" class="toast-container"></div>
 
-<div
-  id="toastContainer"
-  class="toast-container"
-></div>
-
-
+<!-- =======================================================
+     JavaScript (模組)
+======================================================= -->
 <script type="module">
-
-/* =========================================================
-   Firebase
-========================================================= */
-
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  doc,
-  addDoc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-
-/*
-===========================================================
-你的 Firebase 設定
-===========================================================
-
-這裡使用你之前提供的 Firebase Project。
-
-如果未來重新建立 Firebase Project，
-只需要把這個 firebaseConfig 換掉即可。
-
-===========================================================
-*/
-
-const firebaseConfig = {
-
-  apiKey:
-    "AIzaSyAYG2UObkOr-jnSI7ZfO4jsQb2ZSScOSoI",
-
-  authDomain:
-    "accounting-system-b42ba.firebaseapp.com",
-
-  projectId:
-    "accounting-system-b42ba",
-
-  storageBucket:
-    "accounting-system-b42ba.firebasestorage.app",
-
-  messagingSenderId:
-    "112901288885",
-
-  appId:
-    "1:112901288885:web:350f90297018165d941ffc",
-
-  measurementId:
-    "G-XSP0NTY9ED"
-};
-
-
-const firebaseApp =
-  initializeApp(firebaseConfig);
-
-const auth =
-  getAuth(firebaseApp);
-
-const db =
-  getFirestore(firebaseApp);
-
-const googleProvider =
-  new GoogleAuthProvider();
-
-
-/* =========================================================
-   Firestore Rules 對應方式
-
-   你的 Rules：
-
-   match /users/{userId}/{document=**} {
-     allow read, write:
-       if request.auth != null
-       && request.auth.uid == userId;
-   }
-
-   所以資料會放：
-
-   users
-      └── UID
-           └── records
-                └── recordId
-
-========================================================= */
-
-
-let currentUser = null;
-let unsubscribeRecords = null;
-
-
-/* =========================================================
-   App State
-========================================================= */
-
-let records = [];
-
-let currentPeriod = "all";
-
-let currentCategory = "all";
-
-let currentSearch = "";
-
-let sortField = "id";
-
-let sortDirection = "desc";
-
-let editingId = null;
-
-let selectedRecordId = null;
-
-let expenseChart = null;
-
-
-/* =========================================================
-   Constants
-========================================================= */
-
-const STORAGE_KEY =
-  "accountingRecords";
-
-const CATEGORIES = [
-  "餐飲",
-  "交通",
-  "購物",
-  "娛樂",
-  "房租",
-  "醫療",
-  "其他"
-];
-
-
-/* =========================================================
-   DOM
-========================================================= */
-
-const $ = selector =>
-  document.querySelector(selector);
-
-const $$ = selector =>
-  [...document.querySelectorAll(selector)];
-
-
-/* =========================================================
-   Utility
-========================================================= */
-
-function showToast(message) {
-
-  const container =
-    $("#toastContainer");
-
-  const toast =
-    document.createElement("div");
-
-  toast.className = "toast";
-
-  toast.textContent = message;
-
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 2100);
-}
-
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-function formatMoney(value) {
-
-  return Number(value || 0)
-    .toLocaleString("zh-TW", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  // 您的 Firebase 設定 (已修正 apiKey)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAYG2UObkOr-jnSI7ZfO4jsQb2ZSScOSoI",
+    authDomain: "accounting-system-b42ba.firebaseapp.com",
+    projectId: "accounting-system-b42ba",
+    storageBucket: "accounting-system-b42ba.firebasestorage.app",
+    messagingSenderId: "112901288885",
+    appId: "1:112901288885:web:350f90297018165d941ffc",
+    measurementId: "G-XSP0NTY9ED"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  // =========================================================
+  // 狀態與工具函數
+  // =========================================================
+  let currentUser = null;
+  let unsubscribeRecords = null;
+  let records = [];
+  let currentPeriod = "all";
+  let currentCategory = "all";
+  let currentSearch = "";
+  let sortField = "id";
+  let sortDirection = "desc";
+  let editingId = null;
+  let selectedRecordId = null;
+  let expenseChart = null;
+
+  const STORAGE_KEY = "accountingRecords";
+  const CATEGORIES = ["餐飲","交通","購物","娛樂","房租","醫療","其他"];
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+
+  function showToast(msg) {
+    const c = $("#toastContainer");
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 2100);
+  }
+
+  function escapeHTML(v) { return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+  function formatMoney(v) { return Number(v || 0).toLocaleString("zh-TW", { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+  function formatDate(v) { if (!v) return "-"; const d = new Date(v); if (isNaN(d.getTime())) return v; return d.toLocaleString("zh-TW", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" }); }
+  function localDateTimeValue(d = new Date()) { const p = n => String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+  function getNextId() { if (!records.length) return 1; return Math.max(...records.map(r => Number(r.id) || 0)) + 1; }
+
+  function saveLocal() { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      records = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(records)) records = [];
+    } catch(e) { records = []; }
+  }
+
+  function userRecordsCollection() {
+    if (!currentUser) return null;
+    return collection(db, "users", currentUser.uid, "records");
+  }
+
+  // Firebase 同步
+  function startFirebaseSync() {
+    if (!currentUser) return;
+    if (unsubscribeRecords) unsubscribeRecords();
+    const ref = userRecordsCollection();
+    unsubscribeRecords = onSnapshot(ref, snap => {
+      records = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+      records.sort((a,b) => Number(a.id) - Number(b.id));
+      saveLocal();
+      render();
+    }, err => {
+      console.error(err);
+      showToast("Firebase 同步失敗，使用本機資料");
+      loadLocal();
+      render();
     });
-}
-
-
-function formatDate(value) {
-
-  if (!value) return "-";
-
-  const date =
-    new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
   }
 
-  return date.toLocaleString(
-    "zh-TW",
-    {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    }
-  );
-}
-
-
-function localDateTimeValue(date = new Date()) {
-
-  const pad =
-    n => String(n).padStart(2, "0");
-
-  return [
-    date.getFullYear(),
-    "-",
-    pad(date.getMonth() + 1),
-    "-",
-    pad(date.getDate()),
-    "T",
-    pad(date.getHours()),
-    ":",
-    pad(date.getMinutes())
-  ].join("");
-}
-
-
-function getNextId() {
-
-  if (!records.length) {
-    return 1;
+  // Firebase 寫入
+  async function firebaseAdd(record) {
+    if (!currentUser) return false;
+    try {
+      await addDoc(userRecordsCollection(), record);
+      return true;
+    } catch(e) { console.error(e); showToast("Firebase 儲存失敗"); return false; }
+  }
+  async function firebaseUpdate(record) {
+    if (!currentUser || !record.firebaseId) return false;
+    try {
+      await setDoc(doc(db, "users", currentUser.uid, "records", record.firebaseId), record);
+      return true;
+    } catch(e) { console.error(e); showToast("Firebase 更新失敗"); return false; }
+  }
+  async function firebaseDelete(record) {
+    if (!currentUser || !record.firebaseId) return false;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.uid, "records", record.firebaseId));
+      return true;
+    } catch(e) { console.error(e); showToast("Firebase 刪除失敗"); return false; }
   }
 
-  return Math.max(
-    ...records.map(
-      r => Number(r.id) || 0
-    )
-  ) + 1;
-}
-
-
-/* =========================================================
-   LocalStorage
-========================================================= */
-
-function saveLocal() {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(records)
-  );
-}
-
-
-function loadLocal() {
-
-  try {
-
-    const raw =
-      localStorage.getItem(
-        STORAGE_KEY
-      );
-
-    if (!raw) {
-      records = [];
-      return;
-    }
-
-    const parsed =
-      JSON.parse(raw);
-
-    records =
-      Array.isArray(parsed)
-        ? parsed
-        : [];
-
-  } catch (error) {
-
-    console.error(error);
-
-    records = [];
+  // 過濾與排序
+  function isToday(d) { const n = new Date(); return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate(); }
+  function isThisWeek(d) {
+    const n = new Date();
+    const start = new Date(n);
+    const day = start.getDay();
+    const diff = day===0 ? 6 : day-1;
+    start.setDate(start.getDate() - diff);
+    start.setHours(0,0,0,0);
+    return d >= start;
   }
-}
-
-
-/* =========================================================
-   Firebase collection
-========================================================= */
-
-function userRecordsCollection() {
-
-  if (!currentUser) {
-    return null;
-  }
-
-  return collection(
-    db,
-    "users",
-    currentUser.uid,
-    "records"
-  );
-}
-
-
-/* =========================================================
-   Firebase realtime sync
-========================================================= */
-
-function startFirebaseSync() {
-
-  if (!currentUser) return;
-
-  if (unsubscribeRecords) {
-    unsubscribeRecords();
-  }
-
-  const ref =
-    userRecordsCollection();
-
-  unsubscribeRecords =
-    onSnapshot(
-      ref,
-      snapshot => {
-
-        records =
-          snapshot.docs.map(
-            item => ({
-              ...item.data(),
-              firebaseId: item.id
-            })
-          );
-
-        records.sort(
-          (a, b) =>
-            Number(a.id) -
-            Number(b.id)
-        );
-
-        saveLocal();
-
-        render();
-
-      },
-
-      error => {
-
-        console.error(
-          "Firestore sync error:",
-          error
-        );
-
-        showToast(
-          "Firebase 同步失敗，已使用本機資料"
-        );
-
-        loadLocal();
-
-        render();
-      }
-    );
-}
-
-
-/* =========================================================
-   Firebase Add
-========================================================= */
-
-async function firebaseAdd(record) {
-
-  if (!currentUser) {
-    return false;
-  }
-
-  try {
-
-    const ref =
-      await addDoc(
-        userRecordsCollection(),
-        record
-      );
-
-    return ref.id;
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "Firebase 儲存失敗，已保留本機資料"
-    );
-
-    return false;
-  }
-}
-
-
-/* =========================================================
-   Firebase Update
-========================================================= */
-
-async function firebaseUpdate(record) {
-
-  if (!currentUser) {
-    return false;
-  }
-
-  try {
-
-    await setDoc(
-      doc(
-        db,
-        "users",
-        currentUser.uid,
-        "records",
-        record.firebaseId
-      ),
-      record
-    );
-
-    return true;
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "Firebase 更新失敗"
-    );
-
-    return false;
-  }
-}
-
-
-/* =========================================================
-   Firebase Delete
-========================================================= */
-
-async function firebaseDelete(record) {
-
-  if (!currentUser) {
-    return false;
-  }
-
-  try {
-
-    await deleteDoc(
-      doc(
-        db,
-        "users",
-        currentUser.uid,
-        "records",
-        record.firebaseId
-      )
-    );
-
-    return true;
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "Firebase 刪除失敗"
-    );
-
-    return false;
-  }
-}
-
-
-/* =========================================================
-   Data filtering
-========================================================= */
-
-function isToday(date) {
-
-  const now =
-    new Date();
-
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-}
-
-
-function isThisWeek(date) {
-
-  const now =
-    new Date();
-
-  const start =
-    new Date(now);
-
-  const day =
-    start.getDay();
-
-  const diff =
-    day === 0 ? 6 : day - 1;
-
-  start.setDate(
-    start.getDate() - diff
-  );
-
-  start.setHours(
-    0, 0, 0, 0
-  );
-
-  return date >= start;
-}
-
-
-function isThisMonth(date) {
-
-  const now =
-    new Date();
-
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth()
-  );
-}
-
-
-function getFilteredRecords() {
-
-  let result =
-    [...records];
-
-  if (currentPeriod !== "all") {
-
-    result =
-      result.filter(record => {
-
-        const date =
-          new Date(record.time);
-
-        if (
-          Number.isNaN(
-            date.getTime()
-          )
-        ) {
-          return false;
-        }
-
-        if (
-          currentPeriod === "today"
-        ) {
-          return isToday(date);
-        }
-
-        if (
-          currentPeriod === "week"
-        ) {
-          return isThisWeek(date);
-        }
-
-        if (
-          currentPeriod === "month"
-        ) {
-          return isThisMonth(date);
-        }
-
+  function isThisMonth(d) { const n = new Date(); return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth(); }
+
+  function getFilteredRecords() {
+    let result = [...records];
+    if (currentPeriod !== "all") {
+      result = result.filter(r => {
+        const d = new Date(r.time);
+        if (isNaN(d.getTime())) return false;
+        if (currentPeriod === "today") return isToday(d);
+        if (currentPeriod === "week") return isThisWeek(d);
+        if (currentPeriod === "month") return isThisMonth(d);
         return true;
       });
-  }
-
-
-  if (currentCategory !== "all") {
-
-    result =
-      result.filter(
-        record =>
-          record.category ===
-          currentCategory
-      );
-  }
-
-
-  if (currentSearch.trim()) {
-
-    const keyword =
-      currentSearch
-        .trim()
-        .toLowerCase();
-
-    result =
-      result.filter(record => {
-
-        const content =
-          String(
-            record.content || ""
-          ).toLowerCase();
-
-        const location =
-          String(
-            record.location || ""
-          ).toLowerCase();
-
-        return (
-          content.includes(keyword) ||
-          location.includes(keyword)
-        );
-      });
-  }
-
-
-  result.sort((a, b) => {
-
-    let av;
-    let bv;
-
-    if (sortField === "amount") {
-
-      av =
-        Number(a.amount) || 0;
-
-      bv =
-        Number(b.amount) || 0;
-
-    } else if (
-      sortField === "content"
-    ) {
-
-      av =
-        String(a.content || "");
-
-      bv =
-        String(b.content || "");
-
-    } else {
-
-      av =
-        Number(a.id) || 0;
-
-      bv =
-        Number(b.id) || 0;
     }
-
-    if (
-      typeof av === "string"
-    ) {
-
-      return (
-        av.localeCompare(
-          bv,
-          "zh-Hant"
-        ) *
-        sortDirection
-      );
+    if (currentCategory !== "all") {
+      result = result.filter(r => r.category === currentCategory);
     }
-
-    return (
-      (av - bv) *
-      sortDirection
-    );
-  });
-
-  return result;
-}
-
-
-/* =========================================================
-   Render
-========================================================= */
-
-function render() {
-
-  const filtered =
-    getFilteredRecords();
-
-  renderStats(filtered);
-
-  renderRecords(filtered);
-
-  renderChart(filtered);
-}
-
-
-function renderStats(data) {
-
-  $("#totalCount")
-    .textContent =
-    data.length.toLocaleString(
-      "zh-TW"
-    );
-
-  const total =
-    data.reduce(
-      (sum, record) =>
-        sum +
-        (Number(record.amount) || 0),
-      0
-    );
-
-  $("#totalAmount")
-    .textContent =
-    "NT$ " +
-    formatMoney(total);
-}
-
-
-/* =========================================================
-   Render records
-========================================================= */
-
-function renderRecords(data) {
-
-  const list =
-    $("#recordList");
-
-  if (!data.length) {
-
-    list.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">🧾</div>
-        <div>目前沒有符合條件的消費記錄</div>
-      </div>
-    `;
-
-    return;
+    if (currentSearch.trim()) {
+      const kw = currentSearch.trim().toLowerCase();
+      result = result.filter(r => (r.content || "").toLowerCase().includes(kw) || (r.location || "").toLowerCase().includes(kw));
+    }
+    result.sort((a,b) => {
+      let av, bv;
+      if (sortField === "amount") { av = Number(a.amount) || 0; bv = Number(b.amount) || 0; }
+      else if (sortField === "content") { av = String(a.content || ""); bv = String(b.content || ""); }
+      else { av = Number(a.id) || 0; bv = Number(b.id) || 0; }
+      if (typeof av === "string") return av.localeCompare(bv, "zh-Hant") * sortDirection;
+      return (av - bv) * sortDirection;
+    });
+    return result;
   }
 
+  // =========================================================
+  // 渲染
+  // =========================================================
+  function render() {
+    const data = getFilteredRecords();
+    renderStats(data);
+    renderRecords(data);
+    renderChart(data);
+    $("#recordCount").textContent = data.length ? `${data.length} 筆` : '';
+  }
 
-  list.innerHTML =
-    data.map(record => {
+  function renderStats(data) {
+    $("#totalCount").textContent = data.length.toLocaleString("zh-TW");
+    const total = data.reduce((s,r) => s + (Number(r.amount) || 0), 0);
+    $("#totalAmount").textContent = "NT$ " + formatMoney(total);
+  }
 
-      const category =
-        record.category ||
-        "其他";
-
+  function renderRecords(data) {
+    const list = $("#recordList");
+    if (!data.length) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">🧾</div><div>目前沒有符合條件的消費記錄</div></div>`;
+      return;
+    }
+    list.innerHTML = data.map(record => {
+      const cat = record.category || "其他";
       return `
-
-        <div
-          class="record-row"
-          data-id="${escapeHTML(record.id)}"
-        >
-
-          <div class="record-id">
-            #${escapeHTML(record.id)}
-          </div>
-
-          <div>
-            <span
-              class="category-badge cat-${escapeHTML(category)}"
-            >
-              ${escapeHTML(category)}
-            </span>
-          </div>
-
-          <div class="content">
-            ${escapeHTML(record.content)}
-          </div>
-
-          <div class="amount">
-            NT$ ${formatMoney(record.amount)}
-          </div>
-
+        <div class="record-row" data-id="${escapeHTML(record.id)}">
+          <div class="record-id">#${escapeHTML(record.id)}</div>
+          <div><span class="category-badge cat-${escapeHTML(cat)}">${escapeHTML(cat)}</span></div>
+          <div class="content">${escapeHTML(record.content)}</div>
+          <div class="amount">NT$ ${formatMoney(record.amount)}</div>
           <div class="row-actions">
-
-            <button
-              class="row-action edit-row"
-              data-id="${escapeHTML(record.id)}"
-              title="編輯"
-              type="button"
-            >
-              ✏️
-            </button>
-
-            <button
-              class="row-action delete-row"
-              data-id="${escapeHTML(record.id)}"
-              title="刪除"
-              type="button"
-            >
-              🗑️
-            </button>
-
+            <button class="row-action edit-row" data-id="${escapeHTML(record.id)}" title="編輯" type="button">✏️</button>
+            <button class="row-action delete-row" data-id="${escapeHTML(record.id)}" title="刪除" type="button">🗑️</button>
           </div>
-
-          <div
-            class="date"
-            style="display:none"
-          >
-            ${escapeHTML(formatDate(record.time))}
-          </div>
-
+          <div class="date" style="display:none">${escapeHTML(formatDate(record.time))}</div>
         </div>
       `;
     }).join("");
 
-
-  /*
-    注意：
-
-    手機版不使用 swipe。
-
-    手機卡片會直接顯示時間。
-    桌面版則透過 JS 顯示日期欄。
-  */
-
-  $$(".record-row").forEach(row => {
-
-    const id =
-      Number(row.dataset.id);
-
-    const record =
-      records.find(
-        r =>
-          Number(r.id) === id
-      );
-
-    if (!record) return;
-
-    const date =
-      row.querySelector(".date");
-
-    if (date) {
-
-      date.style.display =
-        "block";
-    }
-
-
-    row.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target.closest(
-            ".row-action"
-          )
-        ) {
-          return;
-        }
-
+    // 綁定事件
+    $$(".record-row").forEach(row => {
+      const id = Number(row.dataset.id);
+      const record = records.find(r => Number(r.id) === id);
+      if (!record) return;
+      const dateEl = row.querySelector(".date");
+      if (dateEl) dateEl.style.display = "block";
+      row.addEventListener("click", e => {
+        if (e.target.closest(".row-action")) return;
         openDetail(record);
-      }
-    );
-  });
-
-
-  $$(".edit-row").forEach(btn => {
-
-    btn.addEventListener(
-      "click",
-      event => {
-
-        event.stopPropagation();
-
-        const id =
-          Number(
-            btn.dataset.id
-          );
-
-        const record =
-          records.find(
-            r =>
-              Number(r.id) === id
-          );
-
-        if (record) {
-          openEdit(record);
-        }
-      }
-    );
-  });
-
-
-  $$(".delete-row").forEach(btn => {
-
-    btn.addEventListener(
-      "click",
-      async event => {
-
-        event.stopPropagation();
-
-        const id =
-          Number(
-            btn.dataset.id
-          );
-
-        const record =
-          records.find(
-            r =>
-              Number(r.id) === id
-          );
-
-        if (record) {
-          await deleteRecord(record);
-        }
-      }
-    );
-  });
-}
-
-
-/* =========================================================
-   Chart
-========================================================= */
-
-function renderChart(data) {
-
-  const canvas =
-    $("#expenseChart");
-
-  const empty =
-    $("#noChart");
-
-  const totals = {};
-
-  data.forEach(record => {
-
-    const category =
-      record.category ||
-      "其他";
-
-    totals[category] =
-      (totals[category] || 0) +
-      (Number(record.amount) || 0);
-  });
-
-
-  const labels =
-    Object.keys(totals);
-
-  const values =
-    Object.values(totals);
-
-
-  if (
-    expenseChart
-  ) {
-
-    expenseChart.destroy();
-
-    expenseChart =
-      null;
+      });
+    });
+    $$(".edit-row").forEach(btn => {
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        const id = Number(btn.dataset.id);
+        const record = records.find(r => Number(r.id) === id);
+        if (record) openEdit(record);
+      });
+    });
+    $$(".delete-row").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        e.stopPropagation();
+        const id = Number(btn.dataset.id);
+        const record = records.find(r => Number(r.id) === id);
+        if (record) await deleteRecord(record);
+      });
+    });
   }
 
-
-  if (!labels.length) {
-
-    canvas.style.display =
-      "none";
-
-    empty.style.display =
-      "grid";
-
-    return;
-  }
-
-
-  canvas.style.display =
-    "block";
-
-  empty.style.display =
-    "none";
-
-
-  const colors = [
-    "#d98b45",
-    "#6e9fd5",
-    "#c875a8",
-    "#9077c9",
-    "#68a77c",
-    "#63aeb0",
-    "#999184"
-  ];
-
-
-  expenseChart =
-    new Chart(
-      canvas,
-      {
-        type: "pie",
-
-        data: {
-          labels,
-
-          datasets: [
-            {
-              data: values,
-
-              backgroundColor:
-                colors.slice(
-                  0,
-                  labels.length
-                ),
-
-              borderWidth: 2,
-
-              borderColor:
-                getComputedStyle(
-                  document.body
-                )
-                .getPropertyValue(
-                  "--surface"
-                )
-            }
-          ]
-        },
-
-        options: {
-
-          responsive: true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-
-            legend: {
-              position:
-                "right",
-
-              labels: {
-                color:
-                  getComputedStyle(
-                    document.body
-                  )
-                  .getPropertyValue(
-                    "--text"
-                  ),
-
-                boxWidth: 13,
-
-                padding: 12
-              }
-            },
-
-            tooltip: {
-
-              callbacks: {
-
-                label(context) {
-
-                  const total =
-                    values.reduce(
-                      (a, b) =>
-                        a + b,
-                      0
-                    );
-
-                  const value =
-                    context.raw;
-
-                  const percent =
-                    total
-                      ? (
-                        value /
-                        total *
-                        100
-                      ).toFixed(1)
-                      : 0;
-
-                  return (
-                    " " +
-                    context.label +
-                    "：" +
-                    formatMoney(value) +
-                    " NTD (" +
-                    percent +
-                    "%)"
-                  );
-                }
+  function renderChart(data) {
+    const canvas = $("#expenseChart");
+    const empty = $("#noChart");
+    const totals = {};
+    data.forEach(r => { const cat = r.category || "其他"; totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0); });
+    const labels = Object.keys(totals);
+    const values = Object.values(totals);
+    if (expenseChart) { expenseChart.destroy(); expenseChart = null; }
+    if (!labels.length) { canvas.style.display = "none"; empty.style.display = "grid"; return; }
+    canvas.style.display = "block"; empty.style.display = "none";
+    const colors = ["#d98b45","#6e9fd5","#c875a8","#9077c9","#68a77c","#63aeb0","#999184"];
+    expenseChart = new Chart(canvas, {
+      type: "pie",
+      data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0,labels.length), borderWidth: 2, borderColor: getComputedStyle(document.body).getPropertyValue("--surface") }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right", labels: { color: getComputedStyle(document.body).getPropertyValue("--text"), boxWidth: 13, padding: 12 } },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const total = values.reduce((a,b) => a+b, 0);
+                const percent = total ? ((ctx.raw/total)*100).toFixed(1) : 0;
+                return ` ${ctx.label}：${formatMoney(ctx.raw)} NTD (${percent}%)`;
               }
             }
           }
         }
       }
-    );
-}
-
-
-/* =========================================================
-   Modal
-========================================================= */
-
-function openModal(id) {
-
-  $("#" + id)
-    .classList.add("show");
-}
-
-
-function closeModal(id) {
-
-  $("#" + id)
-    .classList.remove("show");
-}
-
-
-function closeAllModals() {
-
-  $$(".modal-backdrop")
-    .forEach(modal =>
-      modal.classList.remove(
-        "show"
-      )
-    );
-}
-
-
-/* =========================================================
-   Add modal
-========================================================= */
-
-function openAdd() {
-
-  editingId = null;
-
-  $("#formTitle")
-    .textContent =
-    "➕ 新增消費記錄";
-
-  $("#recordForm")
-    .reset();
-
-  $("#categoryInput")
-    .value =
-    "餐飲";
-
-  $("#timeInput")
-    .value =
-    localDateTimeValue();
-
-  openModal("formModal");
-
-  setTimeout(() => {
-    $("#amountInput").focus();
-  }, 100);
-}
-
-
-/* =========================================================
-   Edit
-========================================================= */
-
-function openEdit(record) {
-
-  editingId =
-    Number(record.id);
-
-  $("#formTitle")
-    .textContent =
-    "✏️ 編輯消費記錄";
-
-  $("#amountInput")
-    .value =
-    record.amount;
-
-  $("#contentInput")
-    .value =
-    record.content || "";
-
-  $("#categoryInput")
-    .value =
-    record.category || "其他";
-
-  $("#timeInput")
-    .value =
-    localDateTimeValue(
-      new Date(record.time)
-    );
-
-  $("#locationInput")
-    .value =
-    record.location || "";
-
-  closeModal("detailModal");
-
-  openModal("formModal");
-}
-
-
-/* =========================================================
-   Detail
-========================================================= */
-
-function openDetail(record) {
-
-  selectedRecordId =
-    Number(record.id);
-
-  $("#detailAmount")
-    .textContent =
-    "NT$ " +
-    formatMoney(record.amount);
-
-  $("#detailId")
-    .textContent =
-    "#" + record.id;
-
-  $("#detailContent")
-    .textContent =
-    record.content || "-";
-
-  $("#detailCategory")
-    .innerHTML =
-    `<span class="category-badge cat-${escapeHTML(
-      record.category || "其他"
-    )}">
-      ${escapeHTML(record.category || "其他")}
-    </span>`;
-
-  $("#detailTime")
-    .textContent =
-    formatDate(record.time);
-
-  $("#detailLocation")
-    .textContent =
-    record.location || "未填寫";
-
-  openModal("detailModal");
-}
-
-
-/* =========================================================
-   Save record
-========================================================= */
-
-$("#recordForm")
-  .addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
-
-
-      const amount =
-        Number(
-          $("#amountInput").value
-        );
-
-      const content =
-        $("#contentInput")
-          .value
-          .trim();
-
-      const time =
-        $("#timeInput").value;
-
-      const location =
-        $("#locationInput")
-          .value
-          .trim();
-
-      const category =
-        $("#categoryInput").value;
-
-
-      if (
-        !Number.isFinite(amount) ||
-        amount < 0
-      ) {
-
-        showToast(
-          "請輸入正確的金額"
-        );
-
-        return;
-      }
-
-
-      if (!content) {
-
-        showToast(
-          "請輸入消費內容"
-        );
-
-        return;
-      }
-
-
-      if (!time) {
-
-        showToast(
-          "請選擇消費時間"
-        );
-
-        return;
-      }
-
-
-      if (editingId === null) {
-
-        const record = {
-
-          id:
-            getNextId(),
-
-          amount:
-            Number(
-              amount.toFixed(2)
-            ),
-
-          content,
-
-          time:
-            new Date(time)
-              .toISOString(),
-
-          location,
-
-          category,
-
-          createdAt:
-            new Date().toISOString()
-        };
-
-
-        records.push(record);
-
-        saveLocal();
-
-
-        if (currentUser) {
-
-          await firebaseAdd(
-            record
-          );
-        }
-
-
-        showToast(
-          "✅ 新增成功"
-        );
-
-      } else {
-
-        const index =
-          records.findIndex(
-            r =>
-              Number(r.id) ===
-              editingId
-          );
-
-        if (index === -1) {
-          return;
-        }
-
-
-        const old =
-          records[index];
-
-
-        const updated = {
-
-          ...old,
-
-          amount:
-            Number(
-              amount.toFixed(2)
-            ),
-
-          content,
-
-          time:
-            new Date(time)
-              .toISOString(),
-
-          location,
-
-          category,
-
-          updatedAt:
-            new Date().toISOString()
-        };
-
-
-        records[index] =
-          updated;
-
-        saveLocal();
-
-
-        if (currentUser) {
-
-          await firebaseUpdate(
-            updated
-          );
-        }
-
-
-        showToast(
-          "✅ 修改成功"
-        );
-      }
-
-
-      closeModal("formModal");
-
-      render();
-    }
-  );
-
-
-/* =========================================================
-   Delete
-========================================================= */
-
-async function deleteRecord(record) {
-
-  const confirmed =
-    confirm(
-      "確認刪除？\n\n" +
-      "「" +
-      record.content +
-      "」\n" +
-      "NT$ " +
-      formatMoney(record.amount)
-    );
-
-  if (!confirmed) {
-    return;
+    });
   }
 
+  // =========================================================
+  // 模態框控制
+  // =========================================================
+  function openModal(id) { $("#"+id).classList.add("show"); }
+  function closeModal(id) { $("#"+id).classList.remove("show"); }
+  function closeAllModals() { $$(".modal-backdrop").forEach(m => m.classList.remove("show")); }
 
-  records =
-    records.filter(
-      r =>
-        Number(r.id) !==
-        Number(record.id)
-    );
-
-  saveLocal();
-
-
-  if (
-    currentUser &&
-    record.firebaseId
-  ) {
-
-    await firebaseDelete(
-      record
-    );
+  // =========================================================
+  // 新增、編輯、刪除、複製、詳細
+  // =========================================================
+  function openAdd() {
+    editingId = null;
+    $("#formTitle").textContent = "➕ 新增消費記錄";
+    $("#recordForm").reset();
+    $("#categoryInput").value = "餐飲";
+    $("#timeInput").value = localDateTimeValue();
+    openModal("formModal");
+    setTimeout(() => $("#amountInput").focus(), 100);
   }
 
+  function openEdit(record) {
+    editingId = Number(record.id);
+    $("#formTitle").textContent = "✏️ 編輯消費記錄";
+    $("#amountInput").value = record.amount;
+    $("#contentInput").value = record.content || "";
+    $("#categoryInput").value = record.category || "其他";
+    $("#timeInput").value = localDateTimeValue(new Date(record.time));
+    $("#locationInput").value = record.location || "";
+    closeModal("detailModal");
+    openModal("formModal");
+  }
 
-  closeModal("detailModal");
+  function openDetail(record) {
+    selectedRecordId = Number(record.id);
+    $("#detailAmount").textContent = "NT$ " + formatMoney(record.amount);
+    $("#detailId").textContent = "#" + record.id;
+    $("#detailContent").textContent = record.content || "-";
+    $("#detailCategory").innerHTML = `<span class="category-badge cat-${escapeHTML(record.category || "其他")}">${escapeHTML(record.category || "其他")}</span>`;
+    $("#detailTime").textContent = formatDate(record.time);
+    $("#detailLocation").textContent = record.location || "未填寫";
+    openModal("detailModal");
+  }
 
-  render();
+  async function deleteRecord(record) {
+    if (!confirm(`確認刪除？\n\n「${record.content}」\nNT$ ${formatMoney(record.amount)}`)) return;
+    records = records.filter(r => Number(r.id) !== Number(record.id));
+    saveLocal();
+    if (currentUser && record.firebaseId) await firebaseDelete(record);
+    closeModal("detailModal");
+    render();
+    showToast("🗑️ 已刪除記錄");
+  }
 
-  showToast(
-    "🗑️ 已刪除記錄"
-  );
-}
+  // =========================================================
+  // 事件綁定
+  // =========================================================
+  // 表單提交
+  $("#recordForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const amount = Number($("#amountInput").value);
+    const content = $("#contentInput").value.trim();
+    const time = $("#timeInput").value;
+    const location = $("#locationInput").value.trim();
+    const category = $("#categoryInput").value;
+    if (!Number.isFinite(amount) || amount < 0) { showToast("請輸入正確的金額"); return; }
+    if (!content) { showToast("請輸入消費內容"); return; }
+    if (!time) { showToast("請選擇消費時間"); return; }
 
-
-/* =========================================================
-   Duplicate
-========================================================= */
-
-$("#duplicateBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (!record) {
-        return;
-      }
-
-
-      const copy = {
-
-        id:
-          getNextId(),
-
-        amount:
-          Number(record.amount),
-
-        content:
-          record.content,
-
-        time:
-          new Date()
-            .toISOString(),
-
-        location:
-          record.location || "",
-
-        category:
-          record.category || "其他",
-
-        createdAt:
-          new Date().toISOString()
-      };
-
-
-      records.push(copy);
-
+    if (editingId === null) {
+      const record = { id: getNextId(), amount: Number(amount.toFixed(2)), content, time: new Date(time).toISOString(), location, category, createdAt: new Date().toISOString() };
+      records.push(record);
       saveLocal();
-
-
-      if (currentUser) {
-
-        await firebaseAdd(
-          copy
-        );
-      }
-
-
-      closeModal("detailModal");
-
-      render();
-
-      showToast(
-        "📑 已複製記錄"
-      );
+      if (currentUser) await firebaseAdd(record);
+      showToast("✅ 新增成功");
+    } else {
+      const idx = records.findIndex(r => Number(r.id) === editingId);
+      if (idx === -1) return;
+      const updated = { ...records[idx], amount: Number(amount.toFixed(2)), content, time: new Date(time).toISOString(), location, category, updatedAt: new Date().toISOString() };
+      records[idx] = updated;
+      saveLocal();
+      if (currentUser) await firebaseUpdate(updated);
+      showToast("✅ 修改成功");
     }
-  );
-
-
-/* =========================================================
-   Detail Edit
-========================================================= */
-
-$("#editBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (record) {
-        openEdit(record);
-      }
-    }
-  );
-
-
-/* =========================================================
-   Detail Delete
-========================================================= */
-
-$("#deleteBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const record =
-        records.find(
-          r =>
-            Number(r.id) ===
-            selectedRecordId
-        );
-
-      if (record) {
-        await deleteRecord(
-          record
-        );
-      }
-    }
-  );
-
-
-/* =========================================================
-   Quick money
-========================================================= */
-
-$$("[data-add-money]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const add =
-          Number(
-            button.dataset.addMoney
-          );
-
-        const input =
-          $("#amountInput");
-
-        const current =
-          Number(input.value) || 0;
-
-        input.value =
-          (
-            current + add
-          ).toFixed(2)
-          .replace(
-            /\.00$/,
-            ""
-          );
-
-        input.focus();
-      }
-    );
+    closeModal("formModal");
+    render();
   });
 
-
-/* =========================================================
-   Google Maps
-========================================================= */
-
-$("#mapBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const location =
-        $("#locationInput")
-          .value
-          .trim();
-
-      const query =
-        location ||
-        "台北市";
-
-      const url =
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(query);
-
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-  );
-
-
-/* =========================================================
-   Add button
-========================================================= */
-
-$("#addBtn")
-  .addEventListener(
-    "click",
-    openAdd
-  );
-
-
-/* =========================================================
-   Modal close
-========================================================= */
-
-$$("[data-close]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        closeModal(
-          button.dataset.close
-        );
-      }
-    );
+  // 快捷金額
+  $$("[data-add-money]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const add = Number(btn.dataset.addMoney);
+      const input = $("#amountInput");
+      const current = Number(input.value) || 0;
+      input.value = (current + add).toFixed(2).replace(/\.00$/,"");
+      input.focus();
+    });
   });
 
-
-$$(".modal-backdrop")
-  .forEach(backdrop => {
-
-    backdrop.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          backdrop
-        ) {
-
-          backdrop.classList.remove(
-            "show"
-          );
-        }
-      }
-    );
+  // 地圖按鈕
+  $("#mapBtn").addEventListener("click", () => {
+    const loc = $("#locationInput").value.trim() || "台北市";
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, "_blank", "noopener,noreferrer");
   });
 
+  // 新增按鈕
+  $("#addBtn").addEventListener("click", openAdd);
 
-document.addEventListener(
-  "keydown",
-  event => {
+  // 關閉模態
+  $$("[data-close]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.close)));
+  $$(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("click", e => { if (e.target === backdrop) backdrop.classList.remove("show"); }));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllModals(); });
 
-    if (
-      event.key === "Escape"
-    ) {
-
-      closeAllModals();
-    }
-  }
-);
-
-
-/* =========================================================
-   Search
-========================================================= */
-
-$("#searchInput")
-  .addEventListener(
-    "input",
-    event => {
-
-      currentSearch =
-        event.target.value;
-
-      render();
-    }
-  );
-
-
-/* =========================================================
-   Period filters
-========================================================= */
-
-$$("[data-period]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        currentPeriod =
-          button.dataset.period;
-
-        $$("[data-period]")
-          .forEach(btn =>
-            btn.classList.toggle(
-              "active",
-              btn === button
-            )
-          );
-
-        render();
-      }
-    );
+  // 搜尋 (原本就在 #searchInput)
+  $("#searchInput").addEventListener("input", e => {
+    currentSearch = e.target.value;
+    render();
   });
 
-
-/* =========================================================
-   Category filter dropdown
-========================================================= */
-
-const categoryFilterBtn =
-  $("#categoryFilterBtn");
-
-const categoryMenu =
-  $("#categoryMenu");
-
-
-categoryFilterBtn
-  .addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-      categoryMenu
-        .classList.toggle(
-          "show"
-        );
-
-      categoryFilterBtn
-        .classList.toggle(
-          "active"
-        );
-    }
-  );
-
-
-categoryMenu
-  .addEventListener(
-    "click",
-    event => {
-
-      const option =
-        event.target.closest(
-          ".category-option"
-        );
-
-      if (!option) return;
-
-      currentCategory =
-        option.dataset.category;
-
-      $$(".category-option")
-        .forEach(item =>
-          item.classList.toggle(
-            "active",
-            item === option
-          )
-        );
-
-      categoryMenu
-        .classList.remove(
-          "show"
-        );
-
-      categoryFilterBtn
-        .classList.toggle(
-          "active",
-          currentCategory !== "all"
-        );
-
-      render();
-    }
-  );
-
-
-document.addEventListener(
-  "click",
-  event => {
-
-    if (
-      !event.target.closest(
-        ".category-filter-wrap"
-      )
-    ) {
-
-      categoryMenu
-        .classList.remove(
-          "show"
-        );
-    }
-  }
-);
-
-
-/* =========================================================
-   Sorting
-========================================================= */
-
-$$("[data-sort]")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const field =
-          button.dataset.sort;
-
-        if (
-          sortField === field
-        ) {
-
-          sortDirection *= -1;
-
-        } else {
-
-          sortField = field;
-
-          sortDirection = 1;
-        }
-
-        $$("[data-sort]")
-          .forEach(btn => {
-
-            const current =
-              btn.dataset.sort ===
-              sortField;
-
-            btn.textContent =
-              btn.textContent
-                .replace(
-                  /[↕↑↓]/,
-                  current
-                    ? (
-                      sortDirection === 1
-                        ? "↑"
-                        : "↓"
-                    )
-                    : "↕"
-                );
-          });
-
-        render();
+  // 手機搜尋切換
+  const searchToggle = $("#searchToggle");
+  const searchInput = $("#searchInput");
+  if (searchToggle) {
+    searchToggle.addEventListener("click", () => {
+      searchInput.classList.toggle("show");
+      if (searchInput.classList.contains("show")) searchInput.focus();
+    });
+    // 點擊頁面其他地方可收合 (但僅當輸入框失去焦點時)
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".header-search") && searchInput.classList.contains("show")) {
+        searchInput.classList.remove("show");
       }
-    );
-  });
-
-
-/* =========================================================
-   Theme
-========================================================= */
-
-$("#themeBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      document.body
-        .classList.toggle(
-          "dark"
-        );
-
-      localStorage.setItem(
-        "accountingTheme",
-        document.body.classList.contains(
-          "dark"
-        )
-          ? "dark"
-          : "light"
-      );
-
-      renderChart();
-    }
-  );
-
-
-const savedTheme =
-  localStorage.getItem(
-    "accountingTheme"
-  );
-
-if (savedTheme === "dark") {
-  document.body.classList.add(
-    "dark"
-  );
-}
-
-
-/* =========================================================
-   Font size
-========================================================= */
-
-$("#fontSlider")
-  .addEventListener(
-    "input",
-    event => {
-
-      const size =
-        event.target.value;
-
-      document.documentElement
-        .style
-        .setProperty(
-          "--font-size",
-          size + "px"
-        );
-
-      localStorage.setItem(
-        "accountingFontSize",
-        size
-      );
-    }
-  );
-
-
-const savedFontSize =
-  localStorage.getItem(
-    "accountingFontSize"
-  );
-
-if (savedFontSize) {
-
-  $("#fontSlider")
-    .value =
-    savedFontSize;
-
-  document.documentElement
-    .style
-    .setProperty(
-      "--font-size",
-      savedFontSize + "px"
-    );
-}
-
-
-/* =========================================================
-   Export CSV
-========================================================= */
-
-$("#exportBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if (!records.length) {
-
-        showToast(
-          "目前沒有資料可以匯出"
-        );
-
-        return;
-      }
-
-
-      /*
-        Excel CSV 標題按照你的要求：
-
-        消費序號
-        消費內容
-        消費金額
-        消費時間
-
-        同時額外保留：
-        消費地點
-        消費類別
-
-        方便資料還原。
-      */
-
-      const headers = [
-        "消費序號",
-        "消費內容",
-        "消費金額",
-        "消費時間",
-        "消費地點",
-        "消費類別"
-      ];
-
-
-      const rows =
-        records.map(record => [
-
-          record.id,
-
-          record.content,
-
-          record.amount,
-
-          formatDate(
-            record.time
-          ),
-
-          record.location || "",
-
-          record.category || "其他"
-        ]);
-
-
-      const csv = [
-        headers,
-        ...rows
-      ]
-        .map(row =>
-          row
-            .map(value =>
-              `"${String(
-                value ?? ""
-              ).replaceAll(
-                '"',
-                '""'
-              )}"`
-            )
-            .join(",")
-        )
-        .join("\r\n");
-
-
-      /*
-        UTF-8 BOM
-
-        這個很重要：
-
-        Excel 開啟中文 CSV 時
-        比較不會出現亂碼。
-      */
-
-      const blob =
-        new Blob(
-          [
-            "\uFEFF" + csv
-          ],
-          {
-            type:
-              "text/csv;charset=utf-8"
-          }
-        );
-
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-      const a =
-        document.createElement(
-          "a"
-        );
-
-      a.href = url;
-
-      a.download =
-        "我的記帳本_" +
-        new Date()
-          .toISOString()
-          .slice(0, 10) +
-        ".csv";
-
-      a.click();
-
-      URL.revokeObjectURL(
-        url
-      );
-
-      showToast(
-        "📤 CSV 匯出成功"
-      );
-    }
-  );
-
-
-/* =========================================================
-   Import
-========================================================= */
-
-$("#importBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      $("#fileInput").click();
-    }
-  );
-
-
-$("#fileInput")
-  .addEventListener(
-    "change",
-    async event => {
-
-      const file =
-        event.target.files[0];
-
-      if (!file) return;
-
-
-      try {
-
-        const text =
-          await file.text();
-
-
-        let imported = [];
-
-
-        if (
-          file.name
-            .toLowerCase()
-            .endsWith(".json")
-        ) {
-
-          imported =
-            JSON.parse(text);
-
-          if (
-            !Array.isArray(
-              imported
-            )
-          ) {
-            throw new Error(
-              "JSON 必須是陣列"
-            );
-          }
-
-        } else {
-
-          imported =
-            parseCSV(text);
-        }
-
-
-        if (!imported.length) {
-
-          throw new Error(
-            "檔案沒有資料"
-          );
-        }
-
-
-        const normalized =
-          imported.map(
-            (item, index) => {
-
-              return {
-
-                id:
-                  Number(
-                    item.id ??
-                    item["消費序號"] ??
-                    getNextId() +
-                    index
-                  ),
-
-                amount:
-                  Number(
-                    item.amount ??
-                    item["消費金額"] ??
-                    0
-                  ),
-
-                content:
-                  item.content ??
-                  item["消費內容"] ??
-                  "",
-
-                time:
-                  normalizeImportedTime(
-                    item.time ??
-                    item["消費時間"]
-                  ),
-
-                location:
-                  item.location ??
-                  item["消費地點"] ??
-                  "",
-
-                category:
-                  item.category ??
-                  item["消費類別"] ??
-                  "其他"
-              };
-            }
-          );
-
-
-        const confirmed =
-          confirm(
-            "即將匯入 " +
-            normalized.length +
-            " 筆資料。\n\n" +
-            "按「確定」後會加入現有資料。"
-          );
-
-        if (!confirmed) {
-          return;
-        }
-
-
-        for (
-          const record
-          of normalized
-        ) {
-
-          const exists =
-            records.some(
-              r =>
-                Number(r.id) ===
-                Number(record.id)
-            );
-
-          if (exists) {
-
-            record.id =
-              getNextId();
-          }
-
-
-          records.push(
-            record
-          );
-
-
-          if (currentUser) {
-
-            await firebaseAdd(
-              record
-            );
-          }
-        }
-
-
-        saveLocal();
-
-        render();
-
-        showToast(
-          "📥 匯入成功"
-        );
-
-      } catch (error) {
-
-        console.error(error);
-
-        showToast(
-          "匯入失敗，請檢查 CSV / JSON 格式"
-        );
-      }
-
-
-      event.target.value = "";
-    }
-  );
-
-
-/* =========================================================
-   CSV Parser
-========================================================= */
-
-function parseCSV(text) {
-
-  const lines =
-    text
-      .replace(
-        /^\uFEFF/,
-        ""
-      )
-      .split(/\r?\n/)
-      .filter(
-        line =>
-          line.trim()
-      );
-
-
-  if (lines.length < 2) {
-    return [];
+    });
   }
 
+  // 日期篩選
+  $$("[data-period]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentPeriod = btn.dataset.period;
+      $$("[data-period]").forEach(b => b.classList.toggle("active", b === btn));
+      render();
+    });
+  });
 
-  const headers =
-    splitCSVLine(
-      lines[0]
-    );
+  // 類別篩選 (桌面下拉)
+  const categoryFilterBtn = $("#categoryFilterBtn");
+  const categoryMenu = $("#categoryMenu");
+  categoryFilterBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    categoryMenu.classList.toggle("show");
+    categoryFilterBtn.classList.toggle("active");
+  });
+  categoryMenu.addEventListener("click", e => {
+    const opt = e.target.closest(".category-option");
+    if (!opt) return;
+    currentCategory = opt.dataset.category;
+    $$(".category-option").forEach(o => o.classList.toggle("active", o === opt));
+    categoryMenu.classList.remove("show");
+    categoryFilterBtn.classList.toggle("active", currentCategory !== "all");
+    render();
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".category-filter-wrap")) {
+      categoryMenu.classList.remove("show");
+    }
+  });
 
+  // 排序按鈕 (在篩選面板和表格標頭)
+  $$(".sort-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const field = btn.dataset.sort;
+      if (sortField === field) sortDirection *= -1;
+      else { sortField = field; sortDirection = 1; }
+      $$(".sort-button").forEach(b => {
+        const current = b.dataset.sort === sortField;
+        b.textContent = b.textContent.replace(/[↕↑↓]/, current ? (sortDirection===1 ? "↑" : "↓") : "↕");
+      });
+      render();
+    });
+  });
 
-  return lines
-    .slice(1)
-    .map(line => {
+  // 更多篩選面板 (手機)
+  const moreFilterBtn = $("#moreFilterBtn");
+  const filterPanel = $("#filterPanel");
+  if (moreFilterBtn) {
+    moreFilterBtn.addEventListener("click", () => {
+      filterPanel.classList.toggle("hidden");
+      moreFilterBtn.textContent = filterPanel.classList.contains("hidden") ? "⚙️ 篩選" : "✖️ 關閉";
+    });
+  }
 
-      const values =
-        splitCSVLine(line);
+  // 複製、編輯、刪除 (在詳細面板)
+  $("#duplicateBtn").addEventListener("click", async () => {
+    const record = records.find(r => Number(r.id) === selectedRecordId);
+    if (!record) return;
+    const copy = { id: getNextId(), amount: Number(record.amount), content: record.content, time: new Date().toISOString(), location: record.location || "", category: record.category || "其他", createdAt: new Date().toISOString() };
+    records.push(copy);
+    saveLocal();
+    if (currentUser) await firebaseAdd(copy);
+    closeModal("detailModal");
+    render();
+    showToast("📑 已複製記錄");
+  });
+  $("#editBtn").addEventListener("click", () => {
+    const record = records.find(r => Number(r.id) === selectedRecordId);
+    if (record) openEdit(record);
+  });
+  $("#deleteBtn").addEventListener("click", async () => {
+    const record = records.find(r => Number(r.id) === selectedRecordId);
+    if (record) await deleteRecord(record);
+  });
 
+  // =========================================================
+  // 主題、字體、匯出匯入
+  // =========================================================
+  $("#themeBtn").addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("accountingTheme", document.body.classList.contains("dark") ? "dark" : "light");
+    renderChart();
+  });
+  if (localStorage.getItem("accountingTheme") === "dark") document.body.classList.add("dark");
+
+  $("#fontSlider").addEventListener("input", e => {
+    const size = e.target.value;
+    document.documentElement.style.setProperty("--font-size", size + "px");
+    localStorage.setItem("accountingFontSize", size);
+  });
+  const savedFont = localStorage.getItem("accountingFontSize");
+  if (savedFont) { $("#fontSlider").value = savedFont; document.documentElement.style.setProperty("--font-size", savedFont + "px"); }
+
+  // 匯出
+  $("#exportBtn").addEventListener("click", () => {
+    if (!records.length) { showToast("目前沒有資料可以匯出"); return; }
+    const headers = ["消費序號","消費內容","消費金額","消費時間","消費地點","消費類別"];
+    const rows = records.map(r => [r.id, r.content, r.amount, formatDate(r.time), r.location || "", r.category || "其他"]);
+    const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `我的記帳本_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast("📤 CSV 匯出成功");
+  });
+
+  // 匯入
+  $("#importBtn").addEventListener("click", () => { $("#fileInput").click(); });
+  $("#fileInput").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      let imported = [];
+      if (file.name.toLowerCase().endsWith(".json")) {
+        imported = JSON.parse(text);
+        if (!Array.isArray(imported)) throw new Error("JSON 必須是陣列");
+      } else {
+        imported = parseCSV(text);
+      }
+      if (!imported.length) throw new Error("檔案沒有資料");
+      const normalized = imported.map((item, idx) => ({
+        id: Number(item.id ?? item["消費序號"] ?? getNextId() + idx),
+        amount: Number(item.amount ?? item["消費金額"] ?? 0),
+        content: item.content ?? item["消費內容"] ?? "",
+        time: normalizeImportedTime(item.time ?? item["消費時間"]),
+        location: item.location ?? item["消費地點"] ?? "",
+        category: item.category ?? item["消費類別"] ?? "其他"
+      }));
+      if (!confirm(`即將匯入 ${normalized.length} 筆資料。\n\n按「確定」後會加入現有資料。`)) return;
+      for (const rec of normalized) {
+        if (records.some(r => Number(r.id) === Number(rec.id))) rec.id = getNextId();
+        records.push(rec);
+        if (currentUser) await firebaseAdd(rec);
+      }
+      saveLocal();
+      render();
+      showToast("📥 匯入成功");
+    } catch(err) {
+      console.error(err);
+      showToast("匯入失敗，請檢查 CSV / JSON 格式");
+    }
+    e.target.value = "";
+  });
+
+  function parseCSV(text) {
+    const lines = text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const headers = splitCSVLine(lines[0]);
+    return lines.slice(1).map(line => {
+      const values = splitCSVLine(line);
       const obj = {};
-
-      headers.forEach(
-        (header, index) => {
-
-          obj[header] =
-            values[index] ??
-            "";
-        }
-      );
-
+      headers.forEach((h,i) => obj[h] = values[i] ?? "");
       return obj;
     });
-}
-
-
-function splitCSVLine(line) {
-
-  const result = [];
-
-  let current = "";
-
-  let quoted = false;
-
-
-  for (
-    let i = 0;
-    i < line.length;
-    i++
-  ) {
-
-    const char =
-      line[i];
-
-    if (char === '"') {
-
-      if (
-        quoted &&
-        line[i + 1] === '"'
-      ) {
-
-        current += '"';
-
-        i++;
-
-      } else {
-
-        quoted =
-          !quoted;
-      }
-
-    } else if (
-      char === "," &&
-      !quoted
-    ) {
-
-      result.push(
-        current
-      );
-
-      current = "";
-
-    } else {
-
-      current += char;
+  }
+  function splitCSVLine(line) {
+    const result = [];
+    let current = "", quoted = false;
+    for (let i=0; i<line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (quoted && line[i+1] === '"') { current += '"'; i++; }
+        else quoted = !quoted;
+      } else if (ch === "," && !quoted) { result.push(current); current = ""; }
+      else current += ch;
     }
+    result.push(current);
+    return result;
+  }
+  function normalizeImportedTime(v) {
+    if (!v) return new Date().toISOString();
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
   }
 
-
-  result.push(
-    current
-  );
-
-  return result;
-}
-
-
-function normalizeImportedTime(value) {
-
-  if (!value) {
-    return new Date()
-      .toISOString();
-  }
-
-
-  const date =
-    new Date(value);
-
-
-  if (
-    !Number.isNaN(
-      date.getTime()
-    )
-  ) {
-
-    return date.toISOString();
-  }
-
-
-  return new Date()
-    .toISOString();
-}
-
-
-/* =========================================================
-   Login
-========================================================= */
-
-$("#loginBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if (currentUser) {
-
-        const confirmed =
-          confirm(
-            "確定要登出嗎？"
-          );
-
-        if (confirmed) {
-          signOut(auth);
-        }
-
-      } else {
-
-        openModal(
-          "loginModal"
-        );
-      }
-    }
-  );
-
-
-$("#googleLoginBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      try {
-
-        await signInWithPopup(
-          auth,
-          googleProvider
-        );
-
-        closeModal(
-          "loginModal"
-        );
-
-        showToast(
-          "🔓 Google 登入成功"
-        );
-
-      } catch (error) {
-
-        console.error(error);
-
-        if (
-          error.code ===
-          "auth/popup-closed-by-user"
-        ) {
-
-          return;
-        }
-
-        showToast(
-          "登入失敗：" +
-          error.message
-        );
-      }
-    }
-  );
-
-
-/* =========================================================
-   Auth State
-========================================================= */
-
-onAuthStateChanged(
-  auth,
-  user => {
-
-    currentUser =
-      user || null;
-
-
+  // =========================================================
+  // 登入
+  // =========================================================
+  $("#loginBtn").addEventListener("click", () => {
     if (currentUser) {
-
-      $("#userStatus")
-        .textContent =
-        "👤 " +
-        (
-          currentUser.displayName ||
-          currentUser.email ||
-          "已登入"
-        );
-
-      $("#loginBtn")
-        .textContent =
-        "🚪 登出";
-
-      startFirebaseSync();
-
+      if (confirm("確定要登出嗎？")) signOut(auth);
     } else {
+      openModal("loginModal");
+    }
+  });
+  $("#googleLoginBtn").addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      closeModal("loginModal");
+      showToast("🔓 Google 登入成功");
+    } catch(err) {
+      console.error(err);
+      if (err.code !== "auth/popup-closed-by-user") showToast("登入失敗：" + err.message);
+    }
+  });
 
-      $("#userStatus")
-        .textContent =
-        "🔒 未登入";
-
-      $("#loginBtn")
-        .textContent =
-        "🔑 登入";
-
-      if (unsubscribeRecords) {
-
-        unsubscribeRecords();
-
-        unsubscribeRecords =
-          null;
-      }
-
-      /*
-        未登入時使用 LocalStorage
-      */
-
+  // =========================================================
+  // Auth State
+  // =========================================================
+  onAuthStateChanged(auth, user => {
+    currentUser = user || null;
+    if (currentUser) {
+      $("#userStatus").textContent = "👤 " + (currentUser.displayName || currentUser.email || "已登入");
+      $("#loginBtn").textContent = "🚪 登出";
+      startFirebaseSync();
+    } else {
+      $("#userStatus").textContent = "🔒 未登入";
+      $("#loginBtn").textContent = "🔑 登入";
+      if (unsubscribeRecords) { unsubscribeRecords(); unsubscribeRecords = null; }
       loadLocal();
-
       render();
     }
-  }
-);
+  });
 
-
-/* =========================================================
-   Initial
-========================================================= */
-
-loadLocal();
-
-render();
-
+  // =========================================================
+  // 初始化
+  // =========================================================
+  loadLocal();
+  render();
 </script>
-
 </body>
 </html>
