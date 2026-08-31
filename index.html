@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     /* =========================================================
-       基本設定 (保留原有變數，新增部分樣式)
+       基本設定
     ========================================================= */
     :root {
       --bg: #fffaf0;
@@ -44,13 +44,8 @@
       --shadow: 0 8px 30px rgba(0, 0, 0, 0.24);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-    html {
-      font-size: var(--font-size);
-      scroll-behavior: smooth;
-    }
+    * { box-sizing: border-box; }
+    html { font-size: var(--font-size); scroll-behavior: smooth; }
     body {
       margin: 0;
       background: radial-gradient(circle at top left, rgba(248, 224, 139, 0.20), transparent 35%), var(--bg);
@@ -117,7 +112,6 @@
       margin-top: 2px;
     }
 
-    /* 搜尋框 (桌面) */
     .header-search {
       display: flex;
       align-items: center;
@@ -150,14 +144,10 @@
       gap: 7px;
       flex-wrap: wrap;
       justify-content: flex-end;
+      position: relative;
     }
-    button, input, select {
-      font: inherit;
-    }
-    button {
-      border: 0;
-      cursor: pointer;
-    }
+    button, input, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
     .tool-btn {
       min-height: 40px;
       padding: 8px 12px;
@@ -171,9 +161,7 @@
       background: var(--surface-2);
       border-color: var(--primary);
     }
-    .tool-btn:active {
-      transform: scale(.97);
-    }
+    .tool-btn:active { transform: scale(.97); }
     .primary-btn {
       background: var(--accent);
       color: white;
@@ -215,6 +203,37 @@
       white-space: nowrap;
     }
 
+    /* 更多選單 (手機) */
+    .more-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      padding: 8px;
+      min-width: 150px;
+      z-index: 70;
+    }
+    .more-menu.show { display: block; }
+    .more-item {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      background: transparent;
+      border: 0;
+      text-align: left;
+      color: var(--text);
+      border-radius: 8px;
+      font-size: .9rem;
+    }
+    .more-item:hover {
+      background: var(--surface-2);
+    }
+    .hide-desktop { display: none; } /* 預設隱藏，手機顯示 */
+
     /* =========================================================
        Main
     ========================================================= */
@@ -224,7 +243,6 @@
       padding: 20px;
     }
 
-    /* Dashboard */
     .dashboard {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -269,9 +287,7 @@
       margin-left: 5px;
     }
 
-    /* =========================================================
-       統一的篩選工具欄 (電腦 + 手機)
-    ========================================================= */
+    /* 篩選工具欄 */
     .filter-toolbar {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -295,9 +311,7 @@
       flex: 1;
       -webkit-overflow-scrolling: touch;
     }
-    .filter-chips::-webkit-scrollbar {
-      display: none;
-    }
+    .filter-chips::-webkit-scrollbar { display: none; }
     .filter-chip {
       flex: 0 0 auto;
       min-height: 38px;
@@ -315,9 +329,7 @@
       border-color: var(--accent);
       font-weight: 800;
     }
-    #moreFilterBtn {
-      display: none;
-    }
+    #moreFilterBtn { display: none; }
     .filter-panel {
       display: flex;
       flex-wrap: wrap;
@@ -326,9 +338,7 @@
       margin-top: 10px;
       border-top: 1px dashed var(--border);
     }
-    .filter-panel.hidden {
-      display: none;
-    }
+    .filter-panel.hidden { display: none; }
     .filter-group {
       display: flex;
       align-items: center;
@@ -339,9 +349,7 @@
       color: var(--muted);
       font-size: 0.85rem;
     }
-    .category-filter-wrap {
-      position: relative;
-    }
+    .category-filter-wrap { position: relative; }
     .funnel-btn {
       width: 32px;
       height: 32px;
@@ -370,9 +378,7 @@
       box-shadow: 0 15px 35px rgba(0,0,0,.15);
       display: none;
     }
-    .category-menu.show {
-      display: block;
-    }
+    .category-menu.show { display: block; }
     .category-option {
       width: 100%;
       display: flex;
@@ -385,9 +391,7 @@
       text-align: left;
     }
     .category-option:hover,
-    .category-option.active {
-      background: var(--surface-2);
-    }
+    .category-option.active { background: var(--surface-2); }
     .sort-buttons {
       display: flex;
       gap: 6px;
@@ -400,11 +404,8 @@
       font-size: 0.8rem;
       color: var(--text);
     }
-    .sort-buttons .sort-button:hover {
-      border-color: var(--primary);
-    }
+    .sort-buttons .sort-button:hover { border-color: var(--primary); }
 
-    /* 圖表區塊 */
     .chart-section {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -428,7 +429,6 @@
       color: var(--muted);
     }
 
-    /* 記錄清單 */
     .records-panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -470,14 +470,9 @@
       padding: 4px;
       font-weight: inherit;
     }
-    .table-header .sort-button:hover {
-      color: var(--accent);
-    }
+    .table-header .sort-button:hover { color: var(--accent); }
 
-    .record-list {
-      width: 100%;
-    }
-
+    .record-list { width: 100%; }
     .record-row {
       display: grid;
       grid-template-columns: 90px 105px minmax(0, 1fr) 150px 90px;
@@ -488,12 +483,8 @@
       cursor: pointer;
       transition: background .15s ease;
     }
-    .record-row:hover {
-      background: var(--surface-2);
-    }
-    .record-row:last-child {
-      border-bottom: 0;
-    }
+    .record-row:hover { background: var(--surface-2); }
+    .record-row:last-child { border-bottom: 0; }
     .record-id {
       color: var(--muted);
       font-size: .85rem;
@@ -524,9 +515,7 @@
       opacity: 0;
       transition: opacity .15s ease;
     }
-    .record-row:hover .row-actions {
-      opacity: 1;
-    }
+    .record-row:hover .row-actions { opacity: 1; }
     .row-action {
       width: 34px;
       height: 34px;
@@ -556,16 +545,13 @@
     .cat-房租 { background: #d9efe0; color: #37724b; }
     .cat-醫療 { background: #d8eeee; color: #337276; }
     .cat-其他 { background: #e7e4df; color: #625d54; }
-
     body.dark .cat-餐飲,
     body.dark .cat-交通,
     body.dark .cat-購物,
     body.dark .cat-娛樂,
     body.dark .cat-房租,
     body.dark .cat-醫療,
-    body.dark .cat-其他 {
-      filter: brightness(.78);
-    }
+    body.dark .cat-其他 { filter: brightness(.78); }
 
     .empty {
       padding: 60px 20px;
@@ -589,9 +575,7 @@
       background: rgba(30, 25, 15, .48);
       backdrop-filter: blur(5px);
     }
-    .modal-backdrop.show {
-      display: flex;
-    }
+    .modal-backdrop.show { display: flex; }
     .modal {
       width: min(560px, 100%);
       max-height: min(850px, 92vh);
@@ -621,9 +605,7 @@
       font-weight: 950;
       font-size: 1.08rem;
     }
-    .modal-body {
-      padding: 18px;
-    }
+    .modal-body { padding: 18px; }
     .modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -642,9 +624,7 @@
       flex-direction: column;
       gap: 6px;
     }
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
+    .form-group.full { grid-column: 1 / -1; }
     .form-label {
       font-size: .82rem;
       color: var(--muted);
@@ -668,9 +648,7 @@
       display: flex;
       gap: 7px;
     }
-    .location-row .form-control {
-      min-width: 0;
-    }
+    .location-row .form-control { min-width: 0; }
     .quick-money {
       display: flex;
       gap: 6px;
@@ -684,9 +662,7 @@
       color: var(--accent-dark);
       font-weight: 800;
     }
-    .quick-money button:hover {
-      background: var(--surface-2);
-    }
+    .quick-money button:hover { background: var(--surface-2); }
 
     .detail-card {
       background: var(--surface-2);
@@ -707,17 +683,13 @@
       padding: 9px 0;
       border-bottom: 1px dashed var(--border);
     }
-    .detail-item:last-child {
-      border-bottom: 0;
-    }
+    .detail-item:last-child { border-bottom: 0; }
     .detail-label {
       color: var(--muted);
       font-size: .82rem;
       font-weight: 800;
     }
-    .detail-value {
-      word-break: break-word;
-    }
+    .detail-value { word-break: break-word; }
 
     .toast-container {
       position: fixed;
@@ -756,44 +728,55 @@
       .header-inner {
         min-height: auto;
         padding: 10px 13px 11px;
-        align-items: flex-start;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 8px;
       }
       .brand-icon {
         width: 40px;
         height: 40px;
         font-size: 23px;
       }
-      .brand-subtitle {
-        display: none;
-      }
+      .brand-subtitle { display: none; }
+      .brand-title { font-size: 1rem; }
+
       .header-search {
-        flex: 0 0 auto;
-        margin: 0;
+        flex: 1;
+        margin: 0 4px;
+        min-width: 0;
       }
       .header-search input {
         display: none;
         position: absolute;
-        top: 70px;
-        left: 10px;
-        right: 10px;
-        width: calc(100% - 20px);
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        width: 100%;
         z-index: 60;
         background: var(--surface);
         border-color: var(--primary);
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       }
-      .header-search input.show {
-        display: block;
-      }
+      .header-search input.show { display: block; }
       .header-search #searchToggle {
         display: inline-flex;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        padding: 6px 12px;
+        min-height: 38px;
+        width: auto;
       }
 
-      .header-tools .tool-btn.hide-mobile-text span {
-        display: none;
-      }
-      .font-control {
-        display: none;
+      .header-tools .tool-btn.hide-mobile-text span { display: none; }
+      .font-control { display: none; }
+      .hide-mobile { display: none !important; }
+      .hide-desktop { display: inline-flex; }
+
+      .more-menu {
+        right: 0;
+        left: auto;
+        min-width: 160px;
       }
 
       main {
@@ -807,27 +790,16 @@
         min-height: 118px;
         padding: 18px;
       }
-      .stat-number {
-        font-size: 2.15rem;
-      }
+      .stat-number { font-size: 2.15rem; }
 
-      /* 篩選工具欄手機 */
-      #moreFilterBtn {
-        display: inline-flex;
-      }
+      #moreFilterBtn { display: inline-flex; }
       .filter-panel {
         flex-direction: column;
         gap: 12px;
       }
-      .filter-group {
-        flex-wrap: wrap;
-      }
-      .filter-group label {
-        width: 100%;
-      }
-      .category-filter-wrap {
-        width: 100%;
-      }
+      .filter-group { flex-wrap: wrap; }
+      .filter-group label { width: 100%; }
+      .category-filter-wrap { width: 100%; }
       .category-menu {
         position: static;
         max-height: 200px;
@@ -836,33 +808,18 @@
         margin-top: 6px;
         border-radius: 10px;
       }
-      .sort-buttons {
-        flex-wrap: wrap;
-      }
+      .sort-buttons { flex-wrap: wrap; }
 
       .chart-section {
         padding: 13px;
         border-radius: 14px;
       }
-      .chart-wrap {
-        height: 215px;
-      }
-      .records-panel {
-        border-radius: 14px;
-      }
-      .records-top {
-        padding: 13px;
-      }
+      .chart-wrap { height: 215px; }
+      .records-panel { border-radius: 14px; }
+      .records-top { padding: 13px; }
 
-      /* 手機版隱藏表格標頭，改為卡片式 */
-      .table-header {
-        display: none;
-      }
-      .record-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-      }
+      .table-header { display: none; }
+      .record-list { display: flex; flex-direction: column; }
       .record-row {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -873,13 +830,10 @@
         min-height: 78px;
         padding: 13px 14px;
         align-items: center;
+        position: relative;
       }
-      .record-row:hover {
-        background: transparent;
-      }
-      .record-id {
-        display: none;
-      }
+      .record-row:hover { background: transparent; }
+      .record-id { display: none; }
       .content {
         grid-area: content;
         padding: 0;
@@ -889,21 +843,15 @@
         grid-area: meta;
         font-size: .73rem;
       }
-      .date::before {
-        content: "🕒 ";
-      }
+      .date::before { content: "🕒 "; }
       .amount {
         grid-area: amount;
         padding: 0;
         font-size: 1.02rem;
         align-self: center;
       }
-      .category-badge {
-        margin-right: 6px;
-      }
-      .row-actions {
-        display: none;
-      }
+      .category-badge { margin-right: 6px; }
+      .row-actions { display: none; }
       .record-row::after {
         content: "";
         position: absolute;
@@ -912,16 +860,9 @@
         bottom: 0;
         border-bottom: 1px solid var(--border);
       }
-      .record-row {
-        position: relative;
-      }
 
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-      .form-group.full {
-        grid-column: auto;
-      }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: auto; }
       .modal-backdrop {
         align-items: flex-end;
         padding: 0;
@@ -931,12 +872,8 @@
         max-height: 92vh;
         border-radius: 20px 20px 0 0;
       }
-      .modal-header {
-        padding: 14px 16px;
-      }
-      .modal-body {
-        padding: 16px;
-      }
+      .modal-header { padding: 14px 16px; }
+      .modal-body { padding: 16px; }
       .modal-footer {
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
       }
@@ -944,12 +881,8 @@
         min-height: 45px;
         flex: 1;
       }
-      .location-row {
-        flex-direction: column;
-      }
-      .location-row button {
-        min-height: 44px;
-      }
+      .location-row { flex-direction: column; }
+      .location-row button { min-height: 44px; }
       .quick-money button {
         min-height: 40px;
         flex: 1;
@@ -963,33 +896,25 @@
         top: 72px;
         width: calc(100% - 28px);
       }
-      .toast {
-        width: 100%;
-      }
+      .toast { width: 100%; }
     }
 
     @media (max-width: 380px) {
-      .brand-title {
-        font-size: .95rem;
-      }
+      .brand-title { font-size: .95rem; }
       .header-tools .tool-btn {
         width: 40px;
         padding: 0;
         font-size: 0;
       }
-      .header-tools .tool-btn::first-letter {
-        font-size: 18px;
-      }
-      .stat-number {
-        font-size: 1.9rem;
-      }
+      .header-tools .tool-btn::first-letter { font-size: 18px; }
+      .stat-number { font-size: 1.9rem; }
     }
   </style>
 </head>
 
 <body>
 <!-- =======================================================
-     標題欄 (美化版)
+     標題欄 (手機優化版)
 ======================================================= -->
 <header class="app-header">
   <div class="header-inner">
@@ -1001,24 +926,34 @@
       </div>
     </div>
 
-    <!-- 搜尋框（電腦顯示輸入框，手機顯示切換按鈕） -->
+    <!-- 搜尋框（手機加寬） -->
     <div class="header-search">
-      <input id="searchInput" type="search" placeholder="搜尋消費內容或地點..." autocomplete="off">
-      <button id="searchToggle" class="tool-btn icon-btn" type="button" aria-label="搜尋">🔍</button>
+      <input id="searchInput" type="search" placeholder="搜尋..." autocomplete="off">
+      <button id="searchToggle" class="tool-btn" type="button" aria-label="搜尋">🔍</button>
     </div>
 
     <div class="header-tools">
-      <div class="font-control">
+      <button id="themeBtn" class="tool-btn icon-btn" type="button" title="深色／淺色">🌓</button>
+      <button id="addBtn" class="tool-btn primary-btn" type="button">➕ <span>新增</span></button>
+
+      <!-- 更多選單按鈕 (手機顯示) -->
+      <button id="moreMenuBtn" class="tool-btn icon-btn hide-desktop" type="button" aria-label="更多">⋯</button>
+      <div id="moreMenu" class="more-menu">
+        <button id="mobileExportBtn" class="more-item">📤 匯出</button>
+        <button id="mobileImportBtn" class="more-item">📥 匯入</button>
+        <button id="mobileLoginBtn" class="more-item">🔑 登入</button>
+      </div>
+
+      <!-- 桌面專用按鈕 (手機隱藏) -->
+      <span id="userStatus" class="user-status hide-mobile">🔒 未登入</span>
+      <button id="loginBtn" class="tool-btn hide-mobile" type="button">🔑 登入</button>
+      <button id="exportBtn" class="tool-btn hide-mobile-text hide-mobile" type="button" title="匯出 CSV">📤 <span>匯出</span></button>
+      <button id="importBtn" class="tool-btn hide-mobile-text hide-mobile" type="button" title="匯入資料">📥 <span>匯入</span></button>
+      <input id="fileInput" type="file" accept=".csv,.json" hidden>
+      <div class="font-control hide-mobile">
         <span>字體</span>
         <input id="fontSlider" type="range" min="14" max="21" step="1" value="16">
       </div>
-      <span id="userStatus" class="user-status">🔒 未登入</span>
-      <button id="loginBtn" class="tool-btn" type="button">🔑 登入</button>
-      <button id="exportBtn" class="tool-btn hide-mobile-text" type="button" title="匯出 CSV">📤 <span>匯出</span></button>
-      <button id="importBtn" class="tool-btn hide-mobile-text" type="button" title="匯入資料">📥 <span>匯入</span></button>
-      <input id="fileInput" type="file" accept=".csv,.json" hidden>
-      <button id="themeBtn" class="tool-btn icon-btn" type="button" title="深色／淺色">🌓</button>
-      <button id="addBtn" class="tool-btn primary-btn" type="button">➕ <span>新增</span></button>
     </div>
   </div>
 </header>
@@ -1041,7 +976,7 @@
     </article>
   </section>
 
-  <!-- 統一的篩選工具欄 -->
+  <!-- 篩選工具欄 -->
   <div class="filter-toolbar">
     <div class="filter-row">
       <div class="filter-chips">
@@ -1052,8 +987,6 @@
       </div>
       <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
     </div>
-
-    <!-- 進階篩選面板 (手機可展開) -->
     <div id="filterPanel" class="filter-panel hidden">
       <div class="filter-group">
         <label>類別</label>
@@ -1097,8 +1030,6 @@
       <div class="records-title">📋 歷史消費記錄</div>
       <span id="recordCount" class="record-count"></span>
     </div>
-
-    <!-- 電腦版表格標頭 -->
     <div class="table-header">
       <div><button class="sort-button" data-sort="id">序號 ↕</button></div>
       <div>類別</div>
@@ -1106,7 +1037,6 @@
       <div><button class="sort-button" data-sort="amount">消費金額 ↕</button></div>
       <div>操作</div>
     </div>
-
     <div id="recordList" class="record-list"></div>
   </section>
 </main>
@@ -1226,7 +1156,7 @@
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // 您的 Firebase 設定 (已修正 apiKey)
+  // Firebase 設定 (已修正)
   const firebaseConfig = {
     apiKey: "AIzaSyAYG2UObkOr-jnSI7ZfO4jsQb2ZSScOSoI",
     authDomain: "accounting-system-b42ba.firebaseapp.com",
@@ -1243,7 +1173,7 @@
   const googleProvider = new GoogleAuthProvider();
 
   // =========================================================
-  // 狀態與工具函數
+  // 狀態與工具
   // =========================================================
   let currentUser = null;
   let unsubscribeRecords = null;
@@ -1258,7 +1188,6 @@
   let expenseChart = null;
 
   const STORAGE_KEY = "accountingRecords";
-  const CATEGORIES = ["餐飲","交通","購物","娛樂","房租","醫療","其他"];
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -1292,7 +1221,6 @@
     return collection(db, "users", currentUser.uid, "records");
   }
 
-  // Firebase 同步
   function startFirebaseSync() {
     if (!currentUser) return;
     if (unsubscribeRecords) unsubscribeRecords();
@@ -1310,7 +1238,6 @@
     });
   }
 
-  // Firebase 寫入
   async function firebaseAdd(record) {
     if (!currentUser) return false;
     try {
@@ -1416,7 +1343,6 @@
       `;
     }).join("");
 
-    // 綁定事件
     $$(".record-row").forEach(row => {
       const id = Number(row.dataset.id);
       const record = records.find(r => Number(r.id) === id);
@@ -1480,14 +1406,14 @@
   }
 
   // =========================================================
-  // 模態框控制
+  // 模態框
   // =========================================================
   function openModal(id) { $("#"+id).classList.add("show"); }
   function closeModal(id) { $("#"+id).classList.remove("show"); }
   function closeAllModals() { $$(".modal-backdrop").forEach(m => m.classList.remove("show")); }
 
   // =========================================================
-  // 新增、編輯、刪除、複製、詳細
+  // CRUD 操作
   // =========================================================
   function openAdd() {
     editingId = null;
@@ -1530,6 +1456,35 @@
     closeModal("detailModal");
     render();
     showToast("🗑️ 已刪除記錄");
+  }
+
+  // =========================================================
+  // 匯出、匯入、登入 功能封裝 (供手機與桌面共用)
+  // =========================================================
+  function exportData() {
+    if (!records.length) { showToast("目前沒有資料可以匯出"); return; }
+    const headers = ["消費序號","消費內容","消費金額","消費時間","消費地點","消費類別"];
+    const rows = records.map(r => [r.id, r.content, r.amount, formatDate(r.time), r.location || "", r.category || "其他"]);
+    const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `我的記帳本_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast("📤 CSV 匯出成功");
+  }
+
+  function importData() {
+    $("#fileInput").click();
+  }
+
+  function handleLogin() {
+    if (currentUser) {
+      if (confirm("確定要登出嗎？")) signOut(auth);
+    } else {
+      openModal("loginModal");
+    }
   }
 
   // =========================================================
@@ -1577,13 +1532,13 @@
     });
   });
 
-  // 地圖按鈕
+  // 地圖
   $("#mapBtn").addEventListener("click", () => {
     const loc = $("#locationInput").value.trim() || "台北市";
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, "_blank", "noopener,noreferrer");
   });
 
-  // 新增按鈕
+  // 新增
   $("#addBtn").addEventListener("click", openAdd);
 
   // 關閉模態
@@ -1591,13 +1546,13 @@
   $$(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("click", e => { if (e.target === backdrop) backdrop.classList.remove("show"); }));
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllModals(); });
 
-  // 搜尋 (原本就在 #searchInput)
+  // 搜尋
   $("#searchInput").addEventListener("input", e => {
     currentSearch = e.target.value;
     render();
   });
 
-  // 手機搜尋切換
+  // 手機搜尋展開
   const searchToggle = $("#searchToggle");
   const searchInput = $("#searchInput");
   if (searchToggle) {
@@ -1605,7 +1560,6 @@
       searchInput.classList.toggle("show");
       if (searchInput.classList.contains("show")) searchInput.focus();
     });
-    // 點擊頁面其他地方可收合 (但僅當輸入框失去焦點時)
     document.addEventListener("click", e => {
       if (!e.target.closest(".header-search") && searchInput.classList.contains("show")) {
         searchInput.classList.remove("show");
@@ -1622,7 +1576,7 @@
     });
   });
 
-  // 類別篩選 (桌面下拉)
+  // 類別篩選
   const categoryFilterBtn = $("#categoryFilterBtn");
   const categoryMenu = $("#categoryMenu");
   categoryFilterBtn.addEventListener("click", e => {
@@ -1645,7 +1599,7 @@
     }
   });
 
-  // 排序按鈕 (在篩選面板和表格標頭)
+  // 排序
   $$(".sort-button").forEach(btn => {
     btn.addEventListener("click", () => {
       const field = btn.dataset.sort;
@@ -1659,7 +1613,7 @@
     });
   });
 
-  // 更多篩選面板 (手機)
+  // 更多篩選面板
   const moreFilterBtn = $("#moreFilterBtn");
   const filterPanel = $("#filterPanel");
   if (moreFilterBtn) {
@@ -1669,7 +1623,7 @@
     });
   }
 
-  // 複製、編輯、刪除 (在詳細面板)
+  // 詳細面板按鈕
   $("#duplicateBtn").addEventListener("click", async () => {
     const record = records.find(r => Number(r.id) === selectedRecordId);
     if (!record) return;
@@ -1690,41 +1644,41 @@
     if (record) await deleteRecord(record);
   });
 
-  // =========================================================
-  // 主題、字體、匯出匯入
-  // =========================================================
-  $("#themeBtn").addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    localStorage.setItem("accountingTheme", document.body.classList.contains("dark") ? "dark" : "light");
-    renderChart();
-  });
-  if (localStorage.getItem("accountingTheme") === "dark") document.body.classList.add("dark");
+  // 匯出、匯入、登入 (桌面按鈕)
+  $("#exportBtn").addEventListener("click", exportData);
+  $("#importBtn").addEventListener("click", importData);
+  $("#loginBtn").addEventListener("click", handleLogin);
 
-  $("#fontSlider").addEventListener("input", e => {
-    const size = e.target.value;
-    document.documentElement.style.setProperty("--font-size", size + "px");
-    localStorage.setItem("accountingFontSize", size);
-  });
-  const savedFont = localStorage.getItem("accountingFontSize");
-  if (savedFont) { $("#fontSlider").value = savedFont; document.documentElement.style.setProperty("--font-size", savedFont + "px"); }
+  // 手機更多選單
+  const moreMenuBtn = $("#moreMenuBtn");
+  const moreMenu = $("#moreMenu");
+  if (moreMenuBtn) {
+    moreMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreMenu.classList.toggle("show");
+    });
+    document.addEventListener("click", () => {
+      moreMenu.classList.remove("show");
+    });
+    // 選單項目
+    $("#mobileExportBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreMenu.classList.remove("show");
+      exportData();
+    });
+    $("#mobileImportBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreMenu.classList.remove("show");
+      importData();
+    });
+    $("#mobileLoginBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreMenu.classList.remove("show");
+      handleLogin();
+    });
+  }
 
-  // 匯出
-  $("#exportBtn").addEventListener("click", () => {
-    if (!records.length) { showToast("目前沒有資料可以匯出"); return; }
-    const headers = ["消費序號","消費內容","消費金額","消費時間","消費地點","消費類別"];
-    const rows = records.map(r => [r.id, r.content, r.amount, formatDate(r.time), r.location || "", r.category || "其他"]);
-    const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",")).join("\r\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `我的記帳本_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showToast("📤 CSV 匯出成功");
-  });
-
-  // 匯入
-  $("#importBtn").addEventListener("click", () => { $("#fileInput").click(); });
+  // 檔案上傳 (匯入)
   $("#fileInput").addEventListener("change", async e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1793,16 +1747,23 @@
     return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
   }
 
-  // =========================================================
-  // 登入
-  // =========================================================
-  $("#loginBtn").addEventListener("click", () => {
-    if (currentUser) {
-      if (confirm("確定要登出嗎？")) signOut(auth);
-    } else {
-      openModal("loginModal");
-    }
+  // 主題、字體
+  $("#themeBtn").addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("accountingTheme", document.body.classList.contains("dark") ? "dark" : "light");
+    renderChart();
   });
+  if (localStorage.getItem("accountingTheme") === "dark") document.body.classList.add("dark");
+
+  $("#fontSlider").addEventListener("input", e => {
+    const size = e.target.value;
+    document.documentElement.style.setProperty("--font-size", size + "px");
+    localStorage.setItem("accountingFontSize", size);
+  });
+  const savedFont = localStorage.getItem("accountingFontSize");
+  if (savedFont) { $("#fontSlider").value = savedFont; document.documentElement.style.setProperty("--font-size", savedFont + "px"); }
+
+  // 登入 (Google)
   $("#googleLoginBtn").addEventListener("click", async () => {
     try {
       await signInWithPopup(auth, googleProvider);
@@ -1814,27 +1775,26 @@
     }
   });
 
-  // =========================================================
-  // Auth State
-  // =========================================================
+  // Auth 狀態
   onAuthStateChanged(auth, user => {
     currentUser = user || null;
     if (currentUser) {
       $("#userStatus").textContent = "👤 " + (currentUser.displayName || currentUser.email || "已登入");
       $("#loginBtn").textContent = "🚪 登出";
+      // 更新手機選單中的按鈕文字
+      document.getElementById("mobileLoginBtn").textContent = "🚪 登出";
       startFirebaseSync();
     } else {
       $("#userStatus").textContent = "🔒 未登入";
       $("#loginBtn").textContent = "🔑 登入";
+      document.getElementById("mobileLoginBtn").textContent = "🔑 登入";
       if (unsubscribeRecords) { unsubscribeRecords(); unsubscribeRecords = null; }
       loadLocal();
       render();
     }
   });
 
-  // =========================================================
   // 初始化
-  // =========================================================
   loadLocal();
   render();
 </script>
