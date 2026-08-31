@@ -1,2090 +1,1694 @@
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-  >
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 我的記帳本</title>
 
-  <title>💰 我的記帳本</title>
+<!-- =========================================================
+     Chart.js
+     ========================================================= -->
 
-  <!-- =========================================================
-       Chart.js
-       ========================================================= -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    /* =========================================================
-       基礎設定
-       ========================================================= */
+<style>
+:root{
+    --bg:#fff9df;
+    --surface:#fffdf3;
+    --surface-2:#fff3bd;
+    --border:#eadca7;
+    --text:#4b3621;
+    --muted:#8b7355;
+    --primary:#b86b22;
+    --primary-dark:#7b4315;
+    --accent:#f4c95d;
+    --danger:#c94c4c;
+    --success:#4d8b57;
+    --shadow:0 8px 28px rgba(111,75,28,.10);
+    --radius:18px;
+    --font-size:16px;
+}
 
-    :root {
-      --bg: #fff9df;
-      --bg-soft: #fffdf2;
-      --card: #fffef8;
-      --card-2: #fff6c9;
+*{
+    box-sizing:border-box;
+}
 
-      --primary: #f5d76e;
-      --primary-dark: #d49a22;
+html{
+    scroll-behavior:smooth;
+}
 
-      --brown: #704214;
-      --brown-dark: #4e2c10;
-      --orange: #c86b1d;
-
-      --text: #4b3824;
-      --text-soft: #806b52;
-      --border: #eadcae;
-
-      --danger: #b83b32;
-      --success: #5b8c45;
-
-      --shadow: 0 8px 28px rgba(99, 69, 25, 0.10);
-
-      --font-size: 16px;
-
-      --radius: 18px;
-    }
-
-    body.dark {
-      --bg: #211c14;
-      --bg-soft: #292218;
-      --card: #30281d;
-      --card-2: #3a2f20;
-
-      --primary: #d6af43;
-      --primary-dark: #f0ca5a;
-
-      --brown: #f4dfaa;
-      --brown-dark: #fff0c4;
-      --orange: #e59645;
-
-      --text: #f5ead0;
-      --text-soft: #cbbd9f;
-      --border: #56462d;
-
-      --danger: #e07167;
-      --success: #8fbd70;
-
-      --shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      font-size: var(--font-size);
-      scroll-behavior: smooth;
-    }
-
-    body {
-      margin: 0;
-      font-family:
+body{
+    margin:0;
+    font-family:
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         "Noto Sans TC",
         "Microsoft JhengHei",
         sans-serif;
+    font-size:var(--font-size);
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    transition:.25s;
+}
+
+button,
+input,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+body.dark{
+    --bg:#211a12;
+    --surface:#2c2319;
+    --surface-2:#3a2d1d;
+    --border:#58452d;
+    --text:#fff3d1;
+    --muted:#c5aa7c;
+    --primary:#f0a34a;
+    --primary-dark:#ffd08a;
+    --accent:#b77a27;
+    --shadow:0 8px 28px rgba(0,0,0,.30);
+}
+
+/* =========================================================
+   App Header
+   ========================================================= */
+
+.app-header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(255,253,243,.94);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+}
+
+.dark .app-header{
+    background:rgba(44,35,25,.94);
+}
+
+.header-inner{
+    max-width:1400px;
+    margin:auto;
+    min-height:74px;
+    padding:12px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+}
+
+.brand-icon{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    background:var(--surface-2);
+    font-size:24px;
+    flex:none;
+}
+
+.brand-title{
+    font-size:22px;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.user-area{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.user-status{
+    color:var(--muted);
+    font-size:13px;
+    max-width:210px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text);
+    border-radius:12px;
+    padding:9px 13px;
+    font-weight:700;
+    transition:.18s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 5px 14px rgba(120,80,20,.12);
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:white;
+    border-color:var(--primary);
+}
+
+.btn-danger{
+    background:var(--danger);
+    color:white;
+    border-color:var(--danger);
+}
+
+.btn-success{
+    background:var(--success);
+    color:white;
+    border-color:var(--success);
+}
+
+.icon-btn{
+    width:42px;
+    height:42px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:12px;
+}
+
+.font-control{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 10px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    border-radius:12px;
+}
+
+.font-control input{
+    width:90px;
+}
+
+/* =========================================================
+   Main
+   ========================================================= */
+
+main{
+    max-width:1400px;
+    margin:auto;
+    padding:22px;
+}
+
+/* =========================================================
+   Dashboard
+   ========================================================= */
+
+.dashboard{
+    min-height:230px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-bottom:20px;
+}
+
+.stat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.stat-number{
+    font-size:clamp(36px,5vw,58px);
+    font-weight:950;
+    color:var(--primary);
+    line-height:1.05;
+}
+
+.stat-unit{
+    font-size:15px;
+    color:var(--muted);
+    margin-top:6px;
+}
+
+/* =========================================================
+   Quick filters
+   ========================================================= */
+
+.quick-filter{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:10px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.filter-btn{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    border-radius:10px;
+    padding:9px 14px;
+    font-weight:800;
+}
+
+.filter-btn.active{
+    background:var(--primary);
+    color:white;
+}
+
+/* =========================================================
+   Chart
+   ========================================================= */
+
+.chart-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+}
+
+.chart-title{
+    font-size:17px;
+    font-weight:900;
+    margin-bottom:12px;
+}
+
+.chart-container{
+    height:260px;
+    position:relative;
+}
+
+.no-chart{
+    height:100%;
+    display:grid;
+    place-items:center;
+    color:var(--muted);
+}
+
+/* =========================================================
+   History
+   ========================================================= */
+
+.history-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+}
+
+.history-toolbar{
+    padding:15px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
+}
+
+.search-box{
+    flex:1;
+    min-width:220px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--bg);
+    color:var(--text);
+    padding:11px 14px;
+    outline:none;
+}
+
+.search-box:focus{
+    border-color:var(--primary);
+}
+
+.tool-btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text);
+    padding:10px 13px;
+    border-radius:11px;
+    font-weight:800;
+}
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+
+.history-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.history-table th,
+.history-table td{
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    vertical-align:middle;
+}
+
+.history-table th{
+    background:var(--surface-2);
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.history-table th:nth-child(1),
+.history-table td:nth-child(1){
+    width:110px;
+    text-align:center;
+}
+
+.history-table th:nth-child(2),
+.history-table td:nth-child(2){
+    width:150px;
+}
+
+.history-table th:nth-child(3),
+.history-table td:nth-child(3){
+    width:auto;
+}
+
+.history-table th:nth-child(4),
+.history-table td:nth-child(4){
+    width:180px;
+    text-align:right;
+}
+
+.history-table th:nth-child(5),
+.history-table td:nth-child(5){
+    width:180px;
+}
+
+.sort-btn{
+    border:0;
+    background:transparent;
+    color:inherit;
+    font-weight:900;
+    padding:4px;
+}
+
+.record-row{
+    cursor:pointer;
+    transition:.18s;
+}
+
+.record-row:hover{
+    background:rgba(244,201,93,.14);
+}
+
+.amount-cell{
+    text-align:right !important;
+    color:var(--primary-dark);
+    font-weight:950;
+    font-size:18px;
+}
+
+.category-tag{
+    display:inline-flex;
+    align-items:center;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.cat-餐飲{background:#ffe0d2;color:#9d3d16}
+.cat-交通{background:#d9ebff;color:#1f5e91}
+.cat-購物{background:#f4dcff;color:#793f91}
+.cat-娛樂{background:#dff3dc;color:#357137}
+.cat-房租{background:#ffe8a9;color:#7a5a00}
+.cat-醫療{background:#ffd9e2;color:#9a3450}
+.cat-其他{background:#e6e6e6;color:#555}
+
+.dark .cat-餐飲{background:#67351f;color:#ffd2b7}
+.dark .cat-交通{background:#1d496b;color:#b7ddff}
+.dark .cat-購物{background:#59356b;color:#f1caff}
+.dark .cat-娛樂{background:#28502a;color:#c7f1c2}
+.dark .cat-房租{background:#66501b;color:#ffeaa0}
+.dark .cat-醫療{background:#663344;color:#ffc6d5}
+.dark .cat-其他{background:#4c4c4c;color:#ddd}
+
+.time-desktop{
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.row-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:5px;
+    opacity:0;
+    transition:.18s;
+}
+
+.record-row:hover .row-actions{
+    opacity:1;
+}
+
+.mini-btn{
+    width:34px;
+    height:34px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:var(--surface);
+}
+
+/* =========================================================
+   Mobile Cards
+   ========================================================= */
+
+.mobile-list{
+    display:none;
+}
+
+.mobile-record{
+    position:relative;
+    padding:16px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+}
+
+.mobile-record:last-child{
+    border-bottom:0;
+}
+
+.mobile-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+}
+
+.mobile-amount{
+    font-size:29px;
+    line-height:1;
+    font-weight:950;
+    color:var(--primary);
+    white-space:nowrap;
+}
+
+.mobile-content{
+    font-size:17px;
+    font-weight:850;
+    margin-top:9px;
+    word-break:break-word;
+}
+
+.mobile-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:11px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.mobile-time{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.mobile-row-actions{
+    display:flex;
+    gap:6px;
+}
+
+.mobile-row-actions .mini-btn{
+    opacity:.8;
+}
+
+/* =========================================================
+   Empty
+   ========================================================= */
+
+.empty{
+    padding:45px 20px;
+    text-align:center;
+    color:var(--muted);
+}
+
+/* =========================================================
+   Modal
+   ========================================================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    background:rgba(30,20,10,.52);
+    backdrop-filter:blur(5px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+}
+
+.modal.active{
+    display:flex;
+}
+
+.modal-box{
+    width:min(620px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--surface);
+    color:var(--text);
+    border-radius:22px;
+    border:1px solid var(--border);
+    box-shadow:0 25px 70px rgba(0,0,0,.25);
+}
+
+.modal-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--surface);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid var(--border);
+}
+
+.modal-header h2{
+    margin:0;
+    font-size:20px;
+}
+
+.close-btn{
+    width:38px;
+    height:38px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:26px;
+}
+
+.modal-body{
+    padding:20px;
+}
+
+.modal-footer{
+    display:flex;
+    gap:9px;
+    justify-content:flex-end;
+    padding:16px 20px;
+    border-top:1px solid var(--border);
+}
+
+.detail-grid{
+    display:grid;
+    grid-template-columns:130px 1fr;
+    gap:13px;
+}
+
+.detail-label{
+    color:var(--muted);
+    font-weight:800;
+}
+
+.detail-value{
+    font-weight:700;
+    word-break:break-word;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-label{
+    display:block;
+    margin-bottom:7px;
+    font-weight:850;
+}
+
+.form-control{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:11px;
+    padding:11px 12px;
+    background:var(--bg);
+    color:var(--text);
+    outline:none;
+}
+
+.form-control:focus{
+    border-color:var(--primary);
+}
+
+.amount-shortcuts{
+    display:flex;
+    gap:7px;
+    margin-top:7px;
+}
+
+.amount-shortcuts button{
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--primary-dark);
+    border-radius:9px;
+    padding:6px 10px;
+    font-weight:900;
+}
+
+.location-row{
+    display:flex;
+    gap:8px;
+}
+
+.location-row .form-control{
+    flex:1;
+}
+
+.map-btn{
+    flex:none;
+}
+
+/* =========================================================
+   Data management
+   ========================================================= */
+
+.dropdown{
+    position:relative;
+}
+
+.dropdown-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 7px);
+    width:190px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:13px;
+    box-shadow:var(--shadow);
+    padding:6px;
+    display:none;
+    z-index:200;
+}
+
+.dropdown.open .dropdown-menu{
+    display:block;
+}
+
+.dropdown-item{
+    width:100%;
+    text-align:left;
+    border:0;
+    background:transparent;
+    color:var(--text);
+    border-radius:9px;
+    padding:10px;
+    font-weight:700;
+}
+
+.dropdown-item:hover{
+    background:var(--surface-2);
+}
+
+.hidden-file{
+    display:none;
+}
+
+/* =========================================================
+   Category filter menu
+   ========================================================= */
+
+.category-menu-wrap{
+    position:relative;
+}
+
+.category-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 7px);
+    width:190px;
+    max-height:260px;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:13px;
+    box-shadow:var(--shadow);
+    padding:6px;
+    display:none;
+    z-index:220;
+}
+
+.category-menu.open{
+    display:block;
+}
+
+.category-option{
+    width:100%;
+    text-align:left;
+    border:0;
+    background:transparent;
+    color:var(--text);
+    padding:11px 10px;
+    border-radius:9px;
+    font-weight:750;
+}
+
+.category-option:hover,
+.category-option.active{
+    background:var(--surface-2);
+}
+
+/* =========================================================
+   Toast
+   ========================================================= */
+
+.toast{
+    position:fixed;
+    top:85px;
+    left:50%;
+    transform:translate(-50%,-15px);
+    z-index:1000;
+    opacity:0;
+    pointer-events:none;
+    background:#4b3621;
+    color:white;
+    padding:11px 18px;
+    border-radius:999px;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+    transition:.25s;
+    font-weight:800;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+.toast.error{
+    background:#a33e3e;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media(max-width:900px){
+    .user-status{
+        display:none;
+    }
+
+    .header-inner{
+        padding:10px 14px;
+    }
+
+    main{
+        padding:14px;
+    }
+
+    .history-table th:nth-child(5),
+    .history-table td:nth-child(5){
+        display:none;
+    }
+}
+
+@media(max-width:600px){
+
+    body{
+        font-size:17px;
+    }
+
+    .app-header{
+        position:relative;
+    }
+
+    .header-inner{
+        min-height:auto;
+        padding:10px 12px;
+        gap:8px;
+    }
+
+    .brand{
+        flex:1;
+    }
+
+    .brand-icon{
+        width:40px;
+        height:40px;
+    }
+
+    .brand-title{
+        font-size:19px;
+    }
+
+    .header-actions{
+        gap:5px;
+    }
+
+    .font-control{
+        display:none;
+    }
+
+    .header-actions > .theme-btn{
+        display:grid;
+    }
+
+    .header-actions > .add-btn{
+        width:43px;
+        height:43px;
+        padding:0;
+        font-size:23px;
+    }
+
+    .header-actions > .add-btn span{
+        display:none;
+    }
+
+    .dashboard{
+        grid-template-columns:1fr;
+        min-height:auto;
+        gap:10px;
+    }
+
+    .stat-card{
+        padding:18px;
+    }
+
+    .stat-number{
+        font-size:42px;
+    }
+
+    .quick-filter{
+        overflow-x:auto;
+        flex-wrap:nowrap;
+        scrollbar-width:none;
+    }
+
+    .quick-filter::-webkit-scrollbar{
+        display:none;
+    }
+
+    .filter-btn{
+        white-space:nowrap;
+        min-height:45px;
+        padding:9px 13px;
+    }
+
+    .chart-container{
+        height:230px;
+    }
+
+    .history-toolbar{
+        padding:11px;
+        display:grid;
+        grid-template-columns:1fr auto auto;
+        gap:7px;
+    }
+
+    .search-box{
+        min-width:0;
+        width:100%;
+        grid-column:1 / -1;
+        font-size:16px;
+    }
+
+    .tool-btn{
+        min-height:44px;
+        padding:8px 11px;
+    }
+
+    .table-wrap{
+        display:none;
+    }
+
+    .mobile-list{
+        display:block;
+    }
+
+    .mobile-record{
+        padding:17px 15px;
+    }
+
+    .mobile-amount{
+        font-size:31px;
+    }
+
+    .mobile-content{
+        font-size:17px;
+    }
+
+    .mobile-meta{
+        font-size:13px;
+    }
+
+    .mobile-row-actions{
+        display:none;
+    }
+
+    .detail-grid{
+        grid-template-columns:100px 1fr;
+    }
+
+    .modal{
+        padding:10px;
+    }
+
+    .modal-box{
+        max-height:94vh;
+        border-radius:18px;
+    }
+
+    .modal-body{
+        padding:16px;
+    }
+
+    .modal-footer{
+        padding:13px 16px;
+        flex-wrap:wrap;
+    }
+
+    .modal-footer .btn{
+        flex:1;
+        min-height:46px;
+    }
+
+    .location-row{
+        flex-direction:column;
+    }
+
+    .map-btn{
+        width:100%;
+    }
+
+    .toast{
+        top:18px;
+        width:max-content;
+        max-width:90vw;
+    }
+}
+
+/* Accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{
+    outline:3px solid rgba(184,107,34,.3);
+    outline-offset:2px;
+}
+</style>
 
-      color: var(--text);
-      background:
-        radial-gradient(
-          circle at top left,
-          rgba(255, 232, 147, 0.35),
-          transparent 32%
-        ),
-        var(--bg);
-
-      transition:
-        background 0.25s ease,
-        color 0.25s ease;
-
-      min-height: 100vh;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    /* =========================================================
-       App Layout
-       ========================================================= */
-
-    .app {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* =========================================================
-       Header
-       ========================================================= */
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-
-      min-height: 72px;
-      padding: 12px 28px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-
-      background: rgba(255, 250, 224, 0.94);
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(15px);
-
-      transition: background 0.25s ease;
-    }
-
-    body.dark .topbar {
-      background: rgba(33, 28, 20, 0.94);
-    }
-
-    .brand-area {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      min-width: 0;
-    }
-
-    .brand {
-      font-size: 1.35rem;
-      font-weight: 900;
-      color: var(--brown-dark);
-      white-space: nowrap;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-
-      border-radius: 12px;
-      min-height: 42px;
-      padding: 8px 14px;
-
-      font-weight: 700;
-
-      transition:
-        transform 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 14px rgba(92, 63, 20, 0.10);
-    }
-
-    .btn-primary {
-      background: var(--brown);
-      color: #fff9df;
-      border-color: var(--brown);
-    }
-
-    .btn-primary:hover {
-      background: var(--brown-dark);
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-      border-color: var(--danger);
-    }
-
-    .btn-small {
-      min-height: 34px;
-      padding: 5px 10px;
-      border-radius: 9px;
-      font-size: 0.85rem;
-    }
-
-    .login-btn {
-      border: none;
-      background: transparent;
-      color: var(--brown);
-      font-weight: 800;
-      padding: 8px 10px;
-      border-radius: 9px;
-    }
-
-    .login-btn:hover {
-      background: var(--card-2);
-    }
-
-    .font-control {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 10px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card);
-    }
-
-    .font-control span {
-      font-size: 0.82rem;
-      white-space: nowrap;
-    }
-
-    .font-control input {
-      width: 85px;
-      accent-color: var(--orange);
-    }
-
-    .mobile-menu {
-      display: none;
-    }
-
-    /* =========================================================
-       Main
-       ========================================================= */
-
-    main {
-      width: min(1500px, 100%);
-      margin: 0 auto;
-      padding: 22px 28px 40px;
-      flex: 1;
-    }
-
-    /* =========================================================
-       Dashboard
-       ========================================================= */
-
-    .dashboard {
-      min-height: 25vh;
-
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      position: relative;
-      overflow: hidden;
-
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-
-      box-shadow: var(--shadow);
-
-      padding: 26px 30px;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .stat-card::after {
-      content: "";
-      position: absolute;
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-
-      right: -45px;
-      top: -45px;
-
-      background: rgba(245, 215, 110, 0.23);
-    }
-
-    .stat-label {
-      color: var(--text-soft);
-      font-weight: 800;
-      font-size: 0.95rem;
-      margin-bottom: 8px;
-    }
-
-    .stat-number {
-      font-size: clamp(2rem, 4vw, 3.4rem);
-      font-weight: 950;
-      color: var(--brown-dark);
-      letter-spacing: -1px;
-    }
-
-    .stat-number.money {
-      color: var(--orange);
-    }
-
-    .filter-bar {
-      grid-column: 1 / -1;
-
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      overflow-x: auto;
-      padding: 3px 0 8px;
-      scrollbar-width: thin;
-    }
-
-    .filter-btn {
-      flex: 0 0 auto;
-
-      padding: 9px 15px;
-      border-radius: 999px;
-
-      border: 1px solid var(--border);
-      background: var(--card);
-
-      color: var(--text);
-      font-weight: 750;
-    }
-
-    .filter-btn.active {
-      background: var(--brown);
-      color: white;
-      border-color: var(--brown);
-    }
-
-    /* =========================================================
-       Chart
-       ========================================================= */
-
-    .chart-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-
-      margin-bottom: 22px;
-      padding: 20px;
-
-      min-height: 280px;
-    }
-
-    .section-title {
-      font-weight: 900;
-      font-size: 1.05rem;
-      margin-bottom: 10px;
-    }
-
-    .chart-wrapper {
-      height: 245px;
-      position: relative;
-    }
-
-    .empty-chart {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-soft);
-      font-weight: 700;
-    }
-
-    /* =========================================================
-       Records
-       ========================================================= */
-
-    .records-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-
-      overflow: hidden;
-    }
-
-    .records-toolbar {
-      padding: 17px 18px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-
-      border-bottom: 1px solid var(--border);
-    }
-
-    .search-box {
-      width: min(420px, 100%);
-      position: relative;
-    }
-
-    .search-box input {
-      width: 100%;
-
-      min-height: 42px;
-      padding: 8px 14px 8px 40px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-
-      outline: none;
-      background: var(--bg-soft);
-      color: var(--text);
-    }
-
-    .search-box input:focus {
-      border-color: var(--primary-dark);
-      box-shadow: 0 0 0 3px rgba(245, 215, 110, 0.25);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-
-    .record-count {
-      color: var(--text-soft);
-      font-size: 0.9rem;
-      white-space: nowrap;
-    }
-
-    .table-scroll {
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    .record-table {
-      width: 100%;
-      min-width: 720px;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    .record-table th {
-      background: var(--card-2);
-      color: var(--brown);
-      font-size: 0.88rem;
-      font-weight: 900;
-
-      padding: 13px 14px;
-      text-align: left;
-
-      white-space: nowrap;
-    }
-
-    .record-table td {
-      padding: 13px 14px;
-      border-top: 1px solid var(--border);
-
-      vertical-align: middle;
-    }
-
-    /*
-      重新調整欄位寬度：
-
-      # 序號
-      # 類別
-      # 內容
-      # 時間
-      # 金額
-
-      讓 TH 與 TD 完全使用相同 table layout。
-    */
-
-    .col-id {
-      width: 9%;
-    }
-
-    .col-category {
-      width: 15%;
-    }
-
-    .col-content {
-      width: 32%;
-    }
-
-    .col-time {
-      width: 23%;
-    }
-
-    .col-amount {
-      width: 21%;
-      text-align: right !important;
-    }
-
-    th.col-amount,
-    td.col-amount {
-      text-align: right;
-    }
-
-    .sort-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-
-      border: none;
-      background: transparent;
-      color: inherit;
-
-      padding: 0;
-      font-weight: 900;
-    }
-
-    .sort-button:hover {
-      color: var(--orange);
-    }
-
-    .filter-wrapper {
-      position: relative;
-      display: inline-block;
-      margin-left: 5px;
-    }
-
-    .filter-button {
-      border: none;
-      background: transparent;
-      color: inherit;
-      padding: 3px;
-      font-size: 0.9rem;
-    }
-
-    .category-menu {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-
-      z-index: 200;
-
-      width: 180px;
-      max-height: 260px;
-
-      overflow-y: auto;
-      overscroll-behavior: contain;
-
-      padding: 7px;
-
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-
-      box-shadow: 0 12px 30px rgba(65, 45, 15, 0.18);
-
-      display: none;
-    }
-
-    .category-menu.open {
-      display: block;
-    }
-
-    .category-option {
-      width: 100%;
-
-      border: none;
-      background: transparent;
-
-      padding: 10px;
-      text-align: left;
-
-      color: var(--text);
-      border-radius: 8px;
-      font-weight: 700;
-    }
-
-    .category-option:hover,
-    .category-option.active {
-      background: var(--card-2);
-    }
-
-    /* =========================================================
-       Category
-       ========================================================= */
-
-    .category-tag {
-      display: inline-flex;
-      align-items: center;
-
-      padding: 4px 9px;
-      border-radius: 999px;
-
-      font-size: 0.78rem;
-      font-weight: 900;
-
-      white-space: nowrap;
-    }
-
-    .cat-餐飲 {
-      background: #ffe0b2;
-      color: #874a00;
-    }
-
-    .cat-交通 {
-      background: #cce5ff;
-      color: #16588c;
-    }
-
-    .cat-購物 {
-      background: #ffd2df;
-      color: #9a3055;
-    }
-
-    .cat-娛樂 {
-      background: #ddd0ff;
-      color: #6042a0;
-    }
-
-    .cat-房租 {
-      background: #d9efc4;
-      color: #3e7027;
-    }
-
-    .cat-醫療 {
-      background: #ffcfcf;
-      color: #a12c2c;
-    }
-
-    .cat-其他 {
-      background: #ddd8cd;
-      color: #625b4f;
-    }
-
-    /* =========================================================
-       Time
-       ========================================================= */
-
-    .time-display {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      line-height: 1.2;
-    }
-
-    .time-date {
-      font-weight: 800;
-      color: var(--text);
-      font-size: 0.9rem;
-    }
-
-    .time-clock {
-      color: var(--text-soft);
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    .amount {
-      color: var(--orange);
-      font-size: 1.03rem;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .record-row {
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
-
-    .record-row:hover {
-      background: rgba(245, 215, 110, 0.13);
-    }
-
-    .row-actions {
-      display: none;
-      gap: 5px;
-      margin-left: 7px;
-    }
-
-    .record-row:hover .row-actions {
-      display: inline-flex;
-    }
-
-    .icon-button {
-      width: 30px;
-      height: 30px;
-
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      border: 1px solid var(--border);
-      border-radius: 8px;
-
-      background: var(--card);
-    }
-
-    .icon-button.delete {
-      color: var(--danger);
-    }
-
-    .empty-records {
-      padding: 55px 20px;
-      text-align: center;
-      color: var(--text-soft);
-      font-weight: 700;
-    }
-
-    /* =========================================================
-       Modal
-       ========================================================= */
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-
-      z-index: 500;
-
-      display: none;
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
-
-      background: rgba(28, 21, 12, 0.48);
-      backdrop-filter: blur(5px);
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal {
-      width: min(560px, 100%);
-      max-height: 90vh;
-
-      overflow-y: auto;
-
-      background: var(--card);
-      color: var(--text);
-
-      border: 1px solid var(--border);
-      border-radius: 20px;
-
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
-
-      animation: modalIn 0.18s ease;
-    }
-
-    @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px) scale(0.98);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    .modal-header {
-      padding: 18px 20px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-title {
-      font-size: 1.12rem;
-      font-weight: 950;
-    }
-
-    .modal-close {
-      width: 36px;
-      height: 36px;
-
-      border: none;
-      border-radius: 50%;
-
-      background: var(--card-2);
-      color: var(--text);
-
-      font-size: 1.2rem;
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .detail-main {
-      text-align: center;
-      padding: 10px 0 20px;
-    }
-
-    .detail-amount {
-      font-size: 2.4rem;
-      font-weight: 950;
-      color: var(--orange);
-    }
-
-    .detail-content {
-      margin-top: 6px;
-      font-size: 1.15rem;
-      font-weight: 850;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .detail-item {
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 13px;
-    }
-
-    .detail-item.full {
-      grid-column: 1 / -1;
-    }
-
-    .detail-label {
-      color: var(--text-soft);
-      font-size: 0.78rem;
-      font-weight: 800;
-      margin-bottom: 5px;
-    }
-
-    .detail-value {
-      font-weight: 800;
-    }
-
-    .modal-footer {
-      padding: 15px 20px;
-
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-
-      border-top: 1px solid var(--border);
-    }
-
-    /* =========================================================
-       Form
-       ========================================================= */
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 7px;
-      font-weight: 850;
-    }
-
-    .form-control {
-      width: 100%;
-
-      min-height: 45px;
-
-      border: 1px solid var(--border);
-      border-radius: 11px;
-
-      padding: 9px 12px;
-
-      outline: none;
-
-      background: var(--bg-soft);
-      color: var(--text);
-    }
-
-    .form-control:focus {
-      border-color: var(--primary-dark);
-      box-shadow: 0 0 0 3px rgba(245, 215, 110, 0.25);
-    }
-
-    .amount-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .amount-row input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .quick-add {
-      display: flex;
-      gap: 6px;
-    }
-
-    .quick-add button {
-      border: 1px solid var(--border);
-      background: var(--card-2);
-      color: var(--brown);
-
-      border-radius: 9px;
-      padding: 7px 9px;
-
-      font-weight: 850;
-      white-space: nowrap;
-    }
-
-    .location-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .location-row input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    /* =========================================================
-       Toast
-       ========================================================= */
-
-    .toast-container {
-      position: fixed;
-      top: 84px;
-      left: 50%;
-      transform: translateX(-50%);
-
-      z-index: 1000;
-
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      pointer-events: none;
-    }
-
-    .toast {
-      min-width: 220px;
-      max-width: 90vw;
-
-      padding: 12px 17px;
-
-      border-radius: 12px;
-
-      background: var(--brown);
-      color: white;
-
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-
-      text-align: center;
-      font-weight: 800;
-
-      animation:
-        toastIn 0.2s ease,
-        toastOut 0.25s ease 1.75s forwards;
-    }
-
-    @keyframes toastIn {
-      from {
-        opacity: 0;
-        transform: translateY(-7px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes toastOut {
-      to {
-        opacity: 0;
-        transform: translateY(-7px);
-      }
-    }
-
-    /* =========================================================
-       Data menu
-       ========================================================= */
-
-    .data-menu-wrapper {
-      position: relative;
-    }
-
-    .data-menu {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-
-      width: 190px;
-
-      display: none;
-
-      padding: 7px;
-
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 13px;
-
-      box-shadow: 0 12px 30px rgba(65, 45, 15, 0.18);
-
-      z-index: 300;
-    }
-
-    .data-menu.open {
-      display: block;
-    }
-
-    .data-menu button {
-      width: 100%;
-
-      padding: 10px;
-
-      border: none;
-      background: transparent;
-
-      color: var(--text);
-      text-align: left;
-
-      border-radius: 8px;
-      font-weight: 750;
-    }
-
-    .data-menu button:hover {
-      background: var(--card-2);
-    }
-
-    .data-menu button.danger-item {
-      color: var(--danger);
-    }
-
-    /* =========================================================
-       Mobile
-       ========================================================= */
-
-    @media (max-width: 900px) {
-      .topbar {
-        padding: 10px 16px;
-      }
-
-      main {
-        padding: 17px 16px 30px;
-      }
-
-      .font-control span {
-        display: none;
-      }
-
-      .dashboard {
-        gap: 12px;
-      }
-    }
-
-    @media (max-width: 600px) {
-      html {
-        font-size: max(var(--font-size), 17px);
-      }
-
-      body {
-        overflow-x: hidden;
-      }
-
-      .topbar {
-        min-height: 62px;
-        padding: 8px 11px;
-
-        gap: 7px;
-      }
-
-      .brand-area {
-        gap: 5px;
-        flex: 1;
-        min-width: 0;
-      }
-
-      .brand {
-        font-size: 1rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .header-actions {
-        gap: 5px;
-      }
-
-      .desktop-only {
-        display: none !important;
-      }
-
-      .mobile-menu {
-        display: block;
-      }
-
-      .btn {
-        min-height: 43px;
-        padding: 8px 11px;
-      }
-
-      .header-actions .btn-primary {
-        width: 43px;
-        padding: 0;
-        font-size: 1.25rem;
-      }
-
-      main {
-        padding: 12px 10px 25px;
-      }
-
-      /*
-        手機版統計資料垂直排列
-      */
-
-      .dashboard {
-        min-height: auto;
-
-        grid-template-columns: 1fr;
-
-        margin-bottom: 12px;
-      }
-
-      .stat-card {
-        min-height: 125px;
-        padding: 19px 20px;
-      }
-
-      .stat-number {
-        font-size: 2.15rem;
-      }
-
-      .filter-bar {
-        grid-column: 1;
-        padding-bottom: 3px;
-      }
-
-      .filter-btn {
-        min-height: 43px;
-        padding: 8px 13px;
-      }
-
-      .chart-section {
-        padding: 13px;
-        margin-bottom: 12px;
-        min-height: 250px;
-      }
-
-      .chart-wrapper {
-        height: 220px;
-      }
-
-      .records-toolbar {
-        padding: 11px;
-
-        align-items: center;
-      }
-
-      .search-box {
-        width: 65%;
-      }
-
-      .search-box input {
-        min-height: 43px;
-        padding-left: 37px;
-      }
-
-      .record-count {
-        font-size: 0.78rem;
-      }
-
-      /*
-        清單保持水平表格。
-        使用者可以左右拖動。
-      */
-
-      .table-scroll {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .record-table {
-        min-width: 680px;
-      }
-
-      .record-table th,
-      .record-table td {
-        padding: 12px 9px;
-      }
-
-      .col-id {
-        width: 10%;
-      }
-
-      .col-category {
-        width: 17%;
-      }
-
-      .col-content {
-        width: 31%;
-      }
-
-      .col-time {
-        width: 22%;
-      }
-
-      .col-amount {
-        width: 20%;
-      }
-
-      /*
-        手機不使用左滑刪除功能
-      */
-
-      .row-actions {
-        display: none !important;
-      }
-
-      .detail-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .detail-item.full {
-        grid-column: auto;
-      }
-
-      .modal-backdrop {
-        padding: 10px;
-        align-items: flex-end;
-      }
-
-      .modal {
-        max-height: 88vh;
-        border-radius: 20px 20px 14px 14px;
-      }
-
-      .modal-footer {
-        flex-wrap: wrap;
-      }
-
-      .modal-footer .btn {
-        flex: 1;
-      }
-
-      .toast-container {
-        top: 70px;
-      }
-
-      .font-control {
-        padding: 2px 5px;
-      }
-
-      .font-control input {
-        width: 65px;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- =========================================================
+     Header
+     ========================================================= -->
 
-  <!-- =========================================================
-       Header
-       ========================================================= -->
+<header class="app-header">
+    <div class="header-inner">
 
-  <header class="topbar">
+```
+    <div class="brand">
+        <div class="brand-icon">💰</div>
 
-    <div class="brand-area">
+        <div>
+            <div class="brand-title">我的記帳本</div>
 
-      <div class="brand">
-        💰 我的記帳本
-      </div>
+            <div class="user-area">
+                <span id="userStatus" class="user-status">🔒 未登入</span>
 
-      <!--
-        Google Firebase 登入
+                <button
+                    id="loginBtn"
+                    class="btn"
+                    type="button">
+                    🔑 Google 登入
+                </button>
 
-        登入後會自動顯示「登出」。
-      -->
-      <button
-        id="loginBtn"
-        class="login-btn"
-        type="button"
-      >
-        登入
-      </button>
-
+                <button
+                    id="logoutBtn"
+                    class="btn"
+                    type="button"
+                    style="display:none;">
+                    🚪 登出
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="header-actions">
 
-      <!-- 字體大小 -->
-      <label class="font-control desktop-only">
-        <span>字體</span>
+        <div class="font-control">
+            <span>字體</span>
+            <input
+                id="fontSizeSlider"
+                type="range"
+                min="14"
+                max="22"
+                value="16">
+        </div>
+
+        <button
+            id="themeBtn"
+            class="btn icon-btn theme-btn"
+            type="button"
+            title="深色／淺色模式">
+            🌓
+        </button>
+
+        <!-- 資料管理 -->
+        <div class="dropdown" id="dataDropdown">
+            <button
+                id="dataManageBtn"
+                class="btn"
+                type="button">
+                🗂️ 資料管理
+            </button>
+
+            <div class="dropdown-menu">
+
+                <button
+                    id="exportBtn"
+                    class="dropdown-item"
+                    type="button">
+                    📤 匯出 CSV
+                </button>
+
+                <button
+                    id="importBtn"
+                    class="dropdown-item"
+                    type="button">
+                    📥 匯入 CSV / JSON
+                </button>
+
+                <button
+                    id="clearBtn"
+                    class="dropdown-item"
+                    type="button">
+                    🗑️ 全部刪除
+                </button>
+
+            </div>
+        </div>
 
         <input
-          id="fontSizeRange"
-          type="range"
-          min="14"
-          max="21"
-          step="1"
-          value="16"
-          title="調整字體大小"
-        >
-      </label>
-
-      <!-- 深色模式 -->
-      <button
-        id="themeBtn"
-        class="btn"
-        type="button"
-        title="深色 / 淺色模式"
-      >
-        🌓
-        <span class="desktop-only">模式</span>
-      </button>
-
-      <!-- 資料管理 -->
-      <div class="data-menu-wrapper">
+            id="fileInput"
+            class="hidden-file"
+            type="file"
+            accept=".csv,.json">
 
         <button
-          id="dataMenuBtn"
-          class="btn desktop-only"
-          type="button"
-        >
-          📁 資料管理
+            id="addBtn"
+            class="btn btn-primary add-btn"
+            type="button">
+            <span>➕ 新增記錄</span>
+            <b>＋</b>
         </button>
 
-        <button
-          id="mobileDataMenuBtn"
-          class="btn mobile-menu"
-          type="button"
-          title="資料管理"
-        >
-          📁
-        </button>
+    </div>
+</div>
+```
+
+</header>
+
+<main>
+
+```
+<!-- =====================================================
+     Dashboard
+     ===================================================== -->
+
+<section class="dashboard">
+
+    <div class="stat-card">
+        <div class="stat-label">總消費次數</div>
+        <div id="totalCount" class="stat-number">0</div>
+        <div class="stat-unit">筆記錄</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">總消費金額</div>
+        <div id="totalAmount" class="stat-number">NT$ 0.00</div>
+        <div class="stat-unit">新台幣 NTD</div>
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     Quick filters
+     ===================================================== -->
+
+<section class="quick-filter">
+
+    <button
+        class="filter-btn active"
+        data-period="all">
+        📋 全部
+    </button>
+
+    <button
+        class="filter-btn"
+        data-period="today">
+        📅 今日
+    </button>
+
+    <button
+        class="filter-btn"
+        data-period="week">
+        📅 本週
+    </button>
+
+    <button
+        class="filter-btn"
+        data-period="month">
+        📅 本月
+    </button>
+
+</section>
+
+
+<!-- =====================================================
+     Chart
+     ===================================================== -->
+
+<section class="chart-card">
+
+    <div class="chart-title">
+        📊 消費類別分析
+    </div>
+
+    <div class="chart-container">
+        <canvas id="categoryChart"></canvas>
 
         <div
-          id="dataMenu"
-          class="data-menu"
-        >
+            id="noChart"
+            class="no-chart"
+            style="display:none;">
+            📭 無資料可視化
+        </div>
+    </div>
 
-          <button id="exportBtn">
-            📤 匯出資料
-          </button>
+</section>
 
-          <button id="importBtn">
-            📥 匯入資料
-          </button>
 
-          <button
-            id="clearAllBtn"
-            class="danger-item"
-          >
-            🗑️ 全部刪除
-          </button>
+<!-- =====================================================
+     History
+     ===================================================== -->
+
+<section class="history-card">
+
+    <div class="history-toolbar">
+
+        <input
+            id="searchInput"
+            class="search-box"
+            type="search"
+            placeholder="🔍 搜尋消費內容或地點...">
+
+        <!-- 排序 -->
+        <div class="category-menu-wrap">
+
+            <button
+                id="sortBtn"
+                class="tool-btn"
+                type="button">
+                ↕️ 排序
+            </button>
+
+            <div
+                id="sortMenu"
+                class="category-menu">
+
+                <button
+                    class="category-option"
+                    data-sort="id">
+                    消費序號
+                </button>
+
+                <button
+                    class="category-option"
+                    data-sort="content">
+                    消費內容
+                </button>
+
+                <button
+                    class="category-option"
+                    data-sort="amount">
+                    消費金額
+                </button>
+
+                <button
+                    class="category-option"
+                    data-sort="time">
+                    消費時間
+                </button>
+
+            </div>
 
         </div>
 
-      </div>
 
-      <!-- 新增 -->
-      <button
-        id="addBtn"
-        class="btn btn-primary"
-        type="button"
-        title="新增記錄"
-      >
-        <span class="desktop-only">➕ 新增記錄</span>
-        <span class="mobile-menu">＋</span>
-      </button>
+        <!-- 類別篩選 -->
+        <div class="category-menu-wrap">
+
+            <button
+                id="categoryFilterBtn"
+                class="tool-btn"
+                type="button">
+                🔽 類別
+            </button>
+
+            <div
+                id="categoryMenu"
+                class="category-menu">
+
+                <button
+                    class="category-option active"
+                    data-category="all">
+                    全部類別
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="餐飲">
+                    🍜 餐飲
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="交通">
+                    🚌 交通
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="購物">
+                    🛍️ 購物
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="娛樂">
+                    🎮 娛樂
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="房租">
+                    🏠 房租
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="醫療">
+                    🏥 醫療
+                </button>
+
+                <button
+                    class="category-option"
+                    data-category="其他">
+                    📦 其他
+                </button>
+
+            </div>
+
+        </div>
 
     </div>
 
-  </header>
 
-  <!-- =========================================================
-       Main
-       ========================================================= -->
-
-  <main>
-
-    <!-- =======================================================
-         Dashboard
-         ======================================================= -->
-
-    <section class="dashboard">
-
-      <div class="stat-card">
-
-        <div class="stat-label">
-          總消費次數
-        </div>
-
-        <div
-          id="totalCount"
-          class="stat-number"
-        >
-          0
-        </div>
-
-      </div>
-
-      <div class="stat-card">
-
-        <div class="stat-label">
-          總消費金額（NTD）
-        </div>
-
-        <div
-          id="totalAmount"
-          class="stat-number money"
-        >
-          NT$ 0
-        </div>
-
-      </div>
-
-      <!-- 快速篩選 -->
-      <div class="filter-bar">
-
-        <button
-          class="filter-btn active"
-          data-period="all"
-        >
-          全部
-        </button>
-
-        <button
-          class="filter-btn"
-          data-period="today"
-        >
-          📅 今日
-        </button>
-
-        <button
-          class="filter-btn"
-          data-period="week"
-        >
-          📅 本週
-        </button>
-
-        <button
-          class="filter-btn"
-          data-period="month"
-        >
-          📅 本月
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- =======================================================
-         Chart
-         ======================================================= -->
-
-    <section class="chart-section">
-
-      <div class="section-title">
-        📊 消費類別分析
-      </div>
-
-      <div class="chart-wrapper">
-
-        <canvas
-          id="categoryChart"
-        ></canvas>
-
-        <div
-          id="emptyChart"
-          class="empty-chart"
-          style="display:none;"
-        >
-          無資料可視化
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =======================================================
-         Records
-         ======================================================= -->
-
-    <section class="records-section">
-
-      <div class="records-toolbar">
-
-        <div class="search-box">
-
-          <span class="search-icon">
-            🔍
-          </span>
-
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="搜尋消費內容或地點..."
-          >
-
-        </div>
-
-        <div
-          id="recordCount"
-          class="record-count"
-        >
-          0 筆
-        </div>
-
-      </div>
-
-      <div class="table-scroll">
-
-        <table class="record-table">
-
-          <thead>
-
-            <tr>
-
-              <!-- 序號 -->
-              <th class="col-id">
-
-                <button
-                  class="sort-button"
-                  data-sort="id"
-                >
-                  序號
-                  <span>↕</span>
-                </button>
-
-              </th>
-
-              <!-- 類別 -->
-              <th class="col-category">
-
-                類別
-
-                <span class="filter-wrapper">
-
-                  <button
-                    id="categoryFilterBtn"
-                    class="filter-button"
-                    title="類別篩選"
-                  >
-                    ⚱
-                  </button>
-
-                  <div
-                    id="categoryMenu"
-                    class="category-menu"
-                  >
-
-                    <button
-                      class="category-option active"
-                      data-category="all"
-                    >
-                      全部類別
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="餐飲"
-                    >
-                      🍜 餐飲
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="交通"
-                    >
-                      🚇 交通
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="購物"
-                    >
-                      🛍️ 購物
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="娛樂"
-                    >
-                      🎮 娛樂
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="房租"
-                    >
-                      🏠 房租
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="醫療"
-                    >
-                      🏥 醫療
-                    </button>
-
-                    <button
-                      class="category-option"
-                      data-category="其他"
-                    >
-                      📦 其他
-                    </button>
-
-                  </div>
-
-                </span>
-
-              </th>
-
-              <!-- 內容 -->
-              <th class="col-content">
-
-                <button
-                  class="sort-button"
-                  data-sort="content"
-                >
-                  消費內容
-                  <span>↕</span>
-                </button>
-
-              </th>
-
-              <!-- 時間 -->
-              <th class="col-time">
-                消費時間
-              </th>
-
-              <!-- 金額 -->
-              <th class="col-amount">
-
-                <button
-                  class="sort-button"
-                  data-sort="amount"
-                >
-                  消費金額
-                  <span>↕</span>
-                </button>
-
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody id="recordBody"></tbody>
+    <!-- Desktop table -->
+
+    <div class="table-wrap">
+
+        <table class="history-table">
+
+            <thead>
+                <tr>
+
+                    <th>
+                        <button
+                            class="sort-btn"
+                            data-sort="id">
+                            序號 ↕
+                        </button>
+                    </th>
+
+                    <th>
+                        類別
+                    </th>
+
+                    <th>
+                        <button
+                            class="sort-btn"
+                            data-sort="content">
+                            消費內容 ↕
+                        </button>
+                    </th>
+
+                    <th>
+                        <button
+                            class="sort-btn"
+                            data-sort="amount">
+                            消費金額 ↕
+                        </button>
+                    </th>
+
+                    <th>
+                        消費時間
+                    </th>
+
+                </tr>
+            </thead>
+
+            <tbody id="tableBody"></tbody>
 
         </table>
 
-      </div>
+    </div>
 
-    </section>
 
-  </main>
+    <!-- Mobile list -->
 
-</div>
+    <div
+        id="mobileList"
+        class="mobile-list">
+    </div>
 
-<!-- =========================================================
-     Toast
-     ========================================================= -->
+</section>
+```
 
-<div
-  id="toastContainer"
-  class="toast-container"
-></div>
-
-<!-- =========================================================
-     Import File
-     ========================================================= -->
-
-<input
-  id="fileInput"
-  type="file"
-  accept=".csv,.json,application/json,text/csv"
-  style="display:none;"
->
+</main>
 
 <!-- =========================================================
      Detail Modal
      ========================================================= -->
 
 <div
-  id="detailModal"
-  class="modal-backdrop"
->
+    id="detailModal"
+    class="modal">
 
-  <div class="modal">
+```
+<div class="modal-box">
 
     <div class="modal-header">
 
-      <div class="modal-title">
-        消費記錄詳情
-      </div>
+        <h2>🧾 消費詳細資料</h2>
 
-      <button
-        class="modal-close"
-        data-close="detailModal"
-      >
-        ×
-      </button>
+        <button
+            class="close-btn"
+            data-close="detailModal">
+            ×
+        </button>
 
     </div>
 
-    <div class="modal-body">
-
-      <div class="detail-main">
-
-        <div
-          id="detailAmount"
-          class="detail-amount"
-        >
-          NT$ 0
-        </div>
-
-        <div
-          id="detailContent"
-          class="detail-content"
-        >
-          -
-        </div>
-
-      </div>
-
-      <div class="detail-grid">
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費序號
-          </div>
-
-          <div
-            id="detailId"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費類別
-          </div>
-
-          <div id="detailCategory"></div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費時間
-          </div>
-
-          <div
-            id="detailTime"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-        <div class="detail-item">
-
-          <div class="detail-label">
-            消費地點
-          </div>
-
-          <div
-            id="detailLocation"
-            class="detail-value"
-          >
-            -
-          </div>
-
-        </div>
-
-      </div>
-
+    <div
+        id="detailBody"
+        class="modal-body">
     </div>
 
     <div class="modal-footer">
 
-      <button
-        id="copyRecordBtn"
-        class="btn"
-      >
-        📋 複製此筆
-      </button>
+        <button
+            id="copyRecordBtn"
+            class="btn">
+            📋 複製此筆
+        </button>
 
-      <button
-        id="editRecordBtn"
-        class="btn"
-      >
-        ✏️ 編輯
-      </button>
+        <button
+            id="editRecordBtn"
+            class="btn">
+            ✏️ 編輯
+        </button>
 
-      <button
-        id="deleteRecordBtn"
-        class="btn btn-danger"
-      >
-        🗑️ 刪除
-      </button>
+        <button
+            id="deleteRecordBtn"
+            class="btn btn-danger">
+            🗑️ 刪除
+        </button>
 
     </div>
 
-  </div>
+</div>
+```
 
 </div>
 
 <!-- =========================================================
-     Add/Edit Modal
+     Add / Edit Modal
      ========================================================= -->
 
 <div
-  id="formModal"
-  class="modal-backdrop"
->
+    id="formModal"
+    class="modal">
 
-  <div class="modal">
+```
+<div class="modal-box">
 
     <div class="modal-header">
 
-      <div
-        id="formModalTitle"
-        class="modal-title"
-      >
-        新增消費記錄
-      </div>
+        <h2 id="formTitle">➕ 新增消費記錄</h2>
 
-      <button
-        class="modal-close"
-        data-close="formModal"
-      >
-        ×
-      </button>
+        <button
+            class="close-btn"
+            data-close="formModal">
+            ×
+        </button>
 
     </div>
 
     <form id="recordForm">
 
-      <div class="modal-body">
+        <div class="modal-body">
 
-        <!-- 金額 -->
+            <div class="form-group">
 
-        <div class="form-group">
+                <label class="form-label">
+                    消費金額（NTD）
+                </label>
 
-          <label class="form-label">
-            消費金額（NTD）
-          </label>
+                <input
+                    id="amountInput"
+                    class="form-control"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    placeholder="例如 150">
 
-          <div class="amount-row">
+                <div class="amount-shortcuts">
 
-            <input
-              id="amountInput"
-              class="form-control"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              placeholder="例如 120"
-            >
+                    <button
+                        type="button"
+                        data-add="100">
+                        +100
+                    </button>
 
-            <div class="quick-add">
+                    <button
+                        type="button"
+                        data-add="500">
+                        +500
+                    </button>
 
-              <button
-                type="button"
-                data-add="100"
-              >
-                +100
-              </button>
+                    <button
+                        type="button"
+                        data-add="1000">
+                        +1000
+                    </button>
 
-              <button
-                type="button"
-                data-add="500"
-              >
-                +500
-              </button>
-
-              <button
-                type="button"
-                data-add="1000"
-              >
-                +1000
-              </button>
+                </div>
 
             </div>
 
-          </div>
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    消費內容
+                </label>
+
+                <input
+                    id="contentInput"
+                    class="form-control"
+                    type="text"
+                    required
+                    placeholder="例如：午餐">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    消費時間
+                </label>
+
+                <input
+                    id="timeInput"
+                    class="form-control"
+                    type="datetime-local"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    消費地點
+                </label>
+
+                <div class="location-row">
+
+                    <input
+                        id="locationInput"
+                        class="form-control"
+                        type="text"
+                        placeholder="例如：台北車站">
+
+                    <button
+                        id="mapBtn"
+                        class="btn map-btn"
+                        type="button">
+                        🗺️ 地圖
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    消費類別
+                </label>
+
+                <select
+                    id="categoryInput"
+                    class="form-control">
+
+                    <option value="餐飲">🍜 餐飲</option>
+                    <option value="交通">🚌 交通</option>
+                    <option value="購物">🛍️ 購物</option>
+                    <option value="娛樂">🎮 娛樂</option>
+                    <option value="房租">🏠 房租</option>
+                    <option value="醫療">🏥 醫療</option>
+                    <option value="其他">📦 其他</option>
+
+                </select>
+
+            </div>
 
         </div>
 
-        <!-- 內容 -->
 
-        <div class="form-group">
-
-          <label class="form-label">
-            消費內容
-          </label>
-
-          <input
-            id="contentInput"
-            class="form-control"
-            type="text"
-            maxlength="100"
-            required
-            placeholder="例如：午餐"
-          >
-
-        </div>
-
-        <!-- 時間 -->
-
-        <div class="form-group">
-
-          <label class="form-label">
-            消費時間
-          </label>
-
-          <input
-            id="timeInput"
-            class="form-control"
-            type="datetime-local"
-            required
-          >
-
-        </div>
-
-        <!-- 地點 -->
-
-        <div class="form-group">
-
-          <label class="form-label">
-            消費地點
-          </label>
-
-          <div class="location-row">
-
-            <input
-              id="locationInput"
-              class="form-control"
-              type="text"
-              maxlength="200"
-              placeholder="例如：台北車站"
-            >
+        <div class="modal-footer">
 
             <button
-              id="mapBtn"
-              type="button"
-              class="btn"
-            >
-              🗺️ 地圖
+                type="button"
+                class="btn"
+                data-close="formModal">
+                取消
             </button>
 
-          </div>
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="saveRecordBtn">
+                確定新增
+            </button>
 
         </div>
-
-        <!-- 類別 -->
-
-        <div class="form-group">
-
-          <label class="form-label">
-            消費類別
-          </label>
-
-          <select
-            id="categoryInput"
-            class="form-control"
-          >
-
-            <option value="餐飲">🍜 餐飲</option>
-            <option value="交通">🚇 交通</option>
-            <option value="購物">🛍️ 購物</option>
-            <option value="娛樂">🎮 娛樂</option>
-            <option value="房租">🏠 房租</option>
-            <option value="醫療">🏥 醫療</option>
-            <option value="其他">📦 其他</option>
-
-          </select>
-
-        </div>
-
-      </div>
-
-      <div class="modal-footer">
-
-        <button
-          type="button"
-          class="btn"
-          data-close="formModal"
-        >
-          取消
-        </button>
-
-        <button
-          type="submit"
-          class="btn btn-primary"
-        >
-          確定儲存
-        </button>
-
-      </div>
 
     </form>
 
-  </div>
+</div>
+```
 
 </div>
 
-<!-- =========================================================
-     Firebase
-     ========================================================= -->
+<div
+    id="toast"
+    class="toast">
+</div>
 
 <script type="module">
 
-  /* =========================================================
-     Firebase SDK
-     ========================================================= */
+/* =========================================================
+   Firebase
+   ========================================================= */
 
-  import {
+import {
     initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-  import {
+import {
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    signInWithRedirect,
+    getRedirectResult,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  import {
+import {
     getFirestore,
     collection,
     doc,
+    addDoc,
     setDoc,
     deleteDoc,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    getDocs,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-  /* =========================================================
-     Firebase 設定
-     
-     這裡使用你提供的 Firebase Configuration。
-     
-     注意：
-     Firebase Web API Key 本身不是 Firebase 資料庫密碼。
-     真正控制資料安全的是 Firestore Rules + Authentication。
-     ========================================================= */
+/* =========================================================
+   Firebase Config
+   這就是你剛才提供給我的 Firebase 設定
+   ========================================================= */
 
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyAY2G2UObkOr-jnSI7ZfO4jsQb2ZSScOSoI",
     authDomain: "accounting-system-b42ba.firebaseapp.com",
     projectId: "accounting-system-b42ba",
@@ -2092,51 +1696,28 @@
     messagingSenderId: "112901288885",
     appId: "1:112901288885:web:350f90297018165d941ffc",
     measurementId: "G-XSP0NTY9ED"
-  };
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+
+const auth = getAuth(firebaseApp);
+
+const db = getFirestore(firebaseApp);
+
+const googleProvider = new GoogleAuthProvider();
+
+googleProvider.setCustomParameters({
+    prompt:"select_account"
+});
 
 
-  /* =========================================================
-     初始化 Firebase
-     ========================================================= */
+/* =========================================================
+   常數
+   ========================================================= */
 
-  const firebaseApp = initializeApp(firebaseConfig);
+const STORAGE_KEY = "accountingRecords";
 
-  const auth = getAuth(firebaseApp);
-
-  const db = getFirestore(firebaseApp);
-
-  const googleProvider = new GoogleAuthProvider();
-
-
-  /* =========================================================
-     你的 Firestore Rules 對應
-
-     match /users/{userId}/{document=**} {
-
-       allow read, write:
-         if request.auth != null
-         && request.auth.uid == userId;
-
-     }
-
-     因此資料必須放在：
-
-     users
-       └── UID
-            └── accountingRecords
-                 └── recordId
-
-     這樣登入者只能看到自己的資料。
-     ========================================================= */
-
-
-  /* =========================================================
-     常數
-     ========================================================= */
-
-  const STORAGE_KEY = "accountingRecords";
-
-  const CATEGORIES = [
+const CATEGORIES = [
     "餐飲",
     "交通",
     "購物",
@@ -2144,2252 +1725,1873 @@
     "房租",
     "醫療",
     "其他"
-  ];
+];
+
+let records = [];
+
+let currentUser = null;
+
+let selectedRecordId = null;
+
+let editingRecordId = null;
+
+let unsubscribeFirestore = null;
+
+let chart = null;
+
+let activePeriod = "all";
+
+let activeCategory = "all";
+
+let searchText = "";
+
+let sortField = "time";
+
+let sortDirection = "desc";
 
 
-  /* =========================================================
-     State
-     ========================================================= */
+/* =========================================================
+   DOM
+   ========================================================= */
 
-  let records = [];
+const $ = id => document.getElementById(id);
 
-  let currentUser = null;
+const tableBody = $("tableBody");
 
-  let selectedRecordId = null;
+const mobileList = $("mobileList");
 
-  let editingRecordId = null;
+const totalCount = $("totalCount");
 
-  let activePeriod = "all";
+const totalAmount = $("totalAmount");
 
-  let activeCategory = "all";
+const detailModal = $("detailModal");
 
-  let searchKeyword = "";
+const formModal = $("formModal");
 
-  let sortField = "id";
+const detailBody = $("detailBody");
 
-  let sortDirection = "desc";
+const recordForm = $("recordForm");
 
-  let categoryChart = null;
+const amountInput = $("amountInput");
+
+const contentInput = $("contentInput");
+
+const timeInput = $("timeInput");
+
+const locationInput = $("locationInput");
+
+const categoryInput = $("categoryInput");
+
+const formTitle = $("formTitle");
+
+const saveRecordBtn = $("saveRecordBtn");
+
+const toast = $("toast");
+
+const categoryChartCanvas = $("categoryChart");
+
+const noChart = $("noChart");
 
 
-  /* =========================================================
-     DOM
-     ========================================================= */
+/* =========================================================
+   Utility
+   ========================================================= */
 
-  const $ = (id) => document.getElementById(id);
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
 
 
-  /* =========================================================
-     基本工具
-     ========================================================= */
+function formatMoney(value){
 
-  function showToast(message) {
+    return Number(value || 0).toLocaleString(
+        "zh-TW",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+}
 
-    const toast = document.createElement("div");
 
-    toast.className = "toast";
+function localDateTimeValue(date = new Date()){
+
+    const offset = date.getTimezoneOffset();
+
+    const local = new Date(
+        date.getTime() - offset * 60000
+    );
+
+    return local
+        .toISOString()
+        .slice(0,16);
+}
+
+
+function formatDesktopTime(value){
+
+    if(!value) return "-";
+
+    const d = new Date(value);
+
+    if(Number.isNaN(d.getTime())) return value;
+
+    return d.toLocaleString(
+        "zh-TW",
+        {
+            year:"numeric",
+            month:"2-digit",
+            day:"2-digit",
+            hour:"2-digit",
+            minute:"2-digit",
+            hour12:false
+        }
+    ).replace(/\//g,"/");
+}
+
+
+function formatMobileDate(value){
+
+    if(!value) return ["-",""];
+
+    const d = new Date(value);
+
+    if(Number.isNaN(d.getTime())) return [value,""];
+
+    return [
+        d.toLocaleDateString(
+            "zh-TW",
+            {
+                year:"numeric",
+                month:"2-digit",
+                day:"2-digit"
+            }
+        ),
+        d.toLocaleTimeString(
+            "zh-TW",
+            {
+                hour:"2-digit",
+                minute:"2-digit",
+                hour12:false
+            }
+        )
+    ];
+}
+
+
+function showToast(message,type="success"){
 
     toast.textContent = message;
 
-    $("toastContainer").appendChild(toast);
+    toast.className = "toast show";
 
-    setTimeout(() => {
-
-      toast.remove();
-
-    }, 2000);
-  }
-
-
-  function escapeHtml(value) {
-
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
-  function getNowLocalInputValue() {
-
-    const now = new Date();
-
-    const offset =
-      now.getTimezoneOffset() * 60000;
-
-    return new Date(
-      now.getTime() - offset
-    )
-      .toISOString()
-      .slice(0, 16);
-
-  }
-
-
-  function parseDate(value) {
-
-    if (!value) {
-      return null;
+    if(type === "error"){
+        toast.classList.add("error");
     }
 
-    const date = new Date(value);
+    clearTimeout(showToast.timer);
 
-    if (Number.isNaN(date.getTime())) {
-      return null;
-    }
-
-    return date;
-
-  }
+    showToast.timer = setTimeout(()=>{
+        toast.classList.remove("show");
+    },2000);
+}
 
 
-  function formatDateTime(value) {
+function getNextId(){
 
-    const date = parseDate(value);
-
-    if (!date) {
-      return {
-        date: "-",
-        time: "-"
-      };
-    }
-
-    const year = date.getFullYear();
-
-    const month = String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-    const day = String(
-      date.getDate()
-    ).padStart(2, "0");
-
-    const hour = String(
-      date.getHours()
-    ).padStart(2, "0");
-
-    const minute = String(
-      date.getMinutes()
-    ).padStart(2, "0");
-
-    return {
-      date: `${year}/${month}/${day}`,
-      time: `${hour}:${minute}`
-    };
-
-  }
-
-
-  function formatMoney(value) {
-
-    const number =
-      Number(value) || 0;
-
-    return number.toLocaleString(
-      "zh-TW",
-      {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-      }
-    );
-
-  }
-
-
-  function generateId() {
-
-    if (!records.length) {
-      return 1;
-    }
+    if(!records.length) return 1;
 
     return Math.max(
-      ...records.map(
-        r => Number(r.id) || 0
-      )
+        ...records.map(r => Number(r.id) || 0)
     ) + 1;
+}
 
-  }
 
+/* =========================================================
+   LocalStorage
+   ========================================================= */
 
-  /* =========================================================
-     LocalStorage
-     ========================================================= */
+function loadLocalData(){
 
-  function loadLocalRecords() {
+    try{
 
-    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
 
-      const saved =
-        localStorage.getItem(
-          STORAGE_KEY
-        );
+        if(!raw){
+            records = [];
+            return;
+        }
 
-      if (!saved) {
-        return [];
-      }
+        const parsed = JSON.parse(raw);
 
-      const parsed =
-        JSON.parse(saved);
+        records = Array.isArray(parsed)
+            ? parsed
+            : [];
 
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
+    }catch(error){
 
-      return parsed.map(normalizeRecord);
+        console.error(error);
 
-    } catch (error) {
-
-      console.error(
-        "LocalStorage 讀取失敗",
-        error
-      );
-
-      return [];
+        records = [];
 
     }
+}
 
-  }
 
-
-  function saveLocalRecords() {
+function saveLocalData(){
 
     localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(records)
+        STORAGE_KEY,
+        JSON.stringify(records)
     );
-
-  }
-
-
-  function normalizeRecord(record) {
-
-    return {
-      id: Number(record.id) || 0,
-
-      amount:
-        Number(record.amount) || 0,
-
-      content:
-        String(record.content || ""),
-
-      time:
-        record.time || "",
-
-      location:
-        String(record.location || ""),
-
-      category:
-        CATEGORIES.includes(record.category)
-          ? record.category
-          : "其他"
-    };
-
-  }
+}
 
 
-  /* =========================================================
-     Firebase 讀取
-     ========================================================= */
+/* =========================================================
+   Firebase Firestore
+   路徑：
+   users/{uid}/records/{recordId}
+   ========================================================= */
 
-  async function loadFirebaseRecords() {
+function getUserRecordsCollection(){
 
-    if (!currentUser) {
-      return;
-    }
+    if(!currentUser) return null;
 
-    try {
+    return collection(
+        db,
+        "users",
+        currentUser.uid,
+        "records"
+    );
+}
 
-      const recordsRef =
-        collection(
-          db,
-          "users",
-          currentUser.uid,
-          "accountingRecords"
+
+async function loadFirebaseRecords(){
+
+    if(!currentUser) return;
+
+    try{
+
+        const ref = getUserRecordsCollection();
+
+        const snapshot = await getDocs(ref);
+
+        const cloudRecords = snapshot.docs.map(
+            item => ({
+                id:Number(item.data().id),
+                ...item.data()
+            })
         );
 
-      const snapshot =
-        await getDocs(recordsRef);
+        records = cloudRecords.sort(
+            (a,b)=>Number(a.id)-Number(b.id)
+        );
 
-      const firebaseRecords = [];
+        saveLocalData();
 
-      snapshot.forEach(
-        docSnapshot => {
+        render();
 
-          firebaseRecords.push(
-            normalizeRecord(
-              docSnapshot.data()
-            )
-          );
+        showToast("☁️ 已載入 Firebase 資料");
+
+    }catch(error){
+
+        console.error(
+            "Firestore 載入失敗：",
+            error
+        );
+
+        showToast(
+            "⚠️ Firebase 載入失敗，暫時使用本機資料",
+            "error"
+        );
+
+        loadLocalData();
+
+        render();
+
+    }
+}
+
+
+async function saveRecordToFirebase(record){
+
+    if(!currentUser) return;
+
+    try{
+
+        const recordRef = doc(
+            db,
+            "users",
+            currentUser.uid,
+            "records",
+            String(record.id)
+        );
+
+        await setDoc(
+            recordRef,
+            record
+        );
+
+    }catch(error){
+
+        console.error(
+            "Firebase 儲存失敗：",
+            error
+        );
+
+        showToast(
+            "⚠️ Firebase 儲存失敗，但本機資料已保存",
+            "error"
+        );
+
+    }
+}
+
+
+async function deleteRecordFromFirebase(id){
+
+    if(!currentUser) return;
+
+    try{
+
+        const recordRef = doc(
+            db,
+            "users",
+            currentUser.uid,
+            "records",
+            String(id)
+        );
+
+        await deleteDoc(recordRef);
+
+    }catch(error){
+
+        console.error(error);
+
+        showToast(
+            "⚠️ Firebase 刪除失敗",
+            "error"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   Firebase 即時監聽
+   ========================================================= */
+
+function subscribeFirebase(){
+
+    if(unsubscribeFirestore){
+
+        unsubscribeFirestore();
+
+        unsubscribeFirestore = null;
+
+    }
+
+    if(!currentUser) return;
+
+    const ref = getUserRecordsCollection();
+
+    unsubscribeFirestore = onSnapshot(
+        ref,
+        snapshot => {
+
+            const cloudRecords =
+                snapshot.docs.map(
+                    item => ({
+                        id:Number(item.data().id),
+                        ...item.data()
+                    })
+                );
+
+            records = cloudRecords.sort(
+                (a,b)=>Number(a.id)-Number(b.id)
+            );
+
+            saveLocalData();
+
+            render();
+
+        },
+        error => {
+
+            console.error(
+                "Firestore 即時同步失敗：",
+                error
+            );
 
         }
-      );
-
-      /*
-        Firebase 有資料：
-        以 Firebase 為目前登入帳號的主要資料來源。
-
-        同時寫入 LocalStorage，
-        方便離線 / 未登入狀態使用。
-      */
-
-      records = firebaseRecords;
-
-      saveLocalRecords();
-
-      renderAll();
-
-    } catch (error) {
-
-      console.error(
-        "Firebase 讀取失敗：",
-        error
-      );
-
-      showToast(
-        "Firebase 讀取失敗，暫時使用本機資料"
-      );
-
-    }
-
-  }
-
-
-  /* =========================================================
-     Firebase 儲存單筆
-     ========================================================= */
-
-  async function saveRecordToFirebase(record) {
-
-    if (!currentUser) {
-      return;
-    }
-
-    const recordRef =
-      doc(
-        db,
-        "users",
-        currentUser.uid,
-        "accountingRecords",
-        String(record.id)
-      );
-
-    await setDoc(
-      recordRef,
-      record
     );
-
-  }
-
-
-  /* =========================================================
-     Firebase 刪除單筆
-     ========================================================= */
-
-  async function deleteRecordFromFirebase(id) {
-
-    if (!currentUser) {
-      return;
-    }
-
-    await deleteDoc(
-      doc(
-        db,
-        "users",
-        currentUser.uid,
-        "accountingRecords",
-        String(id)
-      )
-    );
-
-  }
+}
 
 
-  /* =========================================================
-     Google Login
-     ========================================================= */
+/* =========================================================
+   Filter
+   ========================================================= */
 
-  async function loginWithGoogle() {
+function isSameDay(a,b){
 
-    try {
-
-      await signInWithPopup(
-        auth,
-        googleProvider
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Google 登入失敗：",
-        error
-      );
-
-      if (
-        error.code ===
-        "auth/popup-blocked"
-      ) {
-
-        showToast(
-          "Google 登入視窗被瀏覽器阻擋"
-        );
-
-      } else if (
-        error.code ===
-        "auth/popup-closed-by-user"
-      ) {
-
-        showToast(
-          "登入視窗已關閉"
-        );
-
-      } else {
-
-        showToast(
-          "Google 登入失敗，請檢查 Firebase 設定"
-        );
-
-      }
-
-    }
-
-  }
+    return a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
+}
 
 
-  async function logoutGoogle() {
+function getStartOfWeek(date){
 
-    try {
+    const d = new Date(date);
 
-      await signOut(auth);
+    const day = d.getDay();
 
-      showToast("已登出");
+    const diff = day === 0 ? 6 : day - 1;
 
-    } catch (error) {
+    d.setHours(0,0,0,0);
 
-      console.error(error);
+    d.setDate(d.getDate() - diff);
 
-      showToast("登出失敗");
-
-    }
-
-  }
+    return d;
+}
 
 
-  /* =========================================================
-     Firebase Auth 狀態
-     ========================================================= */
-
-  onAuthStateChanged(
-    auth,
-    async user => {
-
-      currentUser = user;
-
-      if (user) {
-
-        $("loginBtn").textContent =
-          "登出";
-
-        $("loginBtn").title =
-          `${user.displayName || ""} 已登入`;
-
-        await loadFirebaseRecords();
-
-      } else {
-
-        $("loginBtn").textContent =
-          "登入";
-
-        $("loginBtn").title =
-          "使用 Google 登入";
-
-        records =
-          loadLocalRecords();
-
-        renderAll();
-
-      }
-
-    }
-  );
-
-
-  /* =========================================================
-     日期篩選
-     ========================================================= */
-
-  function isSameDay(a, b) {
-
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate()
-    );
-
-  }
-
-
-  function isThisWeek(date) {
+function filterRecords(){
 
     const now = new Date();
 
-    const day =
-      now.getDay();
+    let result = [...records];
 
-    const diff =
-      day === 0
-        ? 6
-        : day - 1;
+    if(activePeriod === "today"){
 
-    const monday =
-      new Date(now);
-
-    monday.setHours(
-      0, 0, 0, 0
-    );
-
-    monday.setDate(
-      now.getDate() - diff
-    );
-
-    const nextMonday =
-      new Date(monday);
-
-    nextMonday.setDate(
-      monday.getDate() + 7
-    );
-
-    return (
-      date >= monday &&
-      date < nextMonday
-    );
-
-  }
-
-
-  function isThisMonth(date) {
-
-    const now = new Date();
-
-    return (
-      date.getFullYear() ===
-        now.getFullYear() &&
-      date.getMonth() ===
-        now.getMonth()
-    );
-
-  }
-
-
-  function recordPassesPeriod(record) {
-
-    if (activePeriod === "all") {
-      return true;
-    }
-
-    const date =
-      parseDate(record.time);
-
-    if (!date) {
-      return false;
-    }
-
-    if (activePeriod === "today") {
-      return isSameDay(
-        date,
-        new Date()
-      );
-    }
-
-    if (activePeriod === "week") {
-      return isThisWeek(date);
-    }
-
-    if (activePeriod === "month") {
-      return isThisMonth(date);
-    }
-
-    return true;
-
-  }
-
-
-  /* =========================================================
-     Filtering
-     ========================================================= */
-
-  function getFilteredRecords() {
-
-    let result =
-      records.filter(
-        record =>
-          recordPassesPeriod(record)
-      );
-
-    if (activeCategory !== "all") {
-
-      result =
-        result.filter(
-          record =>
-            record.category ===
-            activeCategory
+        result = result.filter(r =>
+            isSameDay(
+                new Date(r.time),
+                now
+            )
         );
 
     }
 
-    if (searchKeyword.trim()) {
+    if(activePeriod === "week"){
 
-      const keyword =
-        searchKeyword
-          .trim()
-          .toLowerCase();
+        const start = getStartOfWeek(now);
 
-      result =
-        result.filter(record => {
+        result = result.filter(r =>
+            new Date(r.time) >= start
+        );
 
-          return (
-            String(record.content)
-              .toLowerCase()
-              .includes(keyword) ||
+    }
 
-            String(record.location)
-              .toLowerCase()
-              .includes(keyword)
-          );
+    if(activePeriod === "month"){
+
+        result = result.filter(r => {
+
+            const d = new Date(r.time);
+
+            return d.getFullYear() === now.getFullYear()
+                && d.getMonth() === now.getMonth();
 
         });
 
     }
 
-    result.sort(
-      (a, b) => {
+    if(activeCategory !== "all"){
 
-        let valueA;
-        let valueB;
-
-        if (sortField === "id") {
-
-          valueA =
-            Number(a.id);
-
-          valueB =
-            Number(b.id);
-
-        } else if (
-          sortField === "amount"
-        ) {
-
-          valueA =
-            Number(a.amount);
-
-          valueB =
-            Number(b.amount);
-
-        } else if (
-          sortField === "content"
-        ) {
-
-          valueA =
-            String(a.content)
-              .localeCompare(
-                String(b.content),
-                "zh-Hant"
-              );
-
-          valueB = 0;
-
-        }
-
-        if (
-          sortField === "content"
-        ) {
-
-          return sortDirection === "asc"
-            ? valueA
-            : -valueA;
-
-        }
-
-        return sortDirection === "asc"
-          ? valueA - valueB
-          : valueB - valueA;
-
-      }
-    );
-
-    return result;
-
-  }
-
-
-  /* =========================================================
-     Dashboard
-     ========================================================= */
-
-  function renderDashboard() {
-
-    const filtered =
-      getFilteredRecords();
-
-    const count =
-      filtered.length;
-
-    const total =
-      filtered.reduce(
-        (sum, record) =>
-          sum + Number(record.amount || 0),
-        0
-      );
-
-    $("totalCount").textContent =
-      count.toLocaleString("zh-TW");
-
-    $("totalAmount").textContent =
-      `NT$ ${formatMoney(total)}`;
-
-    $("recordCount").textContent =
-      `${count} 筆`;
-
-  }
-
-
-  /* =========================================================
-     Render Records
-     ========================================================= */
-
-  function renderRecords() {
-
-    const tbody =
-      $("recordBody");
-
-    const filtered =
-      getFilteredRecords();
-
-    if (!filtered.length) {
-
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5">
-            <div class="empty-records">
-              📭 目前沒有符合條件的消費記錄
-            </div>
-          </td>
-        </tr>
-      `;
-
-      return;
+        result = result.filter(
+            r => r.category === activeCategory
+        );
 
     }
 
-    tbody.innerHTML =
-      filtered
-        .map(record => {
+    if(searchText){
 
-          const time =
-            formatDateTime(
-              record.time
-            );
+        const q = searchText.toLowerCase();
 
-          const safeCategory =
-            escapeHtml(
-              record.category
-            );
+        result = result.filter(r =>
+            String(r.content || "")
+                .toLowerCase()
+                .includes(q)
+            ||
+            String(r.location || "")
+                .toLowerCase()
+                .includes(q)
+        );
 
-          return `
-            <tr
-              class="record-row"
-              data-id="${record.id}"
-            >
+    }
 
-              <td class="col-id">
-                #${record.id}
-              </td>
+    result.sort((a,b)=>{
 
-              <td class="col-category">
+        let av;
+        let bv;
+
+        if(sortField === "amount"){
+
+            av = Number(a.amount);
+            bv = Number(b.amount);
+
+        }else if(sortField === "id"){
+
+            av = Number(a.id);
+            bv = Number(b.id);
+
+        }else if(sortField === "content"){
+
+            av = String(a.content || "");
+
+            bv = String(b.content || "");
+
+        }else{
+
+            av = new Date(a.time).getTime();
+
+            bv = new Date(b.time).getTime();
+
+        }
+
+        if(av < bv)
+            return -1 * sortDirection;
+
+        if(av > bv)
+            return 1 * sortDirection;
+
+        return 0;
+
+    });
+
+    return result;
+}
+
+
+/* =========================================================
+   Render
+   ========================================================= */
+
+function render(){
+
+    const visible = filterRecords();
+
+    renderStats(visible);
+
+    renderTable(visible);
+
+    renderMobile(visible);
+
+    renderChart(visible);
+
+}
+
+
+function renderStats(list){
+
+    totalCount.textContent = list.length;
+
+    const sum = list.reduce(
+        (total,r)=>
+            total + Number(r.amount || 0),
+        0
+    );
+
+    totalAmount.textContent =
+        `NT$ ${formatMoney(sum)}`;
+
+}
+
+
+/* =========================================================
+   Desktop table
+   ========================================================= */
+
+function renderTable(list){
+
+    if(!list.length){
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    📭 沒有符合條件的消費記錄
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    tableBody.innerHTML =
+        list.map(record => `
+
+        <tr
+            class="record-row"
+            data-id="${record.id}">
+
+            <td>
+                <strong>${escapeHtml(record.id)}</strong>
+            </td>
+
+            <td>
                 <span
-                  class="category-tag cat-${safeCategory}"
-                >
-                  ${safeCategory}
+                    class="category-tag cat-${escapeHtml(record.category || "其他")}">
+                    ${escapeHtml(record.category || "其他")}
                 </span>
-              </td>
+            </td>
 
-              <td class="col-content">
+            <td>
+                <strong>
+                    ${escapeHtml(record.content)}
+                </strong>
+            </td>
 
-                <span>
-                  ${escapeHtml(record.content)}
-                </span>
+            <td class="amount-cell">
+                NT$ ${formatMoney(record.amount)}
+            </td>
 
-                <span class="row-actions">
+            <td>
 
-                  <button
-                    class="icon-button"
-                    data-action="edit"
-                    data-id="${record.id}"
-                    title="編輯"
-                  >
-                    ✏️
-                  </button>
-
-                  <button
-                    class="icon-button delete"
-                    data-action="delete"
-                    data-id="${record.id}"
-                    title="刪除"
-                  >
-                    🗑️
-                  </button>
-
+                <span class="time-desktop">
+                    ${escapeHtml(
+                        formatDesktopTime(record.time)
+                    )}
                 </span>
 
-              </td>
+                <div class="row-actions">
 
-              <td class="col-time">
+                    <button
+                        class="mini-btn edit-row"
+                        data-id="${record.id}"
+                        title="編輯">
+                        ✏️
+                    </button>
 
-                <div class="time-display">
-
-                  <span class="time-date">
-                    ${time.date}
-                  </span>
-
-                  <span class="time-clock">
-                    ${time.time}
-                  </span>
+                    <button
+                        class="mini-btn delete-row"
+                        data-id="${record.id}"
+                        title="刪除">
+                        🗑️
+                    </button>
 
                 </div>
 
-              </td>
+            </td>
 
-              <td class="col-amount">
+        </tr>
 
-                <span class="amount">
-                  NT$ ${formatMoney(record.amount)}
-                </span>
+    `).join("");
 
-              </td>
-
-            </tr>
-          `;
-
-        })
-        .join("");
-
-  }
+}
 
 
-  /* =========================================================
-     Chart
-     ========================================================= */
+/* =========================================================
+   Mobile list
+   ========================================================= */
 
-  function renderChart() {
+function renderMobile(list){
 
-    const filtered =
-      getFilteredRecords();
+    if(!list.length){
 
-    const canvas =
-      $("categoryChart");
+        mobileList.innerHTML = `
+            <div class="empty">
+                📭 沒有符合條件的消費記錄
+            </div>
+        `;
 
-    const empty =
-      $("emptyChart");
-
-    if (
-      categoryChart
-    ) {
-
-      categoryChart.destroy();
-
-      categoryChart = null;
+        return;
 
     }
 
-    if (!filtered.length) {
+    mobileList.innerHTML =
+        list.map(record => {
 
-      canvas.style.display =
-        "none";
+            const time =
+                formatMobileDate(record.time);
 
-      empty.style.display =
-        "flex";
+            return `
 
-      return;
+            <article
+                class="mobile-record"
+                data-id="${record.id}">
 
-    }
+                <div class="mobile-top">
 
-    canvas.style.display =
-      "block";
+                    <div>
 
-    empty.style.display =
-      "none";
+                        <span
+                            class="category-tag cat-${escapeHtml(record.category || "其他")}">
+                            ${escapeHtml(record.category || "其他")}
+                        </span>
 
-    const categoryTotals =
-      {};
+                        <div class="mobile-content">
+                            ${escapeHtml(record.content)}
+                        </div>
+
+                    </div>
+
+                    <div class="mobile-amount">
+                        NT$${formatMoney(record.amount)}
+                    </div>
+
+                </div>
+
+                <div class="mobile-meta">
+
+                    <div class="mobile-time">
+
+                        <span>
+                            ${escapeHtml(time[0])}
+                        </span>
+
+                        <span>
+                            ${escapeHtml(time[1])}
+                        </span>
+
+                    </div>
+
+                    <span>
+                        #${escapeHtml(record.id)}
+                    </span>
+
+                </div>
+
+            </article>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   Chart.js
+   ========================================================= */
+
+function renderChart(list){
+
+    const totals = {};
 
     CATEGORIES.forEach(
-      category => {
-        categoryTotals[category] = 0;
-      }
+        category => totals[category] = 0
     );
 
-    filtered.forEach(
-      record => {
+    list.forEach(record => {
 
         const category =
-          CATEGORIES.includes(
-            record.category
-          )
-            ? record.category
-            : "其他";
+            CATEGORIES.includes(record.category)
+                ? record.category
+                : "其他";
 
-        categoryTotals[category] +=
-          Number(record.amount) || 0;
+        totals[category] +=
+            Number(record.amount || 0);
 
-      }
+    });
+
+    const labels = CATEGORIES.filter(
+        category => totals[category] > 0
     );
 
-    const labels =
-      CATEGORIES.filter(
-        category =>
-          categoryTotals[category] > 0
-      );
-
-    const values =
-      labels.map(
-        category =>
-          categoryTotals[category]
-      );
-
-    categoryChart =
-      new Chart(
-        canvas,
-        {
-          type: "pie",
-
-          data: {
-            labels,
-
-            datasets: [
-              {
-                data: values,
-
-                borderWidth: 2,
-
-                borderColor:
-                  getComputedStyle(
-                    document.body
-                  ).getPropertyValue(
-                    "--card"
-                  )
-              }
-            ]
-          },
-
-          options: {
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            plugins: {
-              legend: {
-                position: "right",
-
-                labels: {
-                  color:
-                    getComputedStyle(
-                      document.body
-                    ).getPropertyValue(
-                      "--text"
-                    )
-                }
-              },
-
-              tooltip: {
-                callbacks: {
-                  label: context => {
-
-                    const total =
-                      values.reduce(
-                        (a, b) => a + b,
-                        0
-                      );
-
-                    const value =
-                      Number(
-                        context.raw
-                      );
-
-                    const percent =
-                      total
-                        ? (
-                            value /
-                            total *
-                            100
-                          ).toFixed(1)
-                        : 0;
-
-                    return `${context.label}: NT$ ${formatMoney(value)} (${percent}%)`;
-
-                  }
-                }
-              }
-            }
-          }
-        }
-      );
-
-  }
-
-
-  /* =========================================================
-     Render All
-     ========================================================= */
-
-  function renderAll() {
-
-    renderDashboard();
-
-    renderRecords();
-
-    renderChart();
-
-  }
-
-
-  /* =========================================================
-     Modal
-     ========================================================= */
-
-  function openModal(id) {
-
-    $(id).classList.add(
-      "open"
+    const values = labels.map(
+        category => totals[category]
     );
 
-    document.body.style.overflow =
-      "hidden";
+    if(chart){
 
-  }
+        chart.destroy();
 
+        chart = null;
 
-  function closeModal(id) {
+    }
 
-    $(id).classList.remove(
-      "open"
-    );
+    if(!labels.length){
+
+        categoryChartCanvas.style.display = "none";
+
+        noChart.style.display = "grid";
+
+        return;
+
+    }
+
+    categoryChartCanvas.style.display = "block";
+
+    noChart.style.display = "none";
 
     /*
-      如果還有其他 modal 開啟，
-      不恢復 body scroll。
+      保留明確顏色。
+      之前圖表變成沒有顏色，
+      通常是因為 dataset backgroundColor 沒有指定。
     */
 
-    const anotherOpen =
-      document.querySelector(
-        ".modal-backdrop.open"
-      );
+    const colors = [
+        "#f28e2b",
+        "#4e79a7",
+        "#b07aa1",
+        "#59a14f",
+        "#edc949",
+        "#e15759",
+        "#9c9c9c"
+    ];
 
-    if (!anotherOpen) {
+    chart = new Chart(
+        categoryChartCanvas,
+        {
+            type:"pie",
 
-      document.body.style.overflow =
-        "";
+            data:{
+                labels,
 
-    }
+                datasets:[{
 
-  }
+                    data:values,
+
+                    backgroundColor:
+                        labels.map(
+                            label =>
+                                colors[
+                                    CATEGORIES.indexOf(label)
+                                ]
+                        ),
+
+                    borderColor:
+                        getComputedStyle(document.body)
+                            .getPropertyValue("--surface"),
+
+                    borderWidth:3
+
+                }]
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+                    legend:{
+                        position:"bottom",
+
+                        labels:{
+                            color:
+                                getComputedStyle(document.body)
+                                    .getPropertyValue("--text")
+                        }
+                    },
+
+                    tooltip:{
+                        callbacks:{
+                            label:function(context){
+
+                                const total =
+                                    context.dataset.data
+                                        .reduce(
+                                            (a,b)=>a+b,
+                                            0
+                                        );
+
+                                const value =
+                                    context.raw;
+
+                                const percent =
+                                    total
+                                        ? (value / total * 100)
+                                        : 0;
+
+                                return `${context.label}：NT$ ${formatMoney(value)} (${percent.toFixed(1)}%)`;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+}
 
 
-  /* =========================================================
-     Detail
-     ========================================================= */
+/* =========================================================
+   Modal
+   ========================================================= */
 
-  function openDetail(id) {
+function openModal(modal){
+
+    modal.classList.add("active");
+
+}
+
+
+function closeModal(modal){
+
+    modal.classList.remove("active");
+
+}
+
+
+function openDetail(id){
 
     const record =
-      records.find(
-        r =>
-          Number(r.id) ===
-          Number(id)
-      );
+        records.find(
+            r => Number(r.id) === Number(id)
+        );
 
-    if (!record) {
-      return;
-    }
+    if(!record) return;
 
-    selectedRecordId =
-      Number(record.id);
+    selectedRecordId = record.id;
 
     const time =
-      formatDateTime(
-        record.time
-      );
+        formatDesktopTime(record.time);
 
-    $("detailId").textContent =
-      `#${record.id}`;
+    detailBody.innerHTML = `
 
-    $("detailAmount").textContent =
-      `NT$ ${formatMoney(record.amount)}`;
+        <div class="detail-grid">
 
-    $("detailContent").textContent =
-      record.content || "-";
+            <div class="detail-label">
+                消費序號
+            </div>
 
-    $("detailTime").textContent =
-      `${time.date} ${time.time}`;
+            <div class="detail-value">
+                #${escapeHtml(record.id)}
+            </div>
 
-    $("detailLocation").textContent =
-      record.location || "未填寫";
+            <div class="detail-label">
+                消費金額
+            </div>
 
-    $("detailCategory").innerHTML = `
-      <span
-        class="category-tag cat-${escapeHtml(record.category)}"
-      >
-        ${escapeHtml(record.category)}
-      </span>
+            <div
+                class="detail-value"
+                style="color:var(--primary);font-size:28px;font-weight:950;">
+                NT$ ${formatMoney(record.amount)}
+            </div>
+
+            <div class="detail-label">
+                消費內容
+            </div>
+
+            <div class="detail-value">
+                ${escapeHtml(record.content)}
+            </div>
+
+            <div class="detail-label">
+                消費類別
+            </div>
+
+            <div class="detail-value">
+                <span
+                    class="category-tag cat-${escapeHtml(record.category || "其他")}">
+                    ${escapeHtml(record.category || "其他")}
+                </span>
+            </div>
+
+            <div class="detail-label">
+                消費時間
+            </div>
+
+            <div class="detail-value">
+                ${escapeHtml(time)}
+            </div>
+
+            <div class="detail-label">
+                消費地點
+            </div>
+
+            <div class="detail-value">
+                ${escapeHtml(record.location || "未填寫")}
+            </div>
+
+        </div>
+
     `;
 
-    openModal(
-      "detailModal"
-    );
+    openModal(detailModal);
 
-  }
+}
 
 
-  /* =========================================================
-     Add / Edit Form
-     ========================================================= */
+/* =========================================================
+   Form
+   ========================================================= */
 
-  function openAddForm() {
+function openAddForm(){
 
-    editingRecordId =
-      null;
+    editingRecordId = null;
 
-    $("formModalTitle").textContent =
-      "新增消費記錄";
+    formTitle.textContent =
+        "➕ 新增消費記錄";
 
-    $("amountInput").value =
-      "";
+    saveRecordBtn.textContent =
+        "確定新增";
 
-    $("contentInput").value =
-      "";
+    recordForm.reset();
 
-    $("timeInput").value =
-      getNowLocalInputValue();
+    timeInput.value =
+        localDateTimeValue();
 
-    $("locationInput").value =
-      "";
+    categoryInput.value =
+        "餐飲";
 
-    $("categoryInput").value =
-      "餐飲";
-
-    openModal(
-      "formModal"
-    );
+    openModal(formModal);
 
     setTimeout(
-      () => $("amountInput").focus(),
-      100
+        ()=>amountInput.focus(),
+        100
     );
 
-  }
+}
 
 
-  function openEditForm(id) {
+function openEditForm(id){
 
     const record =
-      records.find(
-        r =>
-          Number(r.id) ===
-          Number(id)
-      );
+        records.find(
+            r => Number(r.id) === Number(id)
+        );
 
-    if (!record) {
-      return;
-    }
+    if(!record) return;
 
-    editingRecordId =
-      Number(record.id);
+    editingRecordId = record.id;
 
-    $("formModalTitle").textContent =
-      "編輯消費記錄";
+    formTitle.textContent =
+        "✏️ 編輯消費記錄";
 
-    $("amountInput").value =
-      record.amount;
+    saveRecordBtn.textContent =
+        "儲存修改";
 
-    $("contentInput").value =
-      record.content;
+    amountInput.value =
+        Number(record.amount || 0);
 
-    $("timeInput").value =
-      record.time;
+    contentInput.value =
+        record.content || "";
 
-    $("locationInput").value =
-      record.location;
+    timeInput.value =
+        record.time || localDateTimeValue();
 
-    $("categoryInput").value =
-      record.category;
+    locationInput.value =
+        record.location || "";
 
-    closeModal(
-      "detailModal"
-    );
+    categoryInput.value =
+        record.category || "其他";
 
-    openModal(
-      "formModal"
-    );
+    closeModal(detailModal);
 
-  }
+    openModal(formModal);
+
+}
 
 
-  /* =========================================================
-     Save Form
-     ========================================================= */
+/* =========================================================
+   Save
+   ========================================================= */
 
-  $("recordForm")
-    .addEventListener(
-      "submit",
-      async event => {
+recordForm.addEventListener(
+    "submit",
+    async event => {
 
         event.preventDefault();
 
         const amount =
-          Number(
-            $("amountInput").value
-          );
+            Number(amountInput.value);
 
         const content =
-          $("contentInput").value.trim();
+            contentInput.value.trim();
 
-        const time =
-          $("timeInput").value;
+        if(!Number.isFinite(amount) || amount < 0){
 
-        const location =
-          $("locationInput").value.trim();
+            showToast(
+                "⚠️ 請輸入有效金額",
+                "error"
+            );
 
-        const category =
-          $("categoryInput").value;
-
-        if (
-          !Number.isFinite(amount) ||
-          amount < 0
-        ) {
-
-          showToast(
-            "請輸入有效的消費金額"
-          );
-
-          return;
+            return;
 
         }
 
-        if (!content) {
+        if(!content){
 
-          showToast(
-            "請輸入消費內容"
-          );
+            showToast(
+                "⚠️ 請輸入消費內容",
+                "error"
+            );
 
-          return;
-
-        }
-
-        if (!time) {
-
-          showToast(
-            "請選擇消費時間"
-          );
-
-          return;
+            return;
 
         }
 
-        const record = {
-          id:
-            editingRecordId ??
-            generateId(),
+        if(editingRecordId === null){
 
-          amount:
-            Number(
-              amount.toFixed(2)
-            ),
+            const record = {
 
-          content,
+                id:getNextId(),
 
-          time,
+                amount:Number(
+                    amount.toFixed(2)
+                ),
 
-          location,
+                content,
 
-          category
-        };
+                time:timeInput.value,
 
-        try {
+                location:
+                    locationInput.value.trim(),
 
-          if (
-            editingRecordId !== null
-          ) {
+                category:
+                    categoryInput.value || "其他"
+
+            };
+
+            records.push(record);
+
+            saveLocalData();
+
+            if(currentUser){
+
+                await saveRecordToFirebase(record);
+
+            }
+
+            closeModal(formModal);
+
+            render();
+
+            showToast("✅ 已新增消費記錄");
+
+        }else{
 
             const index =
-              records.findIndex(
-                r =>
-                  Number(r.id) ===
-                  Number(editingRecordId)
-              );
+                records.findIndex(
+                    r =>
+                        Number(r.id)
+                        === Number(editingRecordId)
+                );
 
-            if (index !== -1) {
+            if(index === -1) return;
 
-              records[index] =
-                record;
+            const record = {
+
+                ...records[index],
+
+                amount:Number(
+                    amount.toFixed(2)
+                ),
+
+                content,
+
+                time:timeInput.value,
+
+                location:
+                    locationInput.value.trim(),
+
+                category:
+                    categoryInput.value || "其他"
+
+            };
+
+            records[index] = record;
+
+            saveLocalData();
+
+            if(currentUser){
+
+                await saveRecordToFirebase(record);
 
             }
 
-            saveLocalRecords();
+            closeModal(formModal);
 
-            await saveRecordToFirebase(
-              record
-            );
+            render();
 
-            showToast(
-              "記錄已更新"
-            );
-
-          } else {
-
-            records.push(
-              record
-            );
-
-            saveLocalRecords();
-
-            await saveRecordToFirebase(
-              record
-            );
-
-            showToast(
-              "新增記錄成功"
-            );
-
-          }
-
-          closeModal(
-            "formModal"
-          );
-
-          renderAll();
-
-        } catch (error) {
-
-          console.error(error);
-
-          /*
-            即使 Firebase 暫時失敗，
-            LocalStorage 已經先保存，
-            因此不讓使用者的資料消失。
-          */
-
-          saveLocalRecords();
-
-          renderAll();
-
-          showToast(
-            "本機已保存，但 Firebase 同步失敗"
-          );
+            showToast("✅ 已更新記錄");
 
         }
 
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     Delete
-     ========================================================= */
+/* =========================================================
+   Delete
+   ========================================================= */
 
-  async function deleteRecord(id) {
+async function deleteRecord(id){
 
     const record =
-      records.find(
-        r =>
-          Number(r.id) ===
-          Number(id)
-      );
+        records.find(
+            r => Number(r.id) === Number(id)
+        );
 
-    if (!record) {
-      return;
-    }
+    if(!record) return;
 
     const confirmed =
-      confirm(
-        `確認刪除？\n\n#${record.id} ${record.content}\nNT$ ${formatMoney(record.amount)}`
-      );
+        confirm(
+            `確認刪除這筆消費？\n\n${record.content}\nNT$ ${formatMoney(record.amount)}`
+        );
 
-    if (!confirmed) {
-      return;
-    }
+    if(!confirmed) return;
 
-    try {
-
-      records =
+    records =
         records.filter(
-          r =>
-            Number(r.id) !==
-            Number(id)
+            r => Number(r.id) !== Number(id)
         );
 
-      saveLocalRecords();
+    saveLocalData();
 
-      await deleteRecordFromFirebase(
-        id
-      );
+    if(currentUser){
 
-      closeModal(
-        "detailModal"
-      );
-
-      renderAll();
-
-      showToast(
-        "刪除成功"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      /*
-        如果 Firebase 刪除失敗，
-        重新從本機狀態保存。
-      */
-
-      saveLocalRecords();
-
-      renderAll();
-
-      showToast(
-        "本機已刪除，但 Firebase 同步失敗"
-      );
+        await deleteRecordFromFirebase(id);
 
     }
 
-  }
+    closeModal(detailModal);
+
+    render();
+
+    showToast("🗑️ 已刪除消費記錄");
+
+}
 
 
-  /* =========================================================
-     Copy
-     ========================================================= */
+/* =========================================================
+   Copy
+   ========================================================= */
 
-  $("copyRecordBtn")
-    .addEventListener(
-      "click",
-      async () => {
+async function copyRecord(){
 
-        const original =
-          records.find(
+    const source =
+        records.find(
             r =>
-              Number(r.id) ===
-              Number(
-                selectedRecordId
-              )
-          );
-
-        if (!original) {
-          return;
-        }
-
-        const copied = {
-          id:
-            generateId(),
-
-          amount:
-            Number(
-              Number(
-                original.amount
-              ).toFixed(2)
-            ),
-
-          content:
-            original.content,
-
-          time:
-            getNowLocalInputValue(),
-
-          location:
-            original.location,
-
-          category:
-            original.category
-        };
-
-        try {
-
-          records.push(
-            copied
-          );
-
-          saveLocalRecords();
-
-          await saveRecordToFirebase(
-            copied
-          );
-
-          closeModal(
-            "detailModal"
-          );
-
-          renderAll();
-
-          showToast(
-            "已複製為新的消費記錄"
-          );
-
-        } catch (error) {
-
-          console.error(error);
-
-          saveLocalRecords();
-
-          renderAll();
-
-          showToast(
-            "本機已複製，但 Firebase 同步失敗"
-          );
-
-        }
-
-      }
-    );
-
-
-  /* =========================================================
-     Detail buttons
-     ========================================================= */
-
-  $("editRecordBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        if (
-          selectedRecordId === null
-        ) {
-          return;
-        }
-
-        openEditForm(
-          selectedRecordId
+                Number(r.id)
+                === Number(selectedRecordId)
         );
 
-      }
-    );
+    if(!source) return;
+
+    const copy = {
+
+        id:getNextId(),
+
+        amount:Number(
+            Number(source.amount).toFixed(2)
+        ),
+
+        content:source.content,
+
+        time:localDateTimeValue(),
+
+        location:source.location || "",
+
+        category:source.category || "其他"
+
+    };
+
+    records.push(copy);
+
+    saveLocalData();
+
+    if(currentUser){
+
+        await saveRecordToFirebase(copy);
+
+    }
+
+    closeModal(detailModal);
+
+    render();
+
+    showToast("📋 已複製記錄");
+
+}
 
 
-  $("deleteRecordBtn")
-    .addEventListener(
-      "click",
-      () => {
+/* =========================================================
+   Add shortcuts
+   ========================================================= */
 
-        if (
-          selectedRecordId === null
-        ) {
-          return;
-        }
-
-        deleteRecord(
-          selectedRecordId
-        );
-
-      }
-    );
-
-
-  /* =========================================================
-     Add button
-     ========================================================= */
-
-  $("addBtn")
-    .addEventListener(
-      "click",
-      openAddForm
-    );
-
-
-  /* =========================================================
-     Login button
-
-     已登入 -> 登出
-     未登入 -> Google 登入
-     ========================================================= */
-
-  $("loginBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        if (currentUser) {
-
-          logoutGoogle();
-
-        } else {
-
-          loginWithGoogle();
-
-        }
-
-      }
-    );
-
-
-  /* =========================================================
-     Close buttons
-     ========================================================= */
-
-  document
-    .querySelectorAll(
-      "[data-close]"
-    )
-    .forEach(
-      button => {
+document
+    .querySelectorAll("[data-add]")
+    .forEach(button => {
 
         button.addEventListener(
-          "click",
-          () => {
+            "click",
+            ()=>{
 
-            closeModal(
-              button.dataset.close
-            );
+                const current =
+                    Number(amountInput.value) || 0;
 
-          }
-        );
+                const addition =
+                    Number(button.dataset.add);
 
-      }
-    );
-
-
-  /* 點擊背景關閉 */
-
-  document
-    .querySelectorAll(
-      ".modal-backdrop"
-    )
-    .forEach(
-      backdrop => {
-
-        backdrop.addEventListener(
-          "click",
-          event => {
-
-            if (
-              event.target ===
-              backdrop
-            ) {
-
-              closeModal(
-                backdrop.id
-              );
+                amountInput.value =
+                    (current + addition).toFixed(2);
 
             }
-
-          }
         );
 
-      }
-    );
+    });
 
 
-  /* ESC 關閉 */
+/* =========================================================
+   Map
+   ========================================================= */
 
-  document.addEventListener(
-    "keydown",
+$("mapBtn").addEventListener(
+    "click",
+    ()=>{
+
+        const location =
+            locationInput.value.trim();
+
+        const query =
+            location || "台灣";
+
+        const url =
+            "https://www.google.com/maps/search/?api=1&query="
+            + encodeURIComponent(query);
+
+        window.open(
+            url,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   Quick filters
+   ========================================================= */
+
+document
+    .querySelectorAll("[data-period]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                activePeriod =
+                    button.dataset.period;
+
+                document
+                    .querySelectorAll("[data-period]")
+                    .forEach(item =>
+                        item.classList.remove("active")
+                    );
+
+                button.classList.add("active");
+
+                render();
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   Search
+   ========================================================= */
+
+$("searchInput").addEventListener(
+    "input",
     event => {
 
-      if (
-        event.key === "Escape"
-      ) {
+        searchText =
+            event.target.value.trim();
 
-        document
-          .querySelectorAll(
-            ".modal-backdrop.open"
-          )
-          .forEach(
-            modal => {
-              closeModal(
-                modal.id
-              );
-            }
-          );
-
-      }
+        render();
 
     }
-  );
+);
 
 
-  /* =========================================================
-     Search
-     ========================================================= */
+/* =========================================================
+   Sorting
+   ========================================================= */
 
-  $("searchInput")
-    .addEventListener(
-      "input",
-      event => {
+function setSort(field){
 
-        searchKeyword =
-          event.target.value;
+    if(sortField === field){
 
-        renderAll();
+        sortDirection *= -1;
 
-      }
-    );
+    }else{
+
+        sortField = field;
+
+        sortDirection =
+            field === "content"
+                ? 1
+                : -1;
+
+    }
+
+    render();
+
+}
 
 
-  /* =========================================================
-     Period filter
-     ========================================================= */
-
-  document
-    .querySelectorAll(
-      "[data-period]"
-    )
-    .forEach(
-      button => {
+document
+    .querySelectorAll("[data-sort]")
+    .forEach(button => {
 
         button.addEventListener(
-          "click",
-          () => {
+            "click",
+            event => {
 
-            activePeriod =
-              button.dataset.period;
+                event.stopPropagation();
 
-            document
-              .querySelectorAll(
-                "[data-period]"
-              )
-              .forEach(
-                item =>
-                  item.classList.remove(
-                    "active"
-                  )
-              );
+                setSort(
+                    button.dataset.sort
+                );
 
-            button.classList.add(
-              "active"
-            );
+                $("sortMenu")
+                    .classList.remove("open");
 
-            renderAll();
-
-          }
+            }
         );
 
-      }
-    );
+    });
 
 
-  /* =========================================================
-     Category Filter
-     ========================================================= */
-
-  $("categoryFilterBtn")
-    .addEventListener(
-      "click",
-      event => {
+$("sortBtn").addEventListener(
+    "click",
+    event => {
 
         event.stopPropagation();
 
         $("categoryMenu")
-          .classList.toggle(
-            "open"
-          );
+            .classList.remove("open");
 
-      }
-    );
+        $("sortMenu")
+            .classList.toggle("open");
 
-
-  document
-    .querySelectorAll(
-      ".category-option"
-    )
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            activeCategory =
-              button.dataset.category;
-
-            document
-              .querySelectorAll(
-                ".category-option"
-              )
-              .forEach(
-                item =>
-                  item.classList.remove(
-                    "active"
-                  )
-              );
-
-            button.classList.add(
-              "active"
-            );
-
-            $("categoryMenu")
-              .classList.remove(
-                "open"
-              );
-
-            renderAll();
-
-          }
-        );
-
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     Click outside category menu
-     ========================================================= */
+/* =========================================================
+   Category filter
+   ========================================================= */
 
-  document.addEventListener(
+$("categoryFilterBtn").addEventListener(
     "click",
     event => {
 
-      if (
-        !event.target.closest(
-          ".filter-wrapper"
-        )
-      ) {
+        event.stopPropagation();
+
+        $("sortMenu")
+            .classList.remove("open");
 
         $("categoryMenu")
-          .classList.remove(
-            "open"
-          );
-
-      }
-
-      if (
-        !event.target.closest(
-          ".data-menu-wrapper"
-        )
-      ) {
-
-        $("dataMenu")
-          .classList.remove(
-            "open"
-          );
-
-      }
+            .classList.toggle("open");
 
     }
-  );
+);
 
 
-  /* =========================================================
-     Sorting
-     ========================================================= */
-
-  document
-    .querySelectorAll(
-      "[data-sort]"
-    )
-    .forEach(
-      button => {
+document
+    .querySelectorAll("[data-category]")
+    .forEach(button => {
 
         button.addEventListener(
-          "click",
-          () => {
+            "click",
+            event => {
 
-            const field =
-              button.dataset.sort;
+                event.stopPropagation();
 
-            if (
-              sortField === field
-            ) {
+                activeCategory =
+                    button.dataset.category;
 
-              sortDirection =
-                sortDirection ===
-                "asc"
-                  ? "desc"
-                  : "asc";
+                document
+                    .querySelectorAll("[data-category]")
+                    .forEach(item =>
+                        item.classList.remove("active")
+                    );
 
-            } else {
+                button.classList.add("active");
 
-              sortField =
-                field;
+                $("categoryMenu")
+                    .classList.remove("open");
 
-              sortDirection =
-                "asc";
+                render();
 
             }
-
-            renderAll();
-
-          }
         );
 
-      }
-    );
+    });
 
 
-  /* =========================================================
-     Row click / edit / delete
-     ========================================================= */
+document.addEventListener(
+    "click",
+    ()=>{
+        $("categoryMenu")
+            .classList.remove("open");
 
-  $("recordBody")
-    .addEventListener(
-      "click",
-      event => {
+        $("sortMenu")
+            .classList.remove("open");
 
-        const actionButton =
-          event.target.closest(
-            "[data-action]"
-          );
+        $("dataDropdown")
+            .classList.remove("open");
+    }
+);
 
-        if (actionButton) {
 
-          event.stopPropagation();
+/* =========================================================
+   Event delegation
+   ========================================================= */
 
-          const id =
-            Number(
-              actionButton.dataset.id
+tableBody.addEventListener(
+    "click",
+    event => {
+
+        const deleteBtn =
+            event.target.closest(".delete-row");
+
+        if(deleteBtn){
+
+            event.stopPropagation();
+
+            deleteRecord(
+                Number(deleteBtn.dataset.id)
             );
 
-          if (
-            actionButton.dataset.action ===
-            "edit"
-          ) {
+            return;
 
-            openEditForm(id);
+        }
 
-          }
+        const editBtn =
+            event.target.closest(".edit-row");
 
-          if (
-            actionButton.dataset.action ===
-            "delete"
-          ) {
+        if(editBtn){
 
-            deleteRecord(id);
+            event.stopPropagation();
 
-          }
+            openEditForm(
+                Number(editBtn.dataset.id)
+            );
 
-          return;
+            return;
 
         }
 
         const row =
-          event.target.closest(
-            ".record-row"
-          );
+            event.target.closest(".record-row");
 
-        if (!row) {
-          return;
+        if(row){
+
+            openDetail(
+                Number(row.dataset.id)
+            );
+
         }
 
-        openDetail(
-          Number(
-            row.dataset.id
-          )
-        );
-
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     Quick amount buttons
-     ========================================================= */
+mobileList.addEventListener(
+    "click",
+    event => {
 
-  document
-    .querySelectorAll(
-      "[data-add]"
-    )
-    .forEach(
-      button => {
+        const row =
+            event.target.closest(".mobile-record");
 
-        button.addEventListener(
-          "click",
-          () => {
+        if(row){
 
-            const add =
-              Number(
-                button.dataset.add
-              );
+            openDetail(
+                Number(row.dataset.id)
+            );
 
-            const current =
-              Number(
-                $("amountInput").value
-              ) || 0;
-
-            $("amountInput").value =
-              (
-                current + add
-              ).toFixed(2)
-              .replace(
-                /\.00$/,
-                ""
-              );
-
-          }
-        );
-
-      }
-    );
-
-
-  /* =========================================================
-     Google Maps
-     ========================================================= */
-
-  $("mapBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        const location =
-          $("locationInput")
-            .value
-            .trim();
-
-        const query =
-          location ||
-          "Google Maps";
-
-        const url =
-          "https://www.google.com/maps/search/" +
-          encodeURIComponent(
-            query
-          );
-
-        window.open(
-          url,
-          "_blank",
-          "noopener,noreferrer"
-        );
-
-      }
-    );
-
-
-  /* =========================================================
-     Theme
-     ========================================================= */
-
-  function loadTheme() {
-
-    const theme =
-      localStorage.getItem(
-        "accountingTheme"
-      );
-
-    if (
-      theme === "dark"
-    ) {
-
-      document.body.classList.add(
-        "dark"
-      );
+        }
 
     }
+);
 
-  }
+
+/* =========================================================
+   Detail buttons
+   ========================================================= */
+
+$("editRecordBtn").addEventListener(
+    "click",
+    ()=>{
+        if(selectedRecordId !== null){
+            openEditForm(selectedRecordId);
+        }
+    }
+);
 
 
-  $("themeBtn")
-    .addEventListener(
-      "click",
-      () => {
+$("deleteRecordBtn").addEventListener(
+    "click",
+    ()=>{
+        if(selectedRecordId !== null){
+            deleteRecord(selectedRecordId);
+        }
+    }
+);
 
-        document.body.classList.toggle(
-          "dark"
+
+$("copyRecordBtn").addEventListener(
+    "click",
+    copyRecord
+);
+
+
+/* =========================================================
+   Add button
+   ========================================================= */
+
+$("addBtn").addEventListener(
+    "click",
+    openAddForm
+);
+
+
+/* =========================================================
+   Modal close
+   ========================================================= */
+
+document
+    .querySelectorAll("[data-close]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            ()=>{
+                closeModal(
+                    $(button.dataset.close)
+                );
+            }
         );
 
-        const isDark =
-          document.body.classList.contains(
-            "dark"
-          );
+    });
+
+
+document
+    .querySelectorAll(".modal")
+    .forEach(modal => {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if(event.target === modal){
+
+                    closeModal(modal);
+
+                }
+
+            }
+        );
+
+    });
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(event.key === "Escape"){
+
+            document
+                .querySelectorAll(".modal.active")
+                .forEach(modal =>
+                    closeModal(modal)
+                );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   Theme
+   ========================================================= */
+
+$("themeBtn").addEventListener(
+    "click",
+    ()=>{
+
+        document.body.classList.toggle("dark");
+
+        const dark =
+            document.body.classList.contains("dark");
 
         localStorage.setItem(
-          "accountingTheme",
-          isDark
-            ? "dark"
-            : "light"
+            "accountingDarkMode",
+            dark ? "1" : "0"
         );
 
         renderChart();
 
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     Font size
-     ========================================================= */
+if(
+    localStorage.getItem("accountingDarkMode")
+    === "1"
+){
 
-  const savedFontSize =
-    localStorage.getItem(
-      "accountingFontSize"
-    );
+    document.body.classList.add("dark");
 
-  if (savedFontSize) {
-
-    document.documentElement
-      .style
-      .setProperty(
-        "--font-size",
-        `${savedFontSize}px`
-      );
-
-    $("fontSizeRange").value =
-      savedFontSize;
-
-  }
+}
 
 
-  $("fontSizeRange")
-    .addEventListener(
-      "input",
-      event => {
+/* =========================================================
+   Font size
+   ========================================================= */
 
-        const size =
-          event.target.value;
+$("fontSizeSlider").addEventListener(
+    "input",
+    event => {
 
-        document.documentElement
-          .style
-          .setProperty(
-            "--font-size",
-            `${size}px`
-          );
+        document.documentElement.style
+            .setProperty(
+                "--font-size",
+                `${event.target.value}px`
+            );
 
         localStorage.setItem(
-          "accountingFontSize",
-          size
+            "accountingFontSize",
+            event.target.value
         );
 
-      }
+    }
+);
+
+
+const savedFontSize =
+    localStorage.getItem(
+        "accountingFontSize"
     );
 
+if(savedFontSize){
 
-  /* =========================================================
-     Data Management Menu
-     ========================================================= */
+    $("fontSizeSlider").value =
+        savedFontSize;
 
-  function toggleDataMenu() {
+    document.documentElement.style
+        .setProperty(
+            "--font-size",
+            `${savedFontSize}px`
+        );
 
-    $("dataMenu")
-      .classList.toggle(
-        "open"
-      );
-
-  }
+}
 
 
-  $("dataMenuBtn")
-    .addEventListener(
-      "click",
-      event => {
+/* =========================================================
+   Data management dropdown
+   ========================================================= */
+
+$("dataManageBtn").addEventListener(
+    "click",
+    event => {
 
         event.stopPropagation();
 
-        toggleDataMenu();
+        $("dataDropdown")
+            .classList.toggle("open");
 
-      }
-    );
-
-
-  $("mobileDataMenuBtn")
-    .addEventListener(
-      "click",
-      event => {
-
-        event.stopPropagation();
-
-        toggleDataMenu();
-
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     CSV Export
+/* =========================================================
+   CSV Export
+   ========================================================= */
 
-     Excel 標題欄固定為：
+function csvEscape(value){
 
-     消費序號
-     消費內容
-     消費金額
-     消費時間
+    const text =
+        String(value ?? "");
 
-     同時附上地點與類別。
-     ========================================================= */
+    return `"${text.replaceAll('"','""')}"`;
 
-  function exportCSV() {
+}
 
-    const headers = [
-      "消費序號",
-      "消費內容",
-      "消費金額",
-      "消費時間",
-      "消費地點",
-      "消費類別"
-    ];
+
+function exportCSV(){
+
+    if(!records.length){
+
+        showToast(
+            "📭 目前沒有資料可以匯出",
+            "error"
+        );
+
+        return;
+
+    }
+
+    /*
+      Excel / CSV 標題列固定：
+      消費序號、消費內容、消費金額、消費時間
+    */
+
+    const header =
+        [
+            "消費序號",
+            "消費內容",
+            "消費金額",
+            "消費時間",
+            "消費地點",
+            "消費類別"
+        ]
+        .map(csvEscape)
+        .join(",");
 
     const rows =
-      records.map(
-        record => [
-          record.id,
-          record.content,
-          record.amount,
-          record.time,
-          record.location,
-          record.category
-        ]
-      );
+        records.map(record =>
+            [
+                record.id,
+                record.content,
+                Number(record.amount).toFixed(2),
+                formatDesktopTime(record.time),
+                record.location || "",
+                record.category || "其他"
+            ]
+            .map(csvEscape)
+            .join(",")
+        );
 
-    const csvRows = [
-      headers,
-      ...rows
-    ];
+    /*
+      加 BOM，確保 Excel 正確顯示繁體中文。
+    */
 
     const csv =
-      "\uFEFF" +
-      csvRows
-        .map(
-          row =>
-            row
-              .map(
-                value =>
-                  `"${String(
-                    value ?? ""
-                  ).replaceAll(
-                    '"',
-                    '""'
-                  )}"`
-              )
-              .join(",")
-        )
-        .join("\r\n");
+        "\uFEFF"
+        + header
+        + "\r\n"
+        + rows.join("\r\n");
 
     const blob =
-      new Blob(
-        [csv],
-        {
-          type:
-            "text/csv;charset=utf-8;"
-        }
-      );
+        new Blob(
+            [csv],
+            {
+                type:"text/csv;charset=utf-8;"
+            }
+        );
 
     const url =
-      URL.createObjectURL(
-        blob
-      );
+        URL.createObjectURL(blob);
 
     const a =
-      document.createElement(
-        "a"
-      );
-
-    const date =
-      new Date()
-        .toISOString()
-        .slice(0, 10);
+        document.createElement("a");
 
     a.href = url;
 
     a.download =
-      `accountingRecords_${date}.csv`;
+        `我的記帳本_${new Date()
+            .toISOString()
+            .slice(0,10)}.csv`;
 
     document.body.appendChild(a);
 
@@ -4399,539 +3601,651 @@
 
     URL.revokeObjectURL(url);
 
-    showToast(
-      "CSV 匯出成功"
-    );
+    showToast("📤 CSV 匯出成功");
 
-  }
+}
 
 
-  $("exportBtn")
-    .addEventListener(
-      "click",
-      () => {
+/* =========================================================
+   JSON Import
+   ========================================================= */
+
+async function importJSON(text){
+
+    const parsed =
+        JSON.parse(text);
+
+    if(!Array.isArray(parsed)){
+
+        throw new Error(
+            "JSON 必須是一個陣列"
+        );
+
+    }
+
+    const imported =
+        parsed.map((item,index)=>({
+
+            id:Number(item.id) || index + 1,
+
+            amount:Number(
+                item.amount
+                ?? item["消費金額"]
+                ?? 0
+            ),
+
+            content:
+                item.content
+                ?? item["消費內容"]
+                ?? "",
+
+            time:
+                item.time
+                ?? item["消費時間"]
+                ?? localDateTimeValue(),
+
+            location:
+                item.location
+                ?? item["消費地點"]
+                ?? "",
+
+            category:
+                item.category
+                ?? item["消費類別"]
+                ?? "其他"
+
+        }));
+
+    records = imported;
+
+}
+
+
+/* =========================================================
+   CSV Import
+   ========================================================= */
+
+function parseCSV(text){
+
+    const lines =
+        text
+            .replace(/^\uFEFF/,"")
+            .split(/\r?\n/)
+            .filter(line => line.trim());
+
+    if(lines.length < 2){
+
+        throw new Error(
+            "CSV 沒有資料"
+        );
+
+    }
+
+    function parseLine(line){
+
+        const result = [];
+
+        let current = "";
+
+        let insideQuotes = false;
+
+        for(let i=0;i<line.length;i++){
+
+            const char = line[i];
+
+            if(char === '"'){
+
+                if(
+                    insideQuotes
+                    && line[i+1] === '"'
+                ){
+
+                    current += '"';
+
+                    i++;
+
+                }else{
+
+                    insideQuotes =
+                        !insideQuotes;
+
+                }
+
+            }else if(
+                char === ","
+                && !insideQuotes
+            ){
+
+                result.push(current);
+
+                current = "";
+
+            }else{
+
+                current += char;
+
+            }
+
+        }
+
+        result.push(current);
+
+        return result;
+
+    }
+
+    const header =
+        parseLine(lines[0]);
+
+    const rows =
+        lines.slice(1)
+            .map(parseLine);
+
+    const indexOf =
+        name => header.indexOf(name);
+
+    const idIndex =
+        indexOf("消費序號");
+
+    const contentIndex =
+        indexOf("消費內容");
+
+    const amountIndex =
+        indexOf("消費金額");
+
+    const timeIndex =
+        indexOf("消費時間");
+
+    const locationIndex =
+        indexOf("消費地點");
+
+    const categoryIndex =
+        indexOf("消費類別");
+
+    if(
+        contentIndex === -1
+        || amountIndex === -1
+    ){
+
+        throw new Error(
+            "CSV 缺少必要欄位"
+        );
+
+    }
+
+    records =
+        rows.map((row,index)=>({
+
+            id:
+                Number(
+                    idIndex >= 0
+                        ? row[idIndex]
+                        : index + 1
+                ),
+
+            content:
+                row[contentIndex] || "",
+
+            amount:
+                Number(
+                    row[amountIndex] || 0
+                ),
+
+            time:
+                timeIndex >= 0
+                    ? convertImportedTime(
+                        row[timeIndex]
+                    )
+                    : localDateTimeValue(),
+
+            location:
+                locationIndex >= 0
+                    ? row[locationIndex]
+                    : "",
+
+            category:
+                categoryIndex >= 0
+                    ? row[categoryIndex]
+                    : "其他"
+
+        }));
+
+}
+
+
+function convertImportedTime(value){
+
+    if(!value) return localDateTimeValue();
+
+    /*
+      優先處理我們自己匯出的：
+      YYYY/MM/DD HH:mm
+    */
+
+    const match =
+        String(value).match(
+            /^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})$/
+        );
+
+    if(match){
+
+        return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
+
+    }
+
+    const d = new Date(value);
+
+    if(!Number.isNaN(d.getTime())){
+
+        return localDateTimeValue(d);
+
+    }
+
+    return value;
+
+}
+
+
+/* =========================================================
+   Import Event
+   ========================================================= */
+
+$("exportBtn").addEventListener(
+    "click",
+    event => {
+
+        event.stopPropagation();
 
         exportCSV();
 
-        $("dataMenu")
-          .classList.remove(
-            "open"
-          );
+        $("dataDropdown")
+            .classList.remove("open");
 
-      }
-    );
+    }
+);
 
 
-  /* =========================================================
-     Import
-     ========================================================= */
+$("importBtn").addEventListener(
+    "click",
+    event => {
 
-  $("importBtn")
-    .addEventListener(
-      "click",
-      () => {
+        event.stopPropagation();
 
         $("fileInput").click();
 
-        $("dataMenu")
-          .classList.remove(
-            "open"
-          );
+        $("dataDropdown")
+            .classList.remove("open");
 
-      }
-    );
+    }
+);
 
 
-  $("fileInput")
-    .addEventListener(
-      "change",
-      async event => {
+$("fileInput").addEventListener(
+    "change",
+    async event => {
 
         const file =
-          event.target.files[0];
+            event.target.files[0];
 
-        if (!file) {
-          return;
-        }
+        if(!file) return;
 
-        try {
+        try{
 
-          const text =
-            await file.text();
+            const text =
+                await file.text();
 
-          let imported = [];
+            if(
+                file.name
+                    .toLowerCase()
+                    .endsWith(".json")
+            ){
 
-          if (
-            file.name
-              .toLowerCase()
-              .endsWith(".json")
-          ) {
+                await importJSON(text);
 
-            const parsed =
-              JSON.parse(text);
+            }else{
 
-            imported =
-              Array.isArray(parsed)
-                ? parsed
-                : parsed.records || [];
+                parseCSV(text);
 
-          } else {
+            }
 
-            imported =
-              parseCSV(text);
+            /*
+              重新整理 ID，避免匯入後出現
+              重複或非數字 ID。
+            */
 
-          }
+            records =
+                records.map(
+                    (record,index)=>({
 
-          imported =
-            imported
-              .map(normalizeRecord)
-              .filter(
-                record =>
-                  record.content
-              );
+                        ...record,
 
-          if (!imported.length) {
+                        id:index + 1,
+
+                        amount:Number(
+                            Number(record.amount || 0)
+                                .toFixed(2)
+                        )
+
+                    })
+                );
+
+            saveLocalData();
+
+            if(currentUser){
+
+                /*
+                  匯入資料後寫入 Firebase。
+                  先寫入新資料。
+                */
+
+                for(const record of records){
+
+                    await saveRecordToFirebase(
+                        record
+                    );
+
+                }
+
+            }
+
+            render();
+
+            showToast("📥 匯入成功");
+
+        }catch(error){
+
+            console.error(error);
 
             showToast(
-              "找不到有效資料"
+                "❌ 匯入失敗：" + error.message,
+                "error"
             );
-
-            return;
-
-          }
-
-          const confirmed =
-            confirm(
-              `即將匯入 ${imported.length} 筆資料。\n\n匯入後會與目前資料合併，是否繼續？`
-            );
-
-          if (!confirmed) {
-            return;
-          }
-
-          const existingIds =
-            new Set(
-              records.map(
-                r =>
-                  Number(r.id)
-              )
-            );
-
-          imported.forEach(
-            record => {
-
-              if (
-                existingIds.has(
-                  Number(record.id)
-                )
-              ) {
-
-                record.id =
-                  generateId();
-
-              }
-
-              records.push(
-                record
-              );
-
-            }
-          );
-
-          saveLocalRecords();
-
-          /*
-            登入 Firebase 時，
-            將匯入資料同步上傳。
-          */
-
-          if (currentUser) {
-
-            for (
-              const record of imported
-            ) {
-
-              await saveRecordToFirebase(
-                record
-              );
-
-            }
-
-          }
-
-          renderAll();
-
-          showToast(
-            `成功匯入 ${imported.length} 筆資料`
-          );
-
-        } catch (error) {
-
-          console.error(error);
-
-          showToast(
-            "匯入失敗，請確認檔案格式"
-          );
 
         }
 
         event.target.value = "";
 
-      }
-    );
-
-
-  /* =========================================================
-     CSV Parser
-     ========================================================= */
-
-  function parseCSV(text) {
-
-    const lines = [];
-    let row = [];
-    let cell = "";
-    let insideQuotes = false;
-
-    for (
-      let i = 0;
-      i < text.length;
-      i++
-    ) {
-
-      const char =
-        text[i];
-
-      const next =
-        text[i + 1];
-
-      if (
-        char === '"' &&
-        insideQuotes &&
-        next === '"'
-      ) {
-
-        cell += '"';
-
-        i++;
-
-        continue;
-
-      }
-
-      if (
-        char === '"'
-      ) {
-
-        insideQuotes =
-          !insideQuotes;
-
-        continue;
-
-      }
-
-      if (
-        char === "," &&
-        !insideQuotes
-      ) {
-
-        row.push(cell);
-
-        cell = "";
-
-        continue;
-
-      }
-
-      if (
-        (
-          char === "\n" ||
-          char === "\r"
-        ) &&
-        !insideQuotes
-      ) {
-
-        if (
-          char === "\r" &&
-          next === "\n"
-        ) {
-
-          i++;
-
-        }
-
-        row.push(cell);
-
-        cell = "";
-
-        if (
-          row.some(
-            value =>
-              value.trim() !== ""
-          )
-        ) {
-
-          lines.push(row);
-
-        }
-
-        row = [];
-
-        continue;
-
-      }
-
-      cell += char;
-
     }
+);
 
-    row.push(cell);
 
-    if (
-      row.some(
-        value =>
-          value.trim() !== ""
-      )
-    ) {
+/* =========================================================
+   Clear All
+   ========================================================= */
 
-      lines.push(row);
+$("clearBtn").addEventListener(
+    "click",
+    async event => {
 
-    }
+        event.stopPropagation();
 
-    if (lines.length < 2) {
-      return [];
-    }
+        $("dataDropdown")
+            .classList.remove("open");
 
-    /*
-      支援兩種標題：
+        if(!records.length){
 
-      消費序號 / 消費內容 / 消費金額 / 消費時間
-
-      以及本系統完整 CSV
-    */
-
-    const headers =
-      lines[0].map(
-        h =>
-          h.trim()
-            .replace(
-              /^\uFEFF/,
-              ""
-            )
-      );
-
-    const indexOf =
-      (...names) => {
-
-        for (
-          const name of names
-        ) {
-
-          const index =
-            headers.indexOf(
-              name
+            showToast(
+                "目前沒有任何記錄",
+                "error"
             );
 
-          if (index !== -1) {
-            return index;
-          }
+            return;
 
         }
-
-        return -1;
-
-      };
-
-    const idIndex =
-      indexOf(
-        "消費序號",
-        "id"
-      );
-
-    const contentIndex =
-      indexOf(
-        "消費內容",
-        "content"
-      );
-
-    const amountIndex =
-      indexOf(
-        "消費金額",
-        "amount"
-      );
-
-    const timeIndex =
-      indexOf(
-        "消費時間",
-        "time"
-      );
-
-    const locationIndex =
-      indexOf(
-        "消費地點",
-        "location"
-      );
-
-    const categoryIndex =
-      indexOf(
-        "消費類別",
-        "category"
-      );
-
-    return lines
-      .slice(1)
-      .map(
-        values => ({
-          id:
-            idIndex >= 0
-              ? Number(
-                  values[idIndex]
-                )
-              : 0,
-
-          content:
-            contentIndex >= 0
-              ? values[contentIndex]
-              : "",
-
-          amount:
-            amountIndex >= 0
-              ? Number(
-                  values[amountIndex]
-                )
-              : 0,
-
-          time:
-            timeIndex >= 0
-              ? values[timeIndex]
-              : "",
-
-          location:
-            locationIndex >= 0
-              ? values[locationIndex]
-              : "",
-
-          category:
-            categoryIndex >= 0
-              ? values[categoryIndex]
-              : "其他"
-        })
-      );
-
-  }
-
-
-  /* =========================================================
-     Clear All
-
-     雙重確認。
-     ========================================================= */
-
-  $("clearAllBtn")
-    .addEventListener(
-      "click",
-      async () => {
 
         const first =
-          confirm(
-            "⚠️ 確定要刪除全部消費記錄嗎？\n\n這個操作無法復原。"
-          );
+            confirm(
+                "⚠️ 確定要刪除全部消費記錄嗎？"
+            );
 
-        if (!first) {
-          return;
-        }
+        if(!first) return;
 
         const second =
-          confirm(
-            "最後確認：真的要「全部刪除」嗎？"
-          );
+            confirm(
+                "🚨 最後確認：所有記錄都會被永久刪除，確定繼續？"
+            );
 
-        if (!second) {
-          return;
-        }
+        if(!second) return;
 
-        try {
+        if(currentUser){
 
-          /*
-            Firebase：
-            由於你的 Rules 允許目前登入者
-            讀寫自己的 users/{uid}/*，
-            這裡逐筆刪除。
-          */
+            for(const record of records){
 
-          if (currentUser) {
-
-            const recordsRef =
-              collection(
-                db,
-                "users",
-                currentUser.uid,
-                "accountingRecords"
-              );
-
-            const snapshot =
-              await getDocs(
-                recordsRef
-              );
-
-            for (
-              const item of snapshot.docs
-            ) {
-
-              await deleteDoc(
-                item.ref
-              );
+                await deleteRecordFromFirebase(
+                    record.id
+                );
 
             }
 
-          }
+        }
 
-          records = [];
+        records = [];
 
-          localStorage.removeItem(
+        localStorage.removeItem(
             STORAGE_KEY
-          );
+        );
 
-          renderAll();
+        render();
 
-          $("dataMenu")
-            .classList.remove(
-              "open"
+        showToast(
+            "🗑️ 所有消費記錄已清空"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   Google Login
+   ========================================================= */
+
+$("loginBtn").addEventListener(
+    "click",
+    async ()=>{
+
+        try{
+
+            /*
+              優先使用 Popup。
+              GitHub Pages 正常情況下可以使用。
+
+              如果瀏覽器封鎖 Popup，
+              則自動改用 Redirect。
+            */
+
+            try{
+
+                const result =
+                    await signInWithPopup(
+                        auth,
+                        googleProvider
+                    );
+
+                if(result?.user){
+
+                    showToast(
+                        `✅ 歡迎，${result.user.displayName || result.user.email}`
+                    );
+
+                }
+
+            }catch(popupError){
+
+                console.warn(
+                    "Popup 登入失敗，改用 Redirect：",
+                    popupError
+                );
+
+                if(
+                    popupError.code
+                    === "auth/popup-blocked"
+                    ||
+                    popupError.code
+                    === "auth/popup-closed-by-user"
+                    ||
+                    popupError.code
+                    === "auth/cancelled-popup-request"
+                ){
+
+                    await signInWithRedirect(
+                        auth,
+                        googleProvider
+                    );
+
+                }else{
+
+                    throw popupError;
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Google Login Error:",
+                error
             );
 
-          showToast(
-            "所有記錄已清除"
-          );
-
-        } catch (error) {
-
-          console.error(error);
-
-          /*
-            Firebase 清除失敗時，
-            不偷偷假裝已同步成功。
-          */
-
-          showToast(
-            "Firebase 清除失敗，請檢查登入狀態"
-          );
+            showToast(
+                `❌ Google 登入失敗：${error.code || error.message}`,
+                "error"
+            );
 
         }
 
-      }
+    }
+);
+
+
+/* =========================================================
+   Logout
+   ========================================================= */
+
+$("logoutBtn").addEventListener(
+    "click",
+    async ()=>{
+
+        try{
+
+            await signOut(auth);
+
+            currentUser = null;
+
+            if(unsubscribeFirestore){
+
+                unsubscribeFirestore();
+
+                unsubscribeFirestore = null;
+
+            }
+
+            loadLocalData();
+
+            render();
+
+            showToast("👋 已登出");
+
+        }catch(error){
+
+            console.error(error);
+
+            showToast(
+                "❌ 登出失敗",
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   Firebase Redirect Result
+   ========================================================= */
+
+try{
+
+    await getRedirectResult(auth);
+
+}catch(error){
+
+    console.error(
+        "Redirect Login Error:",
+        error
     );
 
+}
 
-  /* =========================================================
-     Initial
-     ========================================================= */
 
-  loadTheme();
+/* =========================================================
+   Auth State
+   ========================================================= */
 
-  records =
-    loadLocalRecords();
+onAuthStateChanged(
+    auth,
+    async user => {
 
-  renderAll();
+        currentUser = user;
 
+        if(user){
+
+            $("loginBtn").style.display =
+                "none";
+
+            $("logoutBtn").style.display =
+                "inline-block";
+
+            $("userStatus").textContent =
+                `✅ ${user.displayName || user.email}`;
+
+            /*
+              登入後：
+              1. 讀取該 UID 的 Firestore 資料
+              2. 建立即時監聽
+            */
+
+            await loadFirebaseRecords();
+
+            subscribeFirebase();
+
+        }else{
+
+            $("loginBtn").style.display =
+                "inline-block";
+
+            $("logoutBtn").style.display =
+                "none";
+
+            $("userStatus").textContent =
+                "🔒 未登入";
+
+            if(unsubscribeFirestore){
+
+                unsubscribeFirestore();
+
+                unsubscribeFirestore = null;
+
+            }
+
+            loadLocalData();
+
+            render();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   Initial Local Data
+   ========================================================= */
+
+loadLocalData();
+
+render();
 
 </script>
 
