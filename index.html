@@ -177,8 +177,11 @@
       width: 40px;
       min-width: 40px;
       padding: 0;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height:1;
+      font-size: 1.2rem;
     }
 
     .font-control {
@@ -290,6 +293,7 @@
 
     /* 篩選工具欄 */
     .filter-toolbar {
+      position: relative;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -333,8 +337,8 @@
     #moreFilterBtn { display: none; }
     .filter-panel {
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px 24px;
+      flex-direction: column;
+      gap: 16px;
       padding-top: 12px;
       margin-top: 10px;
       border-top: 1px dashed var(--border);
@@ -344,6 +348,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .filter-group label {
       font-weight: 700;
@@ -366,8 +371,8 @@
     }
     .category-menu {
       position: absolute;
-      top: calc(100% + 7px);
-      left: 0;
+      top: calc(100% + 8px);
+      right: 0;
       z-index: 40;
       width: 190px;
       max-height: 260px;
@@ -989,40 +994,44 @@
   <!-- 篩選工具欄 -->
   <div class="filter-toolbar">
     <div class="filter-row">
-      <div class="filter-chips">
-        <button class="filter-chip active" data-period="all">📊 全部</button>
-        <button class="filter-chip" data-period="today">📅 今日</button>
-        <button class="filter-chip" data-period="week">📅 本週</button>
-        <button class="filter-chip" data-period="month">📅 本月</button>
-      </div>
+      <button id="categoryFilterBtn" class="filter-chip" type="button" style="display:inline-flex; align-items:center; gap:4px;">
+    📂 類別 <span id="selectedCategoryLabel">全部</span> ▾
+      </button>
       <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
     </div>
-    <div id="filterPanel" class="filter-panel hidden">
-      <div class="filter-group">
-        <label>類別</label>
-        <div class="category-filter-wrap">
-          <button id="categoryFilterBtn" class="funnel-btn" type="button">⏷ 類別</button>
-          <div id="categoryMenu" class="category-menu">
-            <button class="category-option active" data-category="all">◉ 全部類別</button>
-            <button class="category-option" data-category="餐飲"><span class="category-badge cat-餐飲">餐飲</span></button>
-            <button class="category-option" data-category="交通"><span class="category-badge cat-交通">交通</span></button>
-            <button class="category-option" data-category="購物"><span class="category-badge cat-購物">購物</span></button>
-            <button class="category-option" data-category="娛樂"><span class="category-badge cat-娛樂">娛樂</span></button>
-            <button class="category-option" data-category="房租"><span class="category-badge cat-房租">房租</span></button>
-            <button class="category-option" data-category="醫療"><span class="category-badge cat-醫療">醫療</span></button>
-            <button class="category-option" data-category="其他"><span class="category-badge cat-其他">其他</span></button>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>排序</label>
-        <div class="sort-buttons">
-          <button class="sort-button" data-sort="id">序號 ↕</button>
-          <button class="sort-button" data-sort="content">內容 ↕</button>
-          <button class="sort-button" data-sort="amount">金額 ↕</button>
-        </div>
+
+  <div id="filterPanel" class="filter-panel hidden">
+    <!-- 第一行：日期快速篩選 -->
+    <div class="filter-group date-group">
+      <button class="filter-chip active" data-period="all">📊 全部</button>
+      <button class="filter-chip" data-period="today">📅 今日</button>
+      <button class="filter-chip" data-period="week">📅 本週</button>
+      <button class="filter-chip" data-period="month">📅 本月</button>
+    </div>
+    <!-- 第二行：排序按鈕 -->
+    <div class="filter-group">
+      <label>排序</label>
+      <div class="sort-buttons">
+        <button class="sort-button" data-sort="id">序號 ↕</button>
+        <button class="sort-button" data-sort="content">內容 ↕</button>
+        <button class="sort-button" data-sort="amount">金額 ↕</button>
       </div>
     </div>
+  </div>
+
+  <!-- 全域類別選單（桌面與手機共用） -->
+    <div id="categoryMenu" class="category-menu">
+  <!-- 所有類別選項，保持不變 -->
+      <button class="category-option active" data-category="all">◉ 全部類別</button>
+      <button class="category-option" data-category="餐飲"><span class="category-badge cat-餐飲">餐飲</span></button>
+      <button class="category-option" data-category="交通"><span class="category-badge cat-交通">交通</span></button>
+      <button class="category-option" data-category="購物"><span class="category-badge cat-購物">購物</span></button>
+      <button class="category-option" data-category="娛樂"><span class="category-badge cat-娛樂">娛樂</span></button>
+      <button class="category-option" data-category="房租"><span class="category-badge cat-房租">房租</span></button>
+      <button class="category-option" data-category="醫療"><span class="category-badge cat-醫療">醫療</span></button>
+      <button class="category-option" data-category="其他"><span class="category-badge cat-其他">其他</span></button>
+    </div>
+
   </div>
 
   <!-- 圖表 -->
@@ -1098,6 +1107,12 @@
               <input id="locationInput" class="form-control" type="text" placeholder="例如：台北車站">
               <button id="mapBtn" class="tool-btn" type="button">🗺️ 地圖</button>
             </div>
+          </div>
+          <div class="form-group full">
+            <label class="form-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="excludeFromTotal">
+         不計入消費總數（勾選後此筆支出不列入總金額統計）
+            </label>
           </div>
         </div>
       </div>
@@ -1192,7 +1207,7 @@
   let currentCategory = "all";
   let currentSearch = "";
   let sortField = "id";
-  let sortDirection = "desc";
+  let sortDirection = -1;
   let editingId = null;
   let selectedRecordId = null;
   let expenseChart = null;
@@ -1326,7 +1341,9 @@
 
   function renderStats(data) {
     $("#totalCount").textContent = data.length.toLocaleString("zh-TW");
-    const total = data.reduce((s,r) => s + (Number(r.amount) || 0), 0);
+    const total = data
+      .filter(r => !r.excludeFromTotal) // <-- 過濾
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0);
     $("#totalAmount").textContent = "NT$ " + formatMoney(total);
   }
 
@@ -1443,6 +1460,7 @@
     $("#categoryInput").value = record.category || "其他";
     $("#timeInput").value = localDateTimeValue(new Date(record.time));
     $("#locationInput").value = record.location || "";
+    $("#excludeFromTotal").checked = record.excludeFromTotal || false;
     closeModal("detailModal");
     openModal("formModal");
   }
@@ -1513,7 +1531,17 @@
     if (!time) { showToast("請選擇消費時間"); return; }
 
     if (editingId === null) {
-      const record = { id: getNextId(), amount: Number(amount.toFixed(2)), content, time: new Date(time).toISOString(), location, category, createdAt: new Date().toISOString() };
+      const record = {
+        id: getNextId(),
+        amount: Number(amount.toFixed(2)),
+        content,
+        time: new Date(time).toISOString(),
+        location,
+        category,
+        excludeFromTotal: $("#excludeFromTotal").checked, // <-- 新增這行
+        createdAt: new Date().toISOString()
+      };
+
       records.push(record);
       saveLocal();
       if (currentUser) await firebaseAdd(record);
@@ -1521,7 +1549,7 @@
     } else {
       const idx = records.findIndex(r => Number(r.id) === editingId);
       if (idx === -1) return;
-      const updated = { ...records[idx], amount: Number(amount.toFixed(2)), content, time: new Date(time).toISOString(), location, category, updatedAt: new Date().toISOString() };
+      const updated = { ...records[idx], amount: Number(amount.toFixed(2)), content, time: new Date(time).toISOString(), location, category, excludeFromTotal: $("#excludeFromTotal").checked, updatedAt: new Date().toISOString() };
       records[idx] = updated;
       saveLocal();
       if (currentUser) await firebaseUpdate(updated);
@@ -1592,6 +1620,12 @@
     categoryMenu.classList.remove("show");
     categoryFilterBtn.classList.toggle("active", currentCategory !== "all");
     render();
+    const label = document.getElementById("selectedCategoryLabel");
+    if (opt.dataset.category === "all") {
+      label.textContent = "全部";
+    } else {
+      label.textContent = opt.dataset.category;
+    }
   });
   document.addEventListener("click", e => {
     if (!e.target.closest(".category-filter-wrap")) {
