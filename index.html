@@ -28,6 +28,24 @@
       --font-size: 16px;
     }
 
+    /* 統一篩選按鈕字體 */
+    #moreFilterBtn {
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    /* 統一排序按鈕字體 */
+    .sort-buttons .sort-button {
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    /* 類別標籤繼承 */
+    #selectedCategoryLabel {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
     body.dark {
       --bg: #24221d;
       --surface: #2e2b25;
@@ -212,14 +230,17 @@
       display: none;
       position: absolute;
       top: calc(100% + 8px);
-      right: 0;
+      left: 0;
+      z-index:40;
+      min-width: 180px;
+      width:auto;
+      max-height: 260px;
+      overflow-y:auto;
+      padding: 7px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      padding: 8px;
-      min-width: 150px;
-      z-index: 70;
     }
     .more-menu.show { display: block; }
     .more-item {
@@ -304,8 +325,8 @@
     .filter-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      justify-content: flex-start;
+      gap: 12px;
       flex-wrap: wrap;
     }
     .filter-chips {
@@ -334,7 +355,7 @@
       border-color: var(--accent);
       font-weight: 800;
     }
-    #moreFilterBtn { display: none; }
+    #moreFilterBtn { display: inline-flex; }
     .filter-panel {
       display: flex;
       flex-direction: column;
@@ -372,7 +393,7 @@
     .category-menu {
       position: absolute;
       top: calc(100% + 8px);
-      right: 0;
+      left: 0;
       z-index: 40;
       width: 190px;
       max-height: 260px;
@@ -407,7 +428,8 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 4px 10px;
-      font-size: 0.8rem;
+      font-size: 0.86rem;
+      font-weight: 700;
       color: var(--text);
     }
     .sort-buttons .sort-button:hover { border-color: var(--primary); }
@@ -1628,8 +1650,11 @@
     }
   });
   document.addEventListener("click", e => {
-    if (!e.target.closest(".category-filter-wrap")) {
+    const isOutside = !e.target.closest(".category-filter-wrap") && !e.target.closest("#categoryFilterBtn");
+    if (isOutside) {
       categoryMenu.classList.remove("show");
+      // 同步更新按鈕的 active 狀態（根據當前類別是否為「全部」）
+      categoryFilterBtn.classList.toggle("active", currentCategory !== "all");
     }
   });
 
