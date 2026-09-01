@@ -566,6 +566,23 @@
       font-weight: 800;
       white-space: nowrap;
     }
+
+    .exclude-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #e8e0d8;
+      color: #6b5f4e;
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    body.dark .exclude-badge {
+      background: #3d3a32;
+      color: #b8aa8d;
+    }
+
     .cat-餐飲 { background: #ffe1c7; color: #984b13; }
     .cat-交通 { background: #dceaff; color: #315b9a; }
     .cat-購物 { background: #f6d9ec; color: #8c3f72; }
@@ -1377,11 +1394,14 @@
     }
     list.innerHTML = data.map(record => {
       const cat = record.category || "其他";
+      const excludeBadge = record.excludeFromTotal 
+      ? `<span class="exclude-badge">🚫 不計總和</span>` 
+      : '';
       return `
         <div class="record-row" data-id="${escapeHTML(record.id)}">
           <div class="record-id">#${escapeHTML(record.id)}</div>
           <div><span class="category-badge cat-${escapeHTML(cat)}">${escapeHTML(cat)}</span></div>
-          <div class="content">${escapeHTML(record.content)}</div>
+          <div class="content">${escapeHTML(record.content)} ${excludeBadge}</div>
           <div class="amount">NT$ ${formatMoney(record.amount)}</div>
           <div class="row-actions">
             <button class="row-action edit-row" data-id="${escapeHTML(record.id)}" title="編輯" type="button">✏️</button>
