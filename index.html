@@ -1444,27 +1444,75 @@
   function renderChart(data) {
     const canvas = $("#expenseChart");
     const empty = $("#noChart");
+
+    // 🔥 關鍵：過濾掉不計入總和的記錄
+    const filteredData = data.filter(r => !r.excludeFromTotal);
+
     const totals = {};
-    data.forEach(r => { const cat = r.category || "其他"; totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0); });
+    filteredData.forEach(r => {
+      const cat = r.category || "其他";
+      totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
+    });
     const labels = Object.keys(totals);
     const values = Object.values(totals);
-    if (expenseChart) { expenseChart.destroy(); expenseChart = null; }
-    if (!labels.length) { canvas.style.display = "none"; empty.style.display = "grid"; return; }
-    canvas.style.display = "block"; empty.style.display = "none";
-    const colors = ["#d98b45","#6e9fd5","#c875a8","#9077c9","#68a77c","#63aeb0","#999184"];
+
+    // 清除舊圖表
+    if (expenseChart) {
+      expenseChart.destroy();
+      expenseChart = null;
+    }
+
+    // 無資料時顯示提示
+    if (!labels.length) {
+      canvas.style.display = "none";
+      empty.style.display = "grid";
+      return;
+    }
+    canvas.style.display = "block";
+    empty.style.display = "none";
+
+    // 顏色映射（與清單標籤一致）
+    const categoryColors = {
+      '餐飲': '#ffe1c7',
+      '交通': '#dceaff',
+      '購物': '#f6d9ec',
+      '娛樂': '#e5ddff',
+      '房租': '#d9efe0',
+      '醫療': '#d8eeee',
+      '其他': '#e7e4df'
+    };
+    const backgroundColors = labels.map(label => categoryColors[label] || '#cccccc');
+
+    // 建立圖表
     expenseChart = new Chart(canvas, {
       type: "pie",
-      data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0,labels.length), borderWidth: 2, borderColor: getComputedStyle(document.body).getPropertyValue("--surface") }] },
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: backgroundColors,
+          borderWidth: 2,
+          borderColor: getComputedStyle(document.body).getPropertyValue("--surface")
+        }]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "right", labels: { color: getComputedStyle(document.body).getPropertyValue("--text"), boxWidth: 13, padding: 12 } },
+          legend: {
+            position: "right",
+            labels: {
+              color: getComputedStyle(document.body).getPropertyValue("--text"),
+              boxWidth: 13,
+              padding: 12
+            }
+          },
           tooltip: {
             callbacks: {
               label(ctx) {
-                const total = values.reduce((a,b) => a+b, 0);
-                const percent = total ? ((ctx.raw/total)*100).toFixed(1) : 0;
+                // 此處的 total 是過濾後的總和（values 的總和）
+                const total = values.reduce((a, b) => a + b, 0);
+                const percent = total ? ((ctx.raw / total) * 100).toFixed(1) : 0;
                 return ` ${ctx.label}：${formatMoney(ctx.raw)} NTD (${percent}%)`;
               }
             }
