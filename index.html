@@ -1006,16 +1006,19 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
       position: relative;
+      touch-action: manipulation; /* ✅ 消除點擊延遲 */
     }
     .book-item.active {
       background: var(--accent);
       color: white;
     }
-    .book-item:hover {
-      background: var(--surface-2);
-    }
-    .book-item.active:hover {
-      background: var(--accent-dark);
+    @media (hover: hover) {
+      .book-item:hover {
+        background: var(--surface-2);
+      }
+      .book-item.active:hover {
+        background: var(--accent-dark);
+      }
     }
     .book-item .delete-book {
       display: none;
@@ -1289,8 +1292,9 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="tool-btn" data-close="formModal" type="button">取消</button>
         <button class="tool-btn primary-btn" type="submit">確定儲存</button>
+        <button class="tool-btn" data-close="formModal" type="button">取消</button>
+
       </div>
     </form>
   </div>
@@ -1336,6 +1340,7 @@
       <div id="mapContainer" style="height: 100%; width: 100%;"></div>
     </div>
     <div class="modal-footer">
+      <button id="locateMeBtn" class="tool-btn" type="button">📍 當前位置</button>
       <button id="mapPickerConfirmBtn" class="tool-btn primary-btn" type="button">✔ 確認選取</button>
       <button class="tool-btn" data-close="mapPickerModal" type="button">取消</button>
     </div>
@@ -1648,6 +1653,42 @@
       renderBookBar();
       render();  // ✅ 加上這行
       startFirebaseSync();
+    }
+  }
+
+
+  // 定義定位函數
+  function locateUser() {
+    if (!mapInstance) {
+      showToast('地圖尚未載入');
+      return;
+    }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          mapInstance.setView([lat, lng], 15);
+          if (marker) mapInstance.removeLayer(marker);
+          marker = L.marker([lat, lng]).addTo(mapInstance);
+          selectedLatLng = { lat, lng };
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+            const data = await response.json();
+            selectedAddress = data.display_name || `${lat}, ${lng}`;
+          } catch(e) {
+            selectedAddress = `${lat}, ${lng}`;
+          }
+          showToast('📍 已定位到您的位置');
+        },
+        (err) => {
+          showToast('無法獲取位置，請手動點擊地圖選取');
+          console.error(err);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      showToast('您的瀏覽器不支援定位功能');
     }
   }
 
@@ -2018,6 +2059,42 @@
           }
           // 可以在此處即時更新一個預覽標籤（可選）
         });
+        // 綁定定位按鈕
+        const locateBtn = document.getElementById('locateMeBtn');
+        locateBtn.onclick = function() {
+          if (!mapInstance) {
+            showToast('地圖尚未載入，請稍後');
+            return;
+          }
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                mapInstance.setView([lat, lng], 15);
+                if (marker) mapInstance.removeLayer(marker);
+                marker = L.marker([lat, lng]).addTo(mapInstance);
+                selectedLatLng = { lat, lng };
+                try {
+                  const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                  const data = await response.json();
+                  selectedAddress = data.display_name || `${lat}, ${lng}`;
+                  showToast('📍 已定位到您的位置');
+                } catch(e) {
+                  selectedAddress = `${lat}, ${lng}`;
+                  showToast('📍 定位成功，但無法取得地址');
+                }
+              },
+              (err) => {
+                showToast('無法獲取位置，請手動點擊地圖選取');
+                console.error(err);
+              },
+              { enableHighAccuracy: true }
+            );
+          } else {
+            showToast('您的瀏覽器不支援定位功能');
+          }
+        };
       } else {
         // 如果已初始化，調整大小（確保正確顯示）
         mapInstance.invalidateSize();
