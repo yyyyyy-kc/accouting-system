@@ -1083,7 +1083,7 @@
         border-radius: 0;
       }
     }
-    
+
   </style>
 </head>
 
@@ -1370,7 +1370,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // Firebase 設定 (已修正)
   const firebaseConfig = {
@@ -1551,6 +1551,59 @@
   }
   */
 
+  // 登入時同步 Firebase 上的所有帳本名稱
+  async function syncBooksFromFirebase() {
+    if (!currentUser) return;
+
+    try {
+      // 查詢 users/{uid}/books 下的所有文件（每個文件代表一個帳本）
+      const booksRef = collection(db, "users", currentUser.uid, "books");
+      const snapshot = await getDocs(booksRef);
+
+      let fetchedBooks = {};
+
+      if (snapshot.empty) {
+        // 若 Firebase 完全沒有帳本，建立一個「預設」帳本並上傳
+        const defaultBook = "預設";
+        fetchedBooks = { [defaultBook]: [] };
+        // 在 Firebase 建立該帳本的佔位文件（讓它存在）
+        await setDoc(doc(db, "users", currentUser.uid, "books", defaultBook), { name: defaultBook });
+        showToast("📒 已建立預設帳本");
+      } else {
+        // 將查到的每個帳本名稱加入 fetchedBooks
+        snapshot.forEach(docSnap => {
+          const bookName = docSnap.id;
+          fetchedBooks[bookName] = []; // 先設為空陣列，等待後續訂閱記錄
+        });
+      }
+
+      // 🔥 關鍵：用 Firebase 的帳本列表完全覆蓋本地 books
+      books = fetchedBooks;
+
+      // 設定當前帳本（若原 currentBook 不存在，則取第一個）
+      if (!books[currentBook]) {
+        const keys = Object.keys(books);
+        currentBook = keys.length ? keys[0] : "預設";
+      }
+
+      // 儲存到本地（讓下次離線也能看到）
+      saveLocal();
+
+      // 重新渲染帳本欄
+      renderBookBar();
+
+      // 重新訂閱當前帳本的記錄
+      if (unsubscribeRecords) unsubscribeRecords();
+      startFirebaseSync();
+
+      showToast(`📚 已同步 ${Object.keys(books).length} 個帳本`);
+    } catch (error) {
+      console.error("同步帳本列表失敗", error);
+      showToast("⚠️ 帳本同步失敗，使用本機資料");
+    }
+  }
+  
+
   // 過濾與排序
   function isToday(d) { const n = new Date(); return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate(); }
   function isThisWeek(d) {
@@ -1669,10 +1722,20 @@
     name = name.trim();
     if (!name) { showToast('請輸入帳本名稱'); return false; }
     if (books[name]) { showToast('帳本名稱已存在'); return false; }
+
+    // 建立本地帳本
     books[name] = [];
     currentBook = name;
     records = books[name];
     saveLocal();
+
+    // 🔥 若已登入，在 Firebase 建立該帳本的佔位文件
+    if (currentUser) {
+      setDoc(doc(db, "users", currentUser.uid, "books", name), { name: name })
+        .then(() => console.log(`帳本「${name}」已建立於 Firebase`))
+        .catch(err => console.error("建立 Firebase 帳本失敗", err));
+    }
+
     renderBookBar();
     render();
     showToast(`✅ 已建立「${name}」帳本`);
@@ -2312,19 +2375,31 @@
   });
 
   // Auth 狀態
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     currentUser = user || null;
     if (currentUser) {
       $("#userStatus").textContent = "👤 " + (currentUser.displayName || currentUser.email || "已登入");
       $("#loginBtn").textContent = "🚪 登出";
       document.getElementById("mobileLoginBtn").textContent = "🚪 登出";
-      startFirebaseSync();
+
+      // 🔥 先載入本地（快速顯示），再從 Firebase 同步帳本列表
+      loadLocal();
+      renderBookBar();
+      render();
+
+      // 🔥 執行同步（將 Firebase 上的所有帳本名稱拉下來）
+      await syncBooksFromFirebase();
+
+      // 注意：syncBooksFromFirebase 內部已呼叫 startFirebaseSync
+      // 所以不需要再額外呼叫
     } else {
+      // 登出邏輯（保持不變）
       $("#userStatus").textContent = "🔒 未登入";
       $("#loginBtn").textContent = "🔑 登入";
       document.getElementById("mobileLoginBtn").textContent = "🔑 登入";
       if (unsubscribeRecords) { unsubscribeRecords(); unsubscribeRecords = null; }
       loadLocal();
+      renderBookBar();
       render();
     }
   });
