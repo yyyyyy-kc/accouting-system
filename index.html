@@ -1006,7 +1006,9 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
       position: relative;
-      touch-action: manipulation; /* ✅ 消除點擊延遲 */
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .book-item.active {
       background: var(--accent);
@@ -1768,10 +1770,11 @@
     }).join('');
 
     list.querySelectorAll('.book-item').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('pointerdown', (e) => {
         if (e.target.closest('.delete-book')) return;
         const name = btn.dataset.book;
         switchBook(name);
+        e.preventDefault();
       });
       const del = btn.querySelector('.delete-book');
       if (del) {
