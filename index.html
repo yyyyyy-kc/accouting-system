@@ -1562,7 +1562,7 @@
     render();
     showToast(`🗑️ 已刪除「${name}」帳本`);
   }
-  
+
   /* 原本的單帳本
   async function firebaseAdd(record) {
     if (!currentUser) return false;
@@ -1788,24 +1788,17 @@
     return true;
   }
 
-  // 刪除帳本
-  function deleteBook(name) {
-    if (Object.keys(books).length <= 1) {
-      showToast('至少保留一個帳本');
-      return;
+  async function firebaseDelete(record, bookName = currentBook) {
+    if (!currentUser || !record.firebaseId) return false;
+    try {
+      const ref = doc(db, "users", currentUser.uid, "books", bookName, "records", record.firebaseId);
+      await deleteDoc(ref);
+      return true;
+    } catch(e) { 
+      console.error(e); 
+      showToast("Firebase 刪除失敗"); 
+      return false; 
     }
-    if (!confirm(`確定要刪除「${name}」帳本及其所有記錄嗎？`)) return;
-    // 若已登入，需刪除 Firebase 中該帳本的所有記錄（此處省略批量刪除，可參考前文）
-    delete books[name];
-    if (currentBook === name) {
-      const keys = Object.keys(books);
-      currentBook = keys[0];
-    }
-    records = books[currentBook] || [];
-    saveLocal();
-    renderBookBar();
-    render();
-    showToast(`🗑️ 已刪除「${name}」帳本`);
   }
 
   function renderStats(data) {
