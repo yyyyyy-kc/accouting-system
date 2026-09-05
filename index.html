@@ -1513,7 +1513,9 @@
     if (!currentUser || !record.firebaseId) return false;
     try {
       const ref = doc(db, "users", currentUser.uid, "books", bookName, "records", record.firebaseId);
-      await setDoc(ref, record);
+      // ✅ 複製一份，移除 firebaseId，避免寫入文件
+      const { firebaseId, ...dataToUpdate } = record;
+      await setDoc(ref, dataToUpdate);
       return true;
     } catch(e) { console.error(e); showToast("Firebase 更新失敗"); return false; }
   }
@@ -2080,6 +2082,7 @@
   async function deleteRecord(record) {
     if (!confirm(`確認刪除？\n\n「${record.content}」\nNT$ ${formatMoney(record.amount)}`)) return;
     records = records.filter(r => Number(r.id) !== Number(record.id));
+    books[currentBook] = records;  // ✅ 同步更新 books
     saveLocal();
     if (currentUser && record.firebaseId) await firebaseDelete(record);
     closeModal("detailModal");
@@ -2265,14 +2268,25 @@
   $("#duplicateBtn").addEventListener("click", async () => {
     const record = records.find(r => Number(r.id) === selectedRecordId);
     if (!record) return;
-    const copy = { id: getNextId(), amount: Number(record.amount), content: record.content, time: new Date().toISOString(), location: record.location || "", category: record.category || "其他", createdAt: new Date().toISOString() };
+    const copy = { 
+      id: getNextId(), 
+      amount: Number(record.amount), 
+      content: record.content, 
+      time: new Date().toISOString(), 
+      location: record.location || "", 
+      category: record.category || "其他", 
+      excludeFromTotal: record.excludeFromTotal || false, // ✅ 複製該欄位
+      createdAt: new Date().toISOString() 
+    };
     records.push(copy);
+    books[currentBook] = records; // ✅ 同步 books
     saveLocal();
     if (currentUser) await firebaseAdd(copy);
     closeModal("detailModal");
     render();
     showToast("📑 已複製記錄");
   });
+  
   $("#editBtn").addEventListener("click", () => {
     const record = records.find(r => Number(r.id) === selectedRecordId);
     if (record) openEdit(record);
