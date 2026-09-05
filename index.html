@@ -1591,6 +1591,8 @@
 
       // 重新渲染帳本欄
       renderBookBar();
+      // 重新渲染主內容（確保記錄清單也更新）
+      render();
 
       // 重新訂閱當前帳本的記錄
       if (unsubscribeRecords) unsubscribeRecords();
@@ -1600,6 +1602,14 @@
     } catch (error) {
       console.error("同步帳本列表失敗", error);
       showToast("⚠️ 帳本同步失敗，使用本機資料");
+      if (Object.keys(books).length === 0) {
+        books = { '預設': [] };
+        currentBook = '預設';
+        saveLocal();
+      }
+      renderBookBar();
+      render();  // ✅ 加上這行
+      startFirebaseSync();
     }
   }
   
@@ -2389,6 +2399,10 @@
 
       // 🔥 執行同步（將 Firebase 上的所有帳本名稱拉下來）
       await syncBooksFromFirebase();
+
+      // ✅ 同步完成後，再次渲染確保畫面更新
+      renderBookBar();
+      render();
 
       // 注意：syncBooksFromFirebase 內部已呼叫 startFirebaseSync
       // 所以不需要再額外呼叫
