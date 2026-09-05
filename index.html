@@ -1370,7 +1370,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // Firebase 設定 (已修正)
   const firebaseConfig = {
@@ -1518,15 +1518,51 @@
     } catch(e) { console.error(e); showToast("Firebase 更新失敗"); return false; }
   }
 
-  async function firebaseDelete(record, bookName = currentBook) {
-    if (!currentUser || !record.firebaseId) return false;
-    try {
-      const ref = doc(db, "users", currentUser.uid, "books", bookName, "records", record.firebaseId);
-      await deleteDoc(ref);
-      return true;
-    } catch(e) { console.error(e); showToast("Firebase 刪除失敗"); return false; }
+  // 刪除帳本（同步刪除 Firebase）
+  async function deleteBook(name) {
+    if (Object.keys(books).length <= 1) {
+      showToast('至少保留一個帳本');
+      return;
+    }
+    if (!confirm(`確定要刪除「${name}」帳本及其所有記錄嗎？`)) return;
+
+    // 若已登入，先從 Firebase 刪除
+    if (currentUser) {
+      try {
+        // 1. 刪除該帳本下的所有記錄（子集合）
+        const recordsRef = collection(db, "users", currentUser.uid, "books", name, "records");
+        const snapshot = await getDocs(recordsRef);
+        const batch = writeBatch(db);
+        snapshot.forEach(docSnap => {
+          batch.delete(docSnap.ref);
+        });
+        await batch.commit();
+        
+        // 2. 刪除該帳本的佔位文件
+        const bookDocRef = doc(db, "users", currentUser.uid, "books", name);
+        await deleteDoc(bookDocRef);
+        
+        showToast(`🗑️ Firebase 中的「${name}」帳本已刪除`);
+      } catch (error) {
+        console.error('刪除 Firebase 帳本失敗', error);
+        showToast('⚠️ Firebase 刪除失敗，但本地已刪除');
+        // 即使 Firebase 失敗，仍繼續本地刪除
+      }
+    }
+
+    // 本地刪除
+    delete books[name];
+    if (currentBook === name) {
+      const keys = Object.keys(books);
+      currentBook = keys[0];
+    }
+    records = books[currentBook] || [];
+    saveLocal();
+    renderBookBar();
+    render();
+    showToast(`🗑️ 已刪除「${name}」帳本`);
   }
- 
+  
   /* 原本的單帳本
   async function firebaseAdd(record) {
     if (!currentUser) return false;
@@ -1612,7 +1648,7 @@
       startFirebaseSync();
     }
   }
-  
+
 
   // 過濾與排序
   function isToday(d) { const n = new Date(); return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate(); }
