@@ -1015,10 +1015,25 @@
     }
 
     @media (max-width: 700px) {
+      .filter-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        gap: 8px;
+      }
+      .filter-row::-webkit-scrollbar { display: none; }
       .filter-row .tool-btn {
+        flex: 0 0 auto;
         min-height: 42px;
         padding: 8px 14px;
         font-size: 0.9rem;
+        white-space: nowrap;
+      }
+      /* 月份 input 在手機上縮短一點 */
+      #monthPicker {
+        width: 95px;
+        font-size: 0.85rem;
       }
     }
 
@@ -1171,9 +1186,9 @@
         📂 類別 <span id="selectedCategoryLabel">全部</span> ▾
       </button>
       <button id="viewAllBtn" class="tool-btn active" type="button">📋 所有記錄</button>
-      <label id="viewMonthBtn" class="tool-btn" style="cursor:pointer; position:relative; overflow:hidden;">
-        <span id="viewMonthLabel">📅 選擇月份</span>
-        <input id="monthPicker" type="month" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+      <label id="viewMonthBtn" class="tool-btn" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+        📅
+        <input id="monthPicker" type="month" style="border:0; background:transparent; outline:0; font:inherit; color:inherit; cursor:pointer; width:110px;">
       </label>
       <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
     </div>
@@ -2521,7 +2536,6 @@
     selectedMonth = "";
     $("#viewAllBtn").classList.add("active");
     $("#viewMonthBtn").classList.remove("active");
-    document.getElementById("viewMonthLabel").textContent = "📅 選擇月份";
     resetPagination();
   });
 
@@ -2534,7 +2548,6 @@
     currentView = "month";
     $("#viewAllBtn").classList.remove("active");
     $("#viewMonthBtn").classList.add("active");
-    document.getElementById("viewMonthLabel").textContent = "📅 " + val;
     resetPagination();
   });
 
