@@ -34,10 +34,7 @@
     }
 
     /* 統一篩選按鈕字體 */
-    #moreFilterBtn {
-      font-size: 0.86rem;
-      font-weight: 700;
-    }
+
 
     /* 統一排序按鈕字體 */
     .sort-buttons .sort-button {
@@ -186,6 +183,20 @@
       border-color: var(--primary);
     }
     .tool-btn:active { transform: scale(.97); }
+
+    .tool-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 800;
+    }
+
+    .tool-btn.active:hover {
+      background: var(--accent-dark);
+      color: white;
+      border-color: var(--accent-dark);
+    }
+
     .primary-btn {
       background: var(--accent);
       color: white;
@@ -343,24 +354,8 @@
       -webkit-overflow-scrolling: touch;
     }
     .filter-chips::-webkit-scrollbar { display: none; }
-    .filter-chip {
-      flex: 0 0 auto;
-      min-height: 38px;
-      padding: 7px 14px;
-      border-radius: 999px;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      font-size: .86rem;
-      white-space: nowrap;
-    }
-    .filter-chip.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-      font-weight: 800;
-    }
-    #moreFilterBtn { display: inline-flex; }
+
+
     .filter-panel {
       display: flex;
       flex-direction: column;
@@ -949,11 +944,7 @@
         min-height: 40px;
         flex: 1;
       }
-      .filter-chip {
-        min-height: 42px;
-        padding-left: 15px;
-        padding-right: 15px;
-      }
+
       .toast-container {
         top: 72px;
         width: calc(100% - 28px);
@@ -1022,6 +1013,15 @@
         background: var(--accent-dark);
       }
     }
+
+    @media (max-width: 700px) {
+      .filter-row .tool-btn {
+        min-height: 42px;
+        padding: 8px 14px;
+        font-size: 0.9rem;
+      }
+    }
+
     .book-item .delete-book {
       display: none;
       position: absolute;
@@ -1167,9 +1167,12 @@
   <!-- 篩選工具欄 -->
   <div class="filter-toolbar">
     <div class="filter-row">
-      <button id="categoryFilterBtn" class="filter-chip" type="button" style="display:inline-flex; align-items:center; gap:4px;">
-    📂 類別 <span id="selectedCategoryLabel">全部</span> ▾
+      <button id="categoryFilterBtn" class="tool-btn" type="button">
+        📂 類別 <span id="selectedCategoryLabel">全部</span> ▾
       </button>
+      <button id="viewAllBtn" class="tool-btn active" type="button">📋 所有記錄</button>
+      <button id="viewMonthBtn" class="tool-btn" type="button">📅 選擇月份</button>
+      <input id="monthPicker" type="month" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
       <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
     </div>
 
@@ -1380,7 +1383,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, getDocs, writeBatch, getCountFromServer, query, where, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, getDocs, writeBatch, getCountFromServer, getAggregateFromServer, sum, query, where, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // Firebase 設定 (已修正)
   const firebaseConfig = {
@@ -1410,17 +1413,22 @@
   let currentCategory = "all";
   let currentSearch = "";
   let sortField = "time";
-  let sortDirection = -1;
+  let sortDirection = 1;
   let editingId = null;
   let selectedRecordId = null;
   let expenseChart = null;
   // ===== 分頁設定 =====
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 100;
   let pages = [];                 // 快取的頁面資料
   let currentPageIndex = 0;       
   let totalRecords = 0;           // 總筆數
   let totalAmount = 0;            // 歷史總金額
   let isLoading = false;
+  // 檢視模式
+  let currentView = "all";     // "all" | "month"
+  let selectedMonth = "";      // "2026-09"
+  let chartTotals = {};        // 圓餅圖統計（不受分頁影響）
+
 
   const STORAGE_KEY = "accountingRecords";
 
@@ -1711,7 +1719,16 @@
     let q = collection(db, "users", currentUser.uid, "books", bookName, "records");
     const conditions = [];
     // 日期篩選
-    if (currentPeriod !== "all") {
+    // 🔥 檢視模式：月份模式優先
+    if (currentView === "month" && selectedMonth) {
+      const [y, m] = selectedMonth.split("-").map(Number);
+      const startDate = new Date(y, m - 1, 1);
+      const endDate = new Date(y, m, 1);
+      conditions.push(where("time", ">=", startDate.toISOString()));
+      conditions.push(where("time", "<", endDate.toISOString()));
+    }
+    // 日期快速篩選（僅在「所有記錄」模式下生效）
+    else if (currentPeriod !== "all") {
       const now = new Date();
       let startDate, endDate;
       if (currentPeriod === "today") {
@@ -1759,17 +1776,87 @@
       pages[pageIndex] = { data, firstDoc: snap.docs[0] || null, lastDoc: snap.docs[snap.docs.length - 1] || null };
       currentPageIndex = pageIndex;
       // 更新統計
-      const countSnap = await getCountFromServer(baseQuery);
-      totalRecords = countSnap.data().count;
-      const amountSnap = await getDocs(baseQuery);
-      let sum = 0; amountSnap.forEach(d => { if (!d.data().excludeFromTotal) sum += Number(d.data().amount) || 0; });
-      totalAmount = sum;
-      render();
+     // 總筆數（輕量）
+     const countSnap = await getCountFromServer(baseQuery);
+     totalRecords = countSnap.data().count;
+
+     // 總金額（聚合查詢，只計算不計入總和的記錄）
+     // 注意：Firestore 無法「排除某欄位」，所以我們需要分兩次查
+     // 簡化做法：所有記錄的 sum(amount)，再減去 excludeFromTotal=true 的 sum(amount)
+     const totalSnap = await getAggregateFromServer(baseQuery, {
+       totalSum: sum("amount")
+     });
+     const excludeQuery = query(baseQuery, where("excludeFromTotal", "==", true));
+     const excludeSnap = await getAggregateFromServer(excludeQuery, {
+       excludeSum: sum("amount")
+     });
+     totalAmount = (totalSnap.data().totalSum || 0) - (excludeSnap.data().excludeSum || 0);
+
+     render();
     } catch(e) { console.error(e); showToast("載入失敗"); } finally { isLoading = false; }
   }
 
-  function resetPagination() { pages = []; currentPageIndex = 0; totalRecords = 0; totalAmount = 0; loadPage(0); }
+  // 圓餅圖統計（不受分頁影響，取所有符合條件的資料）
+  async function updateChartTotals() {
+    const totals = {};
 
+    // 未登入：從本地資料算
+    if (!currentUser) {
+      (books[currentBook] || []).forEach(r => {
+        if (r.excludeFromTotal) return;
+        const t = new Date(r.time);
+        if (isNaN(t.getTime())) return;
+
+        // 月份模式
+        if (currentView === "month" && selectedMonth) {
+          const [y, m] = selectedMonth.split("-").map(Number);
+          if (t.getFullYear() !== y || t.getMonth() !== m - 1) return;
+        } else if (currentPeriod !== "all") {
+          // 快速篩選模式
+          if (currentPeriod === "today" && !isToday(t)) return;
+          if (currentPeriod === "week" && !isThisWeek(t)) return;
+          if (currentPeriod === "month" && !isThisMonth(t)) return;
+        }
+
+        // 類別篩選
+        if (currentCategory !== "all" && r.category !== currentCategory) return;
+
+        const cat = r.category || "其他";
+        totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
+      });
+      chartTotals = totals;
+      renderChart();
+      return;
+    }
+
+    // 已登入：從 Firebase 拉全部
+    try {
+      const baseQuery = buildBaseQuery();
+      if (!baseQuery) { chartTotals = {}; renderChart(); return; }
+      const snap = await getDocs(baseQuery);
+      snap.forEach(d => {
+        const r = d.data();
+        if (r.excludeFromTotal) return;
+        const cat = r.category || "其他";
+        totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
+      });
+      chartTotals = totals;
+      renderChart();
+    } catch(e) {
+      console.error("圖表統計失敗", e);
+      chartTotals = {};
+      renderChart();
+    }
+  }
+
+  function resetPagination() {
+    pages = [];
+    currentPageIndex = 0;
+    totalRecords = 0;
+    totalAmount = 0;
+    updateChartTotals();   // 非同步更新圓餅圖
+    loadPage(0);
+  }
   // 取代舊的 getFilteredRecords
   function getFilteredRecords() {
     let data = pages[currentPageIndex]?.data || [];
@@ -1784,11 +1871,11 @@
   function render() {
     const data = getFilteredRecords();
     // 本頁統計
-    $("#totalCount").textContent = data.length.toLocaleString("zh-TW");
+    $("#totalCount").textContent = totalRecords.toLocaleString("zh-TW");
     const pageTotal = data.filter(r => !r.excludeFromTotal).reduce((s, r) => s + (Number(r.amount) || 0), 0);
     $("#totalAmount").textContent = "NT$ " + formatMoney(totalAmount); // 歷史金額
     renderRecords(data);
-    renderChart(data);
+    renderChart();
     
     // 分頁按鈕
     const totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
@@ -1796,9 +1883,9 @@
     if (container) {
       container.innerHTML = `
         <div style="display:flex; justify-content:center; gap:10px; margin-top:16px; align-items:center; flex-wrap:wrap;">
-          <button class="tool-btn" id="prevPageBtn" ${currentPageIndex <= 0 ? 'disabled' : ''}>⬅ 上一頁</button>
+          <button class="tool-btn" id="prevPageBtn" ${currentPageIndex <= 0 ? 'disabled' : ''}> 上一頁</button>
           <span>第 ${currentPageIndex+1} / ${totalPages} 頁（共 ${totalRecords} 筆）</span>
-          <button class="tool-btn" id="nextPageBtn" ${currentPageIndex+1 >= totalPages ? 'disabled' : ''}>下一頁 ➔</button>
+          <button class="tool-btn" id="nextPageBtn" ${currentPageIndex+1 >= totalPages ? 'disabled' : ''}>下一頁 </button>
         </div>
       `;
       document.getElementById("prevPageBtn")?.addEventListener("click", () => loadPage(currentPageIndex-1));
@@ -1959,20 +2046,13 @@
   }  // ✅ 補上這個閉合大括號
 
 
-  function renderChart(data) {
+  function renderChart() {   // ✅ 不接收參數
     const canvas = $("#expenseChart");
     const empty = $("#noChart");
 
-    // 🔥 關鍵：過濾掉不計入總和的記錄
-    const filteredData = data.filter(r => !r.excludeFromTotal);
-
-    const totals = {};
-    filteredData.forEach(r => {
-      const cat = r.category || "其他";
-      totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
-    });
-    const labels = Object.keys(totals);
-    const values = Object.values(totals);
+    // 使用全域 chartTotals（已包含所有頁面的資料）
+    const labels = Object.keys(chartTotals);
+    const values = Object.values(chartTotals);
 
     // 清除舊圖表
     if (expenseChart) {
@@ -2386,6 +2466,51 @@
       moreFilterBtn.textContent = filterPanel.classList.contains("hidden") ? "⚙️ 篩選" : "✖️ 關閉";
     });
   }
+
+  // ===== 檢視模式切換 =====
+
+  // 所有記錄按鈕
+  $("#viewAllBtn").addEventListener("click", () => {
+    if (currentView === "all" && !selectedMonth) return;
+    currentView = "all";
+    selectedMonth = "";
+    $("#viewAllBtn").classList.add("active");
+    $("#viewMonthBtn").classList.remove("active");
+    $("#viewMonthBtn").innerHTML = "📅 選擇月份";
+    resetPagination();
+  });
+
+  // 選擇月份按鈕（觸發原生月份選擇器）
+  $("#viewMonthBtn").addEventListener("click", () => {
+    const picker = $("#monthPicker");
+    if (typeof picker.showPicker === "function") {
+      try { picker.showPicker(); } catch(e) { picker.click(); }
+    } else {
+      picker.click();
+    }
+  });
+
+  // 月份選擇器變更
+  $("#monthPicker").addEventListener("change", (e) => {
+    const val = e.target.value;
+    if (!val) return;
+    selectedMonth = val;
+    currentView = "month";
+    $("#viewAllBtn").classList.remove("active");
+    $("#viewMonthBtn").classList.add("active");
+    $("#viewMonthBtn").innerHTML = "📅 " + val;
+    resetPagination();
+  });
+
+  // 初始化 monthPicker 預設為當前月
+  (function initMonthPicker() {
+    const now = new Date();
+    const picker = $("#monthPicker");
+    if (picker) {
+      picker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    }
+  })();
+
 
   // 詳細面板按鈕
   $("#duplicateBtn").addEventListener("click", async () => {
