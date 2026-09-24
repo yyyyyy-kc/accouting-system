@@ -1171,8 +1171,10 @@
         📂 類別 <span id="selectedCategoryLabel">全部</span> ▾
       </button>
       <button id="viewAllBtn" class="tool-btn active" type="button">📋 所有記錄</button>
-      <button id="viewMonthBtn" class="tool-btn" type="button">📅 選擇月份</button>
-      <input id="monthPicker" type="month" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
+      <label id="viewMonthBtn" class="tool-btn" style="cursor:pointer; position:relative; overflow:hidden;">
+        <span id="viewMonthLabel">📅 選擇月份</span>
+        <input id="monthPicker" type="month" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+      </label>
       <button id="moreFilterBtn" class="tool-btn" type="button">⚙️ 篩選</button>
     </div>
 
@@ -1756,6 +1758,46 @@
     return qRef;
   }
 
+  // 純篩選查詢（給聚合查詢用，不含 orderBy）
+  function buildFilterQuery(bookName = currentBook) {
+    if (!currentUser) return null;
+    let q = collection(db, "users", currentUser.uid, "books", bookName, "records");
+    const conditions = [];
+
+    // 日期篩選（邏輯與 buildBaseQuery 一致）
+    if (currentView === "month" && selectedMonth) {
+      const [y, m] = selectedMonth.split("-").map(Number);
+      const startDate = new Date(y, m - 1, 1);
+      const endDate = new Date(y, m, 1);
+      conditions.push(where("time", ">=", startDate.toISOString()));
+      conditions.push(where("time", "<", endDate.toISOString()));
+    } else if (currentPeriod !== "all") {
+      const now = new Date();
+      let startDate, endDate;
+      if (currentPeriod === "today") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      } else if (currentPeriod === "week") {
+        const day = now.getDay();
+        const diff = day === 0 ? 6 : day - 1;
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
+        endDate = new Date(startDate); endDate.setDate(endDate.getDate() + 7);
+      } else if (currentPeriod === "month") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      }
+      if (startDate && endDate) {
+        conditions.push(where("time", ">=", startDate.toISOString()));
+        conditions.push(where("time", "<", endDate.toISOString()));
+      }
+    }
+    if (currentCategory !== "all") conditions.push(where("category", "==", currentCategory));
+
+    let qRef = q;
+    conditions.forEach(cond => { qRef = query(qRef, cond); });
+    return qRef;
+  }
+
   async function loadPage(pageIndex) {
     if (isLoading || pageIndex < 0) return;
     if (pages[pageIndex]) { currentPageIndex = pageIndex; render(); return; }
@@ -1776,21 +1818,24 @@
       pages[pageIndex] = { data, firstDoc: snap.docs[0] || null, lastDoc: snap.docs[snap.docs.length - 1] || null };
       currentPageIndex = pageIndex;
       // 更新統計
-     // 總筆數（輕量）
-     const countSnap = await getCountFromServer(baseQuery);
-     totalRecords = countSnap.data().count;
+      // 用「純篩選」查詢來算統計（不含 orderBy）
+      const filterQuery = buildFilterQuery();
+      if (filterQuery) {
+        const countSnap = await getCountFromServer(filterQuery);
+        totalRecords = countSnap.data().count;
 
-     // 總金額（聚合查詢，只計算不計入總和的記錄）
-     // 注意：Firestore 無法「排除某欄位」，所以我們需要分兩次查
-     // 簡化做法：所有記錄的 sum(amount)，再減去 excludeFromTotal=true 的 sum(amount)
-     const totalSnap = await getAggregateFromServer(baseQuery, {
-       totalSum: sum("amount")
-     });
-     const excludeQuery = query(baseQuery, where("excludeFromTotal", "==", true));
-     const excludeSnap = await getAggregateFromServer(excludeQuery, {
-       excludeSum: sum("amount")
-     });
-     totalAmount = (totalSnap.data().totalSum || 0) - (excludeSnap.data().excludeSum || 0);
+        const totalSnap = await getAggregateFromServer(filterQuery, {
+          totalSum: sum("amount")
+        });
+        const excludeQuery = query(filterQuery, where("excludeFromTotal", "==", true));
+        const excludeSnap = await getAggregateFromServer(excludeQuery, {
+          excludeSum: sum("amount")
+        });
+        totalAmount = (totalSnap.data().totalSum || 0) - (excludeSnap.data().excludeSum || 0);
+      } else {
+        totalRecords = 0;
+        totalAmount = 0;
+      }
 
      render();
     } catch(e) { console.error(e); showToast("載入失敗"); } finally { isLoading = false; }
@@ -1831,9 +1876,9 @@
 
     // 已登入：從 Firebase 拉全部
     try {
-      const baseQuery = buildBaseQuery();
-      if (!baseQuery) { chartTotals = {}; renderChart(); return; }
-      const snap = await getDocs(baseQuery);
+      const filterQuery = buildFilterQuery();
+      if (!filterQuery) { chartTotals = {}; renderChart(); return; }
+      const snap = await getDocs(filterQuery);
       snap.forEach(d => {
         const r = d.data();
         if (r.excludeFromTotal) return;
@@ -2476,19 +2521,10 @@
     selectedMonth = "";
     $("#viewAllBtn").classList.add("active");
     $("#viewMonthBtn").classList.remove("active");
-    $("#viewMonthBtn").innerHTML = "📅 選擇月份";
+    document.getElementById("viewMonthLabel").textContent = "📅 選擇月份";
     resetPagination();
   });
 
-  // 選擇月份按鈕（觸發原生月份選擇器）
-  $("#viewMonthBtn").addEventListener("click", () => {
-    const picker = $("#monthPicker");
-    if (typeof picker.showPicker === "function") {
-      try { picker.showPicker(); } catch(e) { picker.click(); }
-    } else {
-      picker.click();
-    }
-  });
 
   // 月份選擇器變更
   $("#monthPicker").addEventListener("change", (e) => {
@@ -2498,7 +2534,7 @@
     currentView = "month";
     $("#viewAllBtn").classList.remove("active");
     $("#viewMonthBtn").classList.add("active");
-    $("#viewMonthBtn").innerHTML = "📅 " + val;
+    document.getElementById("viewMonthLabel").textContent = "📅 " + val;
     resetPagination();
   });
 
