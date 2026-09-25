@@ -1470,6 +1470,80 @@
     setTimeout(() => t.remove(), 2100);
   }
 
+  // =========================================================
+  // 數字滾動動畫
+  // =========================================================
+  const numberAnimations = new WeakMap();  // 記錄每個元素的動畫狀態
+
+  /**
+   * 讓指定元素從舊值平滑滾動到新值
+   * @param {HTMLElement} el - 目標元素
+   * @param {number} to - 目標數值
+   * @param {object} opts - { prefix, suffix, duration, isMoney }
+   */
+  function animateNumber(el, to, opts = {}) {
+    if (!el) return;
+    const {
+      prefix = "",
+      suffix = "",
+      duration = 600,
+      isMoney = false,
+      decimals = 0
+    } = opts;
+
+    // 取得舊值（從 data 屬性或從 WeakMap）
+    let from = parseFloat(el.dataset.animValue);
+    if (isNaN(from)) {
+      from = 0;
+    }
+
+    // 若數值沒變，直接顯示，不播動畫
+    if (from === to) {
+      el.textContent = prefix + formatNumber(to, isMoney, decimals) + suffix;
+      return;
+    }
+
+    // 取消該元素正在跑的動畫
+    const existing = numberAnimations.get(el);
+    if (existing) cancelAnimationFrame(existing);
+
+    const start = performance.now();
+    const diff = to - from;
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutCubic 緩動
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = from + diff * eased;
+
+      el.textContent = prefix + formatNumber(current, isMoney, decimals) + suffix;
+
+      if (progress < 1) {
+        const raf = requestAnimationFrame(tick);
+        numberAnimations.set(el, raf);
+      } else {
+        el.dataset.animValue = to;
+        numberAnimations.delete(el);
+      }
+    }
+
+    el.dataset.animValue = to;  // 先記錄目標值，避免重複觸發
+    const raf = requestAnimationFrame(tick);
+    numberAnimations.set(el, raf);
+  }
+
+  // 數字格式化（整數或金額）
+  function formatNumber(v, isMoney, decimals) {
+    const n = isMoney
+      ? Math.round(v)              // 金額顯示整數（避免滾動時小數亂跳）
+      : Math.round(v);
+    if (isMoney) {
+      return n.toLocaleString("zh-TW");
+    }
+    return n.toLocaleString("zh-TW");
+  }
+
   function escapeHTML(v) { return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
   function formatMoney(v) { return Number(v || 0).toLocaleString("zh-TW", { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
   function formatDate(v) { if (!v) return "-"; const d = new Date(v); if (isNaN(d.getTime())) return v; return d.toLocaleString("zh-TW", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" }); }
@@ -1913,13 +1987,15 @@
     return data;
   }
 
-  // 取代舊的 render
+
   function render() {
     const data = getFilteredRecords();
-    // 本頁統計
-    $("#totalCount").textContent = totalRecords.toLocaleString("zh-TW");
     const pageTotal = data.filter(r => !r.excludeFromTotal).reduce((s, r) => s + (Number(r.amount) || 0), 0);
-    $("#totalAmount").textContent = "NT$ " + formatMoney(totalAmount); // 歷史金額
+
+    // ✅ 用滾動動畫顯示數字
+    animateNumber($("#totalCount"), totalRecords, { duration: 700 });
+    animateNumber($("#totalAmount"), totalAmount, { prefix: "NT$ ", duration: 700, isMoney: true });
+
     renderRecords(data);
     renderChart();
     
@@ -1938,8 +2014,52 @@
       document.getElementById("nextPageBtn")?.addEventListener("click", () => loadPage(currentPageIndex+1));
     }
     // 標題旁本頁金額
-    document.getElementById("pageAmount").textContent = `本頁金額：NT$ ${formatMoney(pageTotal)}`;
+    // 標題旁本頁金額（用動畫）
+    const pageAmountEl = document.getElementById("pageAmount");
+    const prevPageVal = parseFloat(pageAmountEl.dataset.pageValue) || 0;
+    if (prevPageVal !== pageTotal) {
+      pageAmountEl.dataset.pageValue = pageTotal;
+      // 用獨立的動畫函數（前綴是「本頁金額：NT$ 」）
+      animateTextNumber(pageAmountEl, pageTotal, "本頁金額：NT$ ", 500);
+    }
     document.getElementById("recordCount").textContent = data.length ? `顯示 ${data.length} 筆` : '';
+  }
+
+  // 帶文字前綴的數字滾動（給 pageAmount 用）
+  function animateTextNumber(el, to, prefix, duration = 500) {
+    if (!el) return;
+    const existing = numberAnimations.get(el);
+    if (existing) cancelAnimationFrame(existing);
+
+    let from = parseFloat(el.dataset.animValue);
+    if (isNaN(from)) from = 0;
+
+    if (from === to) {
+      el.textContent = prefix + Math.round(to).toLocaleString("zh-TW");
+      return;
+    }
+
+    const start = performance.now();
+    const diff = to - from;
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = from + diff * eased;
+      el.textContent = prefix + Math.round(current).toLocaleString("zh-TW");
+      if (progress < 1) {
+        const raf = requestAnimationFrame(tick);
+        numberAnimations.set(el, raf);
+      } else {
+        el.dataset.animValue = to;
+        numberAnimations.delete(el);
+      }
+    }
+
+    el.dataset.animValue = to;
+    const raf = requestAnimationFrame(tick);
+    numberAnimations.set(el, raf);
   }
 
   // 渲染帳本欄
