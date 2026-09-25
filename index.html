@@ -33,7 +33,16 @@
       --font-size: 16px;
     }
 
-    /* 統一篩選按鈕字體 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    .loading-pulse {
+      animation: pulse 1.2s ease-in-out infinite;
+      color: var(--muted) !important;
+      font-weight: 600 !important;
+      font-size: 1.5rem !important;
+    }
 
 
     /* 統一排序按鈕字體 */
@@ -1813,99 +1822,75 @@
     return qRef;
   }
 
-  async function loadPage(pageIndex) {
+  async function loadPage(pageIndex, needStats = false) {
     if (isLoading || pageIndex < 0) return;
     if (pages[pageIndex]) { currentPageIndex = pageIndex; render(); return; }
     if (!currentUser) return;
     isLoading = true;
+
     document.getElementById("recordList").innerHTML = '<div class="empty">⏳ 數據加載中...</div>';
+
+    if (needStats) {
+      const tc = document.getElementById("totalCount");
+      const ta = document.getElementById("totalAmount");
+      const pa = document.getElementById("pageAmount");
+      tc.textContent = "讀取中";
+      tc.classList.add("loading-pulse");
+      ta.textContent = "讀取中";
+      ta.classList.add("loading-pulse");
+      pa.textContent = "本頁金額：讀取中...";
+    }
+
     try {
       const baseQuery = buildBaseQuery();
       if (!baseQuery) { isLoading = false; return; }
       let q = query(baseQuery, limit(PAGE_SIZE));
       if (pageIndex > 0) {
         const prev = pages[pageIndex - 1];
-        if (!prev?.lastDoc) { currentPageIndex = 0; return loadPage(0); }
+        if (!prev?.lastDoc) { currentPageIndex = 0; return loadPage(0, needStats); }
         q = query(q, startAfter(prev.lastDoc));
       }
       const snap = await getDocs(q);
       const data = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
       pages[pageIndex] = { data, firstDoc: snap.docs[0] || null, lastDoc: snap.docs[snap.docs.length - 1] || null };
       currentPageIndex = pageIndex;
-      // 更新統計
-      // 用「純篩選」查詢來算統計（不含 orderBy）
-      const filterQuery = buildFilterQuery();
-      if (filterQuery) {
-        const countSnap = await getCountFromServer(filterQuery);
-        totalRecords = countSnap.data().count;
 
-        const totalSnap = await getAggregateFromServer(filterQuery, {
-          totalSum: sum("amount")
-        });
-        const excludeQuery = query(filterQuery, where("excludeFromTotal", "==", true));
-        const excludeSnap = await getAggregateFromServer(excludeQuery, {
-          excludeSum: sum("amount")
-        });
-        totalAmount = (totalSnap.data().totalSum || 0) - (excludeSnap.data().excludeSum || 0);
-      } else {
-        totalRecords = 0;
-        totalAmount = 0;
+      if (needStats) {
+        const filterQuery = buildFilterQuery();
+        if (filterQuery) {
+          const allSnap = await getDocs(filterQuery);
+          let sumAmt = 0;
+          let cnt = 0;
+          const totals = {};
+          allSnap.forEach(d => {
+            const r = d.data();
+            cnt++;
+            if (!r.excludeFromTotal) {
+              const amt = Number(r.amount) || 0;
+              sumAmt += amt;
+              const cat = r.category || "其他";
+              totals[cat] = (totals[cat] || 0) + amt;
+            }
+          });
+          totalRecords = cnt;
+          totalAmount = sumAmt;
+          chartTotals = totals;
+        } else {
+          totalRecords = 0;
+          totalAmount = 0;
+          chartTotals = {};
+        }
       }
 
-     render();
-    } catch(e) { console.error(e); showToast("載入失敗"); } finally { isLoading = false; }
-  }
+      document.getElementById("totalCount")?.classList.remove("loading-pulse");
+      document.getElementById("totalAmount")?.classList.remove("loading-pulse");
 
-  // 圓餅圖統計（不受分頁影響，取所有符合條件的資料）
-  async function updateChartTotals() {
-    const totals = {};
-
-    // 未登入：從本地資料算
-    if (!currentUser) {
-      (books[currentBook] || []).forEach(r => {
-        if (r.excludeFromTotal) return;
-        const t = new Date(r.time);
-        if (isNaN(t.getTime())) return;
-
-        // 月份模式
-        if (currentView === "month" && selectedMonth) {
-          const [y, m] = selectedMonth.split("-").map(Number);
-          if (t.getFullYear() !== y || t.getMonth() !== m - 1) return;
-        } else if (currentPeriod !== "all") {
-          // 快速篩選模式
-          if (currentPeriod === "today" && !isToday(t)) return;
-          if (currentPeriod === "week" && !isThisWeek(t)) return;
-          if (currentPeriod === "month" && !isThisMonth(t)) return;
-        }
-
-        // 類別篩選
-        if (currentCategory !== "all" && r.category !== currentCategory) return;
-
-        const cat = r.category || "其他";
-        totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
-      });
-      chartTotals = totals;
-      renderChart();
-      return;
-    }
-
-    // 已登入：從 Firebase 拉全部
-    try {
-      const filterQuery = buildFilterQuery();
-      if (!filterQuery) { chartTotals = {}; renderChart(); return; }
-      const snap = await getDocs(filterQuery);
-      snap.forEach(d => {
-        const r = d.data();
-        if (r.excludeFromTotal) return;
-        const cat = r.category || "其他";
-        totals[cat] = (totals[cat] || 0) + (Number(r.amount) || 0);
-      });
-      chartTotals = totals;
-      renderChart();
-    } catch(e) {
-      console.error("圖表統計失敗", e);
-      chartTotals = {};
-      renderChart();
+      render();
+    } catch (e) {
+      console.error(e);
+      showToast("載入失敗");
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -1914,9 +1899,10 @@
     currentPageIndex = 0;
     totalRecords = 0;
     totalAmount = 0;
-    updateChartTotals();   // 非同步更新圓餅圖
-    loadPage(0);
+    chartTotals = {};
+    loadPage(0, true);
   }
+
   // 取代舊的 getFilteredRecords
   function getFilteredRecords() {
     let data = pages[currentPageIndex]?.data || [];
@@ -1977,11 +1963,10 @@
     }).join('');
 
     list.querySelectorAll('.book-item').forEach(btn => {
-      btn.addEventListener('pointerdown', (e) => {
+      btn.addEventListener('click', (e) => {
         if (e.target.closest('.delete-book')) return;
         const name = btn.dataset.book;
         switchBook(name);
-        e.preventDefault();
       });
       const del = btn.querySelector('.delete-book');
       if (del) {
